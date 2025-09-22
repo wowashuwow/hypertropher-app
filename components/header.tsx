@@ -1,0 +1,49 @@
+"use client"
+
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+
+interface HeaderProps {
+  isLoggedIn?: boolean
+}
+
+export function Header({ isLoggedIn = false }: HeaderProps) {
+  return (
+    <header className="w-full py-4 px-6 border-b border-border bg-card">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Logo/App Name */}
+        <Link href="/" className="text-2xl font-bold text-foreground">
+          HYPERTROPHER
+        </Link>
+
+        {/* Navigation */}
+        <div className="flex items-center space-x-4">
+          {isLoggedIn ? (
+            <>
+              <div className="hidden lg:flex items-center space-x-4">
+                <Link href="/" className="text-primary hover:text-primary/80 font-medium">
+                  Discover
+                </Link>
+                <Link href="/my-list" className="text-primary hover:text-primary/80 font-medium">
+                  My List
+                </Link>
+                <Link href="/add-dish" className="text-primary hover:text-primary/80 font-medium">
+                  Add Dish
+                </Link>
+              </div>
+              <Link href="/account">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                  A
+                </div>
+              </Link>
+            </>
+          ) : (
+            <Link href="/signup">
+              <Button size="sm">Login</Button>
+            </Link>
+          )}
+        </div>
+      </div>
+    </header>
+  )
+}
