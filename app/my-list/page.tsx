@@ -15,6 +15,7 @@ const mockSavedDishes = [
     protein: "High" as const,
     taste: "Good" as const,
     addedBy: "Rohan K.",
+    availability: "In-Store" as const,
     imageUrl: "/grilled-chicken-vegetable-bowl.png",
   },
   {
@@ -26,6 +27,7 @@ const mockSavedDishes = [
     protein: "High" as const,
     taste: "Good" as const,
     addedBy: "Aditya M.",
+    availability: "In-Store" as const,
     imageUrl: "/fish-curry-with-rice-indian-cuisine.jpg",
   },
 ]
