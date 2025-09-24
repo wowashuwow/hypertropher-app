@@ -12,9 +12,9 @@ const mockDishes = [
     dishName: "Grilled Chicken Bowl",
     restaurantName: "Healthy Bites",
     city: "Mumbai",
-    price: "$$" as const,
-    protein: "High" as const,
-    taste: "Good" as const,
+    price: "₹320",
+    protein: "Overloaded" as const,
+    taste: "Amazing" as const,
     addedBy: "Rohan K.",
     availability: "In-Store" as const,
     imageUrl: "/grilled-chicken-vegetable-bowl.png",
@@ -25,9 +25,9 @@ const mockDishes = [
     dishName: "Paneer Tikka Salad",
     restaurantName: "Green Garden",
     city: "Mumbai", // Changed to Mumbai so it shows in filtered results
-    price: "$" as const,
-    protein: "High" as const,
-    taste: "Good" as const,
+    price: "₹199",
+    protein: "Great" as const,
+    taste: "Great" as const,
     addedBy: "Priya S.",
     availability: "Online" as const,
     imageUrl: "/paneer-tikka-salad-with-fresh-greens.jpg",
@@ -38,9 +38,9 @@ const mockDishes = [
     dishName: "Fish Curry with Rice",
     restaurantName: "Coastal Kitchen",
     city: "Mumbai",
-    price: "$$$" as const,
-    protein: "High" as const,
-    taste: "Good" as const,
+    price: "₹420",
+    protein: "Overloaded" as const,
+    taste: "Amazing" as const,
     addedBy: "Aditya M.",
     availability: "In-Store" as const,
     imageUrl: "/fish-curry-with-rice-indian-cuisine.jpg",
@@ -51,9 +51,9 @@ const mockDishes = [
     dishName: "Egg White Omelette",
     restaurantName: "Morning Fresh",
     city: "Mumbai", // Changed to Mumbai so it shows in filtered results
-    price: "$" as const,
-    protein: "Moderate" as const,
-    taste: "Okay" as const,
+    price: "₹150",
+    protein: "Great" as const,
+    taste: "Great" as const,
     addedBy: "Sneha R.",
     availability: "Online" as const,
     imageUrl: "/vegetable-egg-white-omelette.png",
@@ -90,12 +90,24 @@ export default function HomePage() {
       return cityMatch && proteinMatch
     })
     .sort((a, b) => {
-      const priceRank: Record<string, number> = { "$": 1, "$$": 2, "$$$": 3 }
+      // Extract numeric value from price strings like "₹320"; fallback to Infinity/0
+      const parsePrice = (p: string | undefined) => {
+        if (!p) return NaN
+        const n = Number(String(p).replace(/[^0-9.]/g, ""))
+        return isNaN(n) ? NaN : n
+      }
+      const pa = parsePrice(a.price)
+      const pb = parsePrice(b.price)
+
       if (priceSort === "low-to-high") {
-        return (priceRank[a.price] ?? 0) - (priceRank[b.price] ?? 0)
+        const va = isNaN(pa) ? Number.POSITIVE_INFINITY : pa
+        const vb = isNaN(pb) ? Number.POSITIVE_INFINITY : pb
+        return va - vb
       }
       if (priceSort === "high-to-low") {
-        return (priceRank[b.price] ?? 0) - (priceRank[a.price] ?? 0)
+        const va = isNaN(pa) ? Number.NEGATIVE_INFINITY : pa
+        const vb = isNaN(pb) ? Number.NEGATIVE_INFINITY : pb
+        return vb - va
       }
       return 0
     })

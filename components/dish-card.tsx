@@ -11,10 +11,10 @@ interface DishCardProps {
   restaurantName: string
   city: string
   imageUrl?: string
-  price: "$" | "$$" | "$$$"
-  protein: "High" | "Moderate"
-  taste: "Good" | "Okay"
-  satisfaction?: "High" | "Medium" | "Low"
+  price: string
+  protein: "Overloaded" | "Great"
+  taste: "Amazing" | "Great"
+  satisfaction?: "Would Eat Everyday" | "Great"
   addedBy: string
   availability: "Online" | "In-Store"
   isBookmarked?: boolean
@@ -30,7 +30,7 @@ export function DishCard({
   price,
   protein,
   taste,
-  satisfaction = "High",
+  satisfaction = "Great",
   addedBy,
   availability,
   isBookmarked = false,
@@ -43,22 +43,17 @@ export function DishCard({
     onBookmarkToggle?.(id)
   }
 
-  const getPriceEmojis = (price: string) => {
-    const emojiMap = { $: "💲", $$: "💲💲", $$$: "💲💲💲" }
-    return emojiMap[price as keyof typeof emojiMap] || "💲"
-  }
-
   const getProteinEmojis = (protein: string) => {
-    return protein === "High" ? "💪💪💪" : "💪💪"
+    return protein === "Overloaded" ? "💪" : "👍"
   }
 
   const getTasteEmojis = (taste: string) => {
-    return taste === "Good" ? "🤌🤌" : "🤌"
+    return taste === "Amazing" ? "🤤" : "👍"
   }
 
   const getSatisfactionEmojis = (satisfaction: string) => {
-    const emojiMap = { High: "🤩🤩", Medium: "🤩", Low: "😐" }
-    return emojiMap[satisfaction as keyof typeof emojiMap] || "🤩"
+    const emojiMap = { "Would Eat Everyday": "🤩", Great: "👍" }
+    return emojiMap[satisfaction as keyof typeof emojiMap] || "👍"
   }
 
   return (
@@ -91,8 +86,8 @@ export function DishCard({
 
         <div className="space-y-1 mb-3 flex-grow">
           <div className="text-sm">
-            <span className="text-muted-foreground">Cost: </span>
-            <span>{getPriceEmojis(price)}</span>
+            <span className="text-muted-foreground">Price: </span>
+            <span>{price}</span>
           </div>
           <div className="text-sm">
             <span className="text-muted-foreground">Protein: </span>

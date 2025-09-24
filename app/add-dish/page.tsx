@@ -21,10 +21,10 @@ export default function AddDishPage() {
     "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other" | ""
   >("")
   const [photo, setPhoto] = useState<File | null>(null)
-  const [taste, setTaste] = useState<"🤌🤌 Good" | "🤌 Okay" | "">("")
-  const [protein, setProtein] = useState<"💪💪💪 High" | "💪💪 Moderate" | "">("")
-  const [price, setPrice] = useState<"💲" | "💲💲" | "💲💲💲" | "">("")
-  const [satisfaction, setSatisfaction] = useState<"🤩🤩 High" | "🤩 Medium" | "😐 Low" | "">("")
+  const [taste, setTaste] = useState<"🤤 Amazing" | "👍 Great" | "">("")
+  const [protein, setProtein] = useState<"💪 Overloaded" | "👍 Great" | "">("")
+  const [price, setPrice] = useState("")
+  const [satisfaction, setSatisfaction] = useState<"🤩 Would Eat Everyday" | "👍 Great" | "">("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,36 +229,48 @@ export default function AddDishPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Taste</Label>
-                  <ButtonGroup options={["🤌🤌 Good", "🤌 Okay"]} value={taste} onChange={setTaste} name="taste" />
+                  <ButtonGroup
+                    options={["🤤 Amazing", "👍 Great"]}
+                    value={taste}
+                    onChange={(value) => setTaste(value as typeof taste)}
+                    name="taste"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Protein Content</Label>
                   <ButtonGroup
-                    options={["💪💪💪 High", "💪💪 Moderate"]}
+                    options={["💪 Overloaded", "👍 Great"]}
                     value={protein}
-                    onChange={setProtein}
+                    onChange={(value) => setProtein(value as typeof protein)}
                     name="protein"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Price</Label>
-                  <ButtonGroup options={["💲", "💲💲", "💲💲💲"]} value={price} onChange={setPrice} name="price" />
+                  <Label htmlFor="price">Price</Label>
+                  <Input
+                    id="price"
+                    type="text"
+                    placeholder="Enter exact price"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Overall Satisfaction</Label>
                   <ButtonGroup
-                    options={["🤩🤩 High", "🤩 Medium", "😐 Low"]}
+                    options={["🤩 Would Eat Everyday", "👍 Great"]}
                     value={satisfaction}
-                    onChange={setSatisfaction}
+                    onChange={(value) => setSatisfaction(value as typeof satisfaction)}
                     name="satisfaction"
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource}>
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource || !price}>
                 {isLoading ? "Submitting..." : "Submit Dish"}
               </Button>
             </form>
