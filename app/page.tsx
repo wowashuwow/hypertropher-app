@@ -4,6 +4,7 @@ import { useState } from "react"
 import { MainLayout } from "@/components/main-layout"
 import { DishCard } from "@/components/dish-card"
 import { Button } from "@/components/ui/button"
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 
 const mockDishes = [
   {
@@ -65,6 +66,7 @@ type ProteinSource = "All" | "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "
 export default function HomePage() {
   const [bookmarkedDishes, setBookmarkedDishes] = useState<Set<string>>(new Set())
   const [selectedProteinFilter, setSelectedProteinFilter] = useState<ProteinSource>("All")
+  const [priceSort, setPriceSort] = useState("default")
 
   const userName = "Alex"
   const userCity = "Mumbai"
@@ -81,11 +83,22 @@ export default function HomePage() {
     })
   }
 
-  const filteredDishes = mockDishes.filter((dish) => {
-    const cityMatch = dish.city === userCity
-    const proteinMatch = selectedProteinFilter === "All" || dish.proteinSource === selectedProteinFilter
-    return cityMatch && proteinMatch
-  })
+  const filteredDishes = mockDishes
+    .filter((dish) => {
+      const cityMatch = dish.city === userCity
+      const proteinMatch = selectedProteinFilter === "All" || dish.proteinSource === selectedProteinFilter
+      return cityMatch && proteinMatch
+    })
+    .sort((a, b) => {
+      const priceRank: Record<string, number> = { "$": 1, "$$": 2, "$$$": 3 }
+      if (priceSort === "low-to-high") {
+        return (priceRank[a.price] ?? 0) - (priceRank[b.price] ?? 0)
+      }
+      if (priceSort === "high-to-low") {
+        return (priceRank[b.price] ?? 0) - (priceRank[a.price] ?? 0)
+      }
+      return 0
+    })
 
   const proteinCategories: { label: string; value: ProteinSource }[] = [
     { label: "All", value: "All" },
@@ -119,6 +132,33 @@ export default function HomePage() {
                 {category.label}
               </Button>
             ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-56">
+            <Select value={priceSort} onValueChange={setPriceSort}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by Price" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="low-to-high">Price: Low to High</SelectItem>
+                <SelectItem value="high-to-low">Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-56">
+            <Select disabled>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by Distance" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nearest" disabled>
+                  Nearest First
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
