@@ -1,13 +1,12 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Search, Upload } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+// import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -24,6 +23,7 @@ export default function AddDishPage() {
   const [taste, setTaste] = useState<"🤤 Amazing" | "👍 Great" | "">("")
   const [protein, setProtein] = useState<"💪 Overloaded" | "👍 Great" | "">("")
   const [price, setPrice] = useState("")
+  const [comment, setComment] = useState("")
   const [satisfaction, setSatisfaction] = useState<"🤩 Would Eat Everyday" | "👍 Great" | "">("")
   const [isLoading, setIsLoading] = useState(false)
 
@@ -52,6 +52,7 @@ export default function AddDishPage() {
       taste,
       protein,
       price,
+      comment,
       satisfaction,
     })
 
@@ -68,6 +69,7 @@ export default function AddDishPage() {
     setTaste("")
     setProtein("")
     setPrice("")
+    setComment("")
     setSatisfaction("")
   }
 
@@ -266,6 +268,17 @@ export default function AddDishPage() {
                     value={satisfaction}
                     onChange={(value) => setSatisfaction(value as typeof satisfaction)}
                     name="satisfaction"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="comment">Comments (Optional)</Label>
+                  <textarea
+                    id="comment"
+                    placeholder="e.g., A bit spicy, but great portion size!"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
               </div>

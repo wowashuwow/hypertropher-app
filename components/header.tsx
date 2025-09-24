@@ -24,11 +24,16 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
                 <Link href="/" className="text-primary hover:text-primary/80 font-medium">
                   Discover
                 </Link>
-                <Link href="/my-list" className="text-primary hover:text-primary/80 font-medium">
-                  My List
+                <Link href="/my-wishlist" className="text-primary hover:text-primary/80 font-medium">
+                  My Wishlist
                 </Link>
-                <Link href="/add-dish" className="text-primary hover:text-primary/80 font-medium">
-                  Add Dish
+                <Link href="/my-dishes" className="text-primary hover:text-primary/80 font-medium">
+                  My Dishes
+                </Link>
+                <Link href="/add-dish">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    Add Dish
+                  </Button>
                 </Link>
               </div>
               <Link href="/account">

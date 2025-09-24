@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bookmark, Link, MapPin } from "lucide-react"
+import { Bookmark, Link, MapPin, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -15,6 +15,7 @@ interface DishCardProps {
   protein: "Overloaded" | "Great"
   taste: "Amazing" | "Great"
   satisfaction?: "Would Eat Everyday" | "Great"
+  comment?: string
   addedBy: string
   availability: "Online" | "In-Store"
   isBookmarked?: boolean
@@ -31,16 +32,24 @@ export function DishCard({
   protein,
   taste,
   satisfaction = "Great",
+  comment,
   addedBy,
   availability,
   isBookmarked = false,
   onBookmarkToggle,
 }: DishCardProps) {
   const [bookmarked, setBookmarked] = useState(isBookmarked)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const handleBookmarkClick = () => {
     setBookmarked(!bookmarked)
     onBookmarkToggle?.(id)
+  }
+
+  const toggleExpanded = () => {
+    if (comment && comment.trim().length > 0) {
+      setIsExpanded(!isExpanded)
+    }
   }
 
   const getProteinEmojis = (protein: string) => {
@@ -58,6 +67,7 @@ export function DishCard({
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md relative flex flex-col h-full">
+      {/* Image Section */}
       <div className="aspect-[4/5] relative">
         <img src={imageUrl || "/placeholder.svg"} alt={dishName} className="w-full h-full object-cover" />
         <button
@@ -68,6 +78,7 @@ export function DishCard({
         </button>
       </div>
 
+      {/* Content Section - Flexible */}
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-start justify-between mb-1 gap-2">
           <h2 className="text-xl font-semibold text-card-foreground">{dishName}</h2>
@@ -109,29 +120,52 @@ export function DishCard({
           </div>
           <p className="text-sm text-muted-foreground">Added by your friend {addedBy}</p>
         </div>
-
-        <div className="mt-auto">
-          {availability === "Online" ? (
-            <Button 
-              className={cn(
-                "w-full bg-green-600 hover:bg-green-700 text-white border-0"
-              )}
-            >
-              <Link className="mr-2 h-4 w-4" />
-              View on Delivery App
-            </Button>
-          ) : (
-            <Button 
-              className={cn(
-                "w-full bg-blue-600 hover:bg-blue-700 text-white border-0"
-              )}
-            >
-              <MapPin className="mr-2 h-4 w-4" />
-              Navigate
-            </Button>
-          )}
-        </div>
       </div>
+
+      {/* Action Section - Fixed Bottom */}
+      <div className="p-4 pt-0 space-y-3 mt-auto">
+        {availability === "Online" ? (
+          <Button 
+            className={cn(
+              "w-full bg-green-600 hover:bg-green-700 text-white border-0"
+            )}
+          >
+            <Link className="mr-2 h-4 w-4" />
+            View on Delivery App
+          </Button>
+        ) : (
+          <Button 
+            className={cn(
+              "w-full bg-blue-600 hover:bg-blue-700 text-white border-0"
+            )}
+          >
+            <MapPin className="mr-2 h-4 w-4" />
+            Navigate
+          </Button>
+        )}
+        
+        {/* Minimal expand button for comments */}
+        {comment && comment.trim().length > 0 && (
+          <button
+            onClick={toggleExpanded}
+            className="w-full flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <span>{isExpanded ? "Hide" : "Show"} comment</span>
+            <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", isExpanded && "rotate-180")} />
+          </button>
+        )}
+      </div>
+      
+      {/* Expandable Comment Section */}
+      {comment && comment.trim().length > 0 && isExpanded && (
+        <div className="border-t border-border bg-muted/20 px-4 py-3">
+          <div className="bg-background rounded-lg p-3 shadow-sm">
+            <p className="text-sm text-foreground leading-relaxed">
+              {comment}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

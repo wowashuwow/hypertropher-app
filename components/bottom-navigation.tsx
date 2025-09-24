@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Bookmark, PlusCircle } from "lucide-react"
+import { Home, Bookmark, PlusCircle, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function BottomNavigation() {
@@ -15,14 +15,19 @@ export function BottomNavigation() {
       label: "Discover",
     },
     {
-      href: "/my-list",
-      icon: Bookmark,
-      label: "My List",
-    },
-    {
       href: "/add-dish",
       icon: PlusCircle,
       label: "Add Dish",
+    },
+    {
+      href: "/my-wishlist",
+      icon: Bookmark,
+      label: "My Wishlist",
+    },
+    {
+      href: "/my-dishes",
+      icon: User,
+      label: "My Dishes",
     },
   ]
 

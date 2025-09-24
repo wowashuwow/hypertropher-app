@@ -15,6 +15,7 @@ const mockDishes = [
     price: "₹320",
     protein: "Overloaded" as const,
     taste: "Amazing" as const,
+    comment: "The chicken was perfectly grilled and very juicy. Great portion size!",
     addedBy: "Rohan K.",
     availability: "In-Store" as const,
     imageUrl: "/grilled-chicken-vegetable-bowl.png",
@@ -41,6 +42,7 @@ const mockDishes = [
     price: "₹420",
     protein: "Overloaded" as const,
     taste: "Amazing" as const,
+    comment: "A bit spicy, but the fish was fresh and flavorful. Perfect with rice!",
     addedBy: "Aditya M.",
     availability: "In-Store" as const,
     imageUrl: "/fish-curry-with-rice-indian-cuisine.jpg",
@@ -174,7 +176,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
           {filteredDishes.map((dish) => (
             <DishCard
               key={dish.id}
