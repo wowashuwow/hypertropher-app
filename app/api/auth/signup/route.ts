@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
     if (otpError) {
       console.error("Supabase OTP Error:", otpError);
       return NextResponse.json(
-        { error: "Failed to send OTP. Please try again." },
-        { status: 500 }
+        { error: otpError.message || "Failed to send OTP. Please try again." },
+        { status: otpError.status || 500 }
       );
     }
 

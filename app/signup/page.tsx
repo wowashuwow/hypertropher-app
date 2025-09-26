@@ -24,7 +24,7 @@ export default function SignUpPage() {
     setIsLoading(true)
 
     try {
-      const fullPhoneNumber = countryCode + phoneNumber
+      const fullPhoneNumber = `${countryCode}${phoneNumber}`
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -56,7 +56,7 @@ export default function SignUpPage() {
     setIsLoading(true)
 
     try {
-      const fullPhoneNumber = countryCode + phoneNumber
+      const fullPhoneNumber = `${countryCode}${phoneNumber}`
       const { error } = await supabase.auth.verifyOtp({
         phone: fullPhoneNumber,
         token: otp,
@@ -66,7 +66,7 @@ export default function SignUpPage() {
       if (error) {
         alert('Invalid OTP. Please try again.')
       } else {
-        window.location.href = '/'
+        window.location.href = `/complete-profile?inviteCode=${inviteCode}`
       }
     } catch (error) {
       console.error('OTP verification error:', error)
@@ -82,7 +82,13 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="flex min-h-screen flex-col items-center justify-center p-6">
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-bold tracking-tighter text-foreground">HYPERTROPHER</h1>
+        <p className="mt-2 text-muted-foreground">
+          Find high protein meals near you. Vetted and verified by bodybuilders just like you.
+        </p>
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
