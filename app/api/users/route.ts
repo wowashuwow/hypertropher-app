@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
+function generateInviteCode(): string {
+  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `HYPER${randomPart}`;
+}
+
 export async function POST(request: NextRequest) {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
@@ -44,6 +49,24 @@ export async function POST(request: NextRequest) {
 
   if (inviteCodeError) {
     console.error("Error updating invite code:", inviteCodeError);
+  }
+
+  // Generate 5 new invite codes for the new user
+  const newCodes = [];
+  for (let i = 0; i < 5; i++) {
+    newCodes.push({
+      code: generateInviteCode(),
+      generated_by_user_id: user.id,
+      is_used: false
+    });
+  }
+
+  const { error: codesError } = await supabase
+    .from("invite_codes")
+    .insert(newCodes);
+
+  if (codesError) {
+    console.error("Error generating invite codes:", codesError);
   }
 
   return NextResponse.json(data);
