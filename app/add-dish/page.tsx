@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 // import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createClient } from "@/lib/supabase/client"
 
 export default function AddDishPage() {
   const [sourceType, setSourceType] = useState<"In-Restaurant" | "Online">("In-Restaurant")
@@ -22,7 +23,7 @@ export default function AddDishPage() {
   const [photo, setPhoto] = useState<File | null>(null)
   const [taste, setTaste] = useState<"🤤 Amazing" | "👍 Great" | "">("")
   const [protein, setProtein] = useState<"💪 Overloaded" | "👍 Great" | "">("")
-  const [price, setPrice] = useState("")
+  const [price, setPrice] = useState<string>("")
   const [comment, setComment] = useState("")
   const [satisfaction, setSatisfaction] = useState<"🤩 Would Eat Everyday" | "👍 Great" | "">("")
   const [isLoading, setIsLoading] = useState(false)
@@ -35,43 +36,81 @@ export default function AddDishPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    if (!proteinSource || !price) {
+      alert("Protein source and price are required.");
+      return;
+    }
+    setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const supabase = createClient();
+    let imageUrl = "";
 
-    console.log("Submitting dish:", {
-      sourceType,
-      restaurant: sourceType === "In-Restaurant" ? restaurant : undefined,
-      deliveryApp: sourceType === "Online" ? deliveryApp : undefined,
-      dishLink: sourceType === "Online" ? dishLink : undefined,
-      dishName,
-      proteinSource,
-      photo: photo?.name,
-      taste,
-      protein,
-      price,
+    // 1. Handle Photo Upload to Supabase Storage
+    if (photo) {
+      const fileName = `${Date.now()}-${photo.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("dish-photos") // NOTE: We will need to create this bucket in Supabase.
+        .upload(fileName, photo);
+
+      if (uploadError) {
+        console.error("Error uploading photo:", uploadError);
+        alert("Failed to upload photo. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Get the public URL of the uploaded image
+      const { data: urlData } = supabase.storage
+        .from("dish-photos")
+        .getPublicUrl(uploadData.path);
+      
+      imageUrl = urlData.publicUrl;
+    }
+
+    // 2. Prepare Dish Data for API
+    const dishData = {
+      dish_name: dishName,
+      restaurant_name: restaurant,
+      city: "Pune", // Hardcoded for now, will be dynamic later
+      availability: sourceType === 'In-Restaurant' ? 'In-Store' : sourceType,
+      image_url: imageUrl,
+      price: parseFloat(price),
+      protein_source: proteinSource,
+      taste: taste.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
+      protein_content: protein.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
+      satisfaction: satisfaction.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
       comment,
-      satisfaction,
-    })
+      delivery_app_url: dishLink || null,
+      restaurant_address: null, // Will add later with Google Maps API
+      latitude: null,
+      longitude: null,
+    };
 
-    setIsLoading(false)
+    // 3. Submit Dish Data to our API
+    try {
+      const response = await fetch('/api/dishes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dishData),
+      });
 
-    // Reset form
-    setSourceType("In-Restaurant")
-    setDeliveryApp("")
-    setDishLink("")
-    setRestaurant("")
-    setDishName("")
-    setProteinSource("")
-    setPhoto(null)
-    setTaste("")
-    setProtein("")
-    setPrice("")
-    setComment("")
-    setSatisfaction("")
-  }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit dish.");
+      }
+
+      alert("Dish submitted successfully!");
+      // Optionally, redirect or reset form here
+      window.location.href = '/'; // Redirect to homepage on success
+
+    } catch (error) {
+      console.error("Submission Error:", error);
+      alert((error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const ButtonGroup = ({
     options,
