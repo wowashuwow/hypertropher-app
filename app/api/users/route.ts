@@ -71,3 +71,79 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(data);
 }
+
+// GET handler for fetching current user profile
+export async function GET() {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "You are not authorized." }, { status: 401 });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, city, created_at")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user profile:", error);
+      return NextResponse.json({ error: "Failed to fetch profile." }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Server Error:", error);
+    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
+  }
+}
+
+// PUT handler for updating user profile
+export async function PUT(request: NextRequest) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "You are not authorized." }, { status: 401 });
+  }
+
+  try {
+    const { name, city } = await request.json();
+
+    if (!name && !city) {
+      return NextResponse.json({ error: "At least one field (name or city) is required." }, { status: 400 });
+    }
+
+    // Build update object with only provided fields
+    const updateData: { name?: string; city?: string } = {};
+    if (name) updateData.name = name;
+    if (city) updateData.city = city;
+
+    const { data, error } = await supabase
+      .from("users")
+      .update(updateData)
+      .eq("id", user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating user profile:", error);
+      return NextResponse.json({ error: "Failed to update profile." }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Server Error:", error);
+    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
+  }
+}

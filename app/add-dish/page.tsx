@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Search, Upload } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
+import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -140,9 +141,10 @@ export default function AddDishPage() {
   )
 
   return (
-    <MainLayout>
-      <div className="max-w-2xl mx-auto py-8 px-6">
-        <Card>
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="max-w-2xl mx-auto py-8 px-6">
+          <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Add a Dish You Found</CardTitle>
           </CardHeader>
@@ -328,7 +330,8 @@ export default function AddDishPage() {
             </form>
           </CardContent>
         </Card>
-      </div>
-    </MainLayout>
+        </div>
+      </MainLayout>
+    </ProtectedRoute>
   )
 }

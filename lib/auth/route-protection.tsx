@@ -1,18 +1,22 @@
 "use client"
 
-import type React from "react"
-
-import { Header } from "@/components/header"
-import { BottomNavigation } from "@/components/bottom-navigation"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useSession } from "@/lib/auth/session-provider"
 
-interface MainLayoutProps {
+interface ProtectedRouteProps {
   children: React.ReactNode
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useSession()
-  const isLoggedIn = !!user
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/signup')
+    }
+  }, [user, loading, router])
 
   if (loading) {
     return (
@@ -25,11 +29,9 @@ export function MainLayout({ children }: MainLayoutProps) {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header isLoggedIn={isLoggedIn} />
-      <main className="pb-20 lg:pb-0">{children}</main>
-      <BottomNavigation />
-    </div>
-  )
+  if (!user) {
+    return null // Will redirect in useEffect
+  }
+
+  return <>{children}</>
 }

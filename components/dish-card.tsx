@@ -12,12 +12,13 @@ interface DishCardProps {
   city: string
   imageUrl?: string
   price: string
-  protein: "Overloaded" | "Great"
-  taste: "Amazing" | "Great"
-  satisfaction?: "Would Eat Everyday" | "Great"
+  protein: "💪 Overloaded" | "👍 Great"
+  taste: "🤤 Amazing" | "👍 Great"
+  satisfaction?: "🤩 Would Eat Everyday" | "👍 Great"
   comment?: string
   addedBy: string
   availability: "Online" | "In-Store"
+  proteinSource?: string
   isBookmarked?: boolean
   onBookmarkToggle?: (id: string) => void
 }
@@ -31,10 +32,11 @@ export function DishCard({
   price,
   protein,
   taste,
-  satisfaction = "Great",
+  satisfaction = "👍 Great",
   comment,
   addedBy,
   availability,
+  proteinSource,
   isBookmarked = false,
   onBookmarkToggle,
 }: DishCardProps) {

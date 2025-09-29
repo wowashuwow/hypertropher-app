@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { SessionProvider } from "@/lib/auth/session-provider"
 import "./globals.css"
 
 const inter = Inter({
@@ -25,7 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={null}>{children}</Suspense>
+        <SessionProvider>
+          <Suspense fallback={null}>{children}</Suspense>
+        </SessionProvider>
         <Analytics />
       </body>
     </html>

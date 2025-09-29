@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClient } from "@/lib/supabase/client"
 
 export default function SignUpPage() {
+  const [isSignUp, setIsSignUp] = useState(true) // true for signup, false for login
   const [inviteCode, setInviteCode] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
   const [countryCode, setCountryCode] = useState("+91")
@@ -25,15 +25,19 @@ export default function SignUpPage() {
 
     try {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`
-      const response = await fetch('/api/auth/signup', {
+      
+      // Choose API endpoint based on signup/login mode
+      const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/login'
+      const body = isSignUp 
+        ? { phone: fullPhoneNumber, inviteCode: inviteCode }
+        : { phone: fullPhoneNumber }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          phone: fullPhoneNumber,
-          inviteCode: inviteCode,
-        }),
+        body: JSON.stringify(body),
       })
 
       const data = await response.json()
@@ -44,7 +48,7 @@ export default function SignUpPage() {
         alert(data.error || 'An error occurred. Please try again.')
       }
     } catch (error) {
-      console.error('Sign-up error:', error)
+      console.error('Auth error:', error)
       alert('Network error. Please check your connection and try again.')
     } finally {
       setIsLoading(false)
@@ -66,7 +70,13 @@ export default function SignUpPage() {
       if (error) {
         alert('Invalid OTP. Please try again.')
       } else {
-        window.location.href = `/complete-profile?inviteCode=${inviteCode}`
+        // Redirect based on signup/login mode
+        if (isSignUp) {
+          window.location.href = `/complete-profile?inviteCode=${inviteCode}`
+        } else {
+          // For login, redirect to homepage
+          window.location.href = '/'
+        }
       }
     } catch (error) {
       console.error('OTP verification error:', error)
@@ -92,58 +102,82 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
-            {otpSent ? "Verify Your Phone" : "Join Your Friends"}
+            {otpSent ? "Verify Your Phone" : (isSignUp ? "Join Your Friends" : "Welcome Back")}
           </CardTitle>
           <CardDescription>
             {otpSent 
               ? `We've sent an OTP to ${countryCode}${phoneNumber}` 
-              : "Enter your invite code and phone number to get started."
+              : (isSignUp 
+                ? "Enter your invite code and phone number to get started."
+                : "Enter your phone number to log in.")
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
           {!otpSent ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="inviteCode">Invite Code</Label>
-                <Input
-                  id="inviteCode"
-                  type="text"
-                  placeholder="Enter your invite code"
-                  value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value)}
-                  required
-                />
-              </div>
+            <div className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {isSignUp && (
+                  <div className="space-y-2">
+                    <Label htmlFor="inviteCode">Invite Code</Label>
+                    <Input
+                      id="inviteCode"
+                      type="text"
+                      placeholder="Enter your invite code"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
 
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <div className="flex">
-                  <select 
-                    className="px-3 py-2 border border-input rounded-l-md bg-background text-sm"
-                    value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                  >
-                    <option value="+91">+91</option>
-                    <option value="+1">+1</option>
-                    <option value="+44">+44</option>
-                  </select>
-                  <Input
-                    id="phoneNumber"
-                    type="tel"
-                    placeholder="Enter your phone number"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="rounded-l-none"
-                    required
-                  />
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <div className="flex">
+                    <select 
+                      className="px-3 py-2 border border-input rounded-l-md bg-background text-sm"
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                    >
+                      <option value="+91">+91</option>
+                      <option value="+1">+1</option>
+                      <option value="+44">+44</option>
+                    </select>
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="rounded-l-none"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Sending..." : "Send OTP"}
-              </Button>
-            </form>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Sending..." : "Send OTP"}
+                </Button>
+              </form>
+              
+              {/* Toggle between signup and login */}
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp)
+                    setInviteCode("")
+                    setPhoneNumber("")
+                  }}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {isSignUp 
+                    ? "Already have an account? Log in" 
+                    : "Don't have an account? Sign up"
+                  }
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4">
               <form onSubmit={handleOtpSubmit} className="space-y-4">
