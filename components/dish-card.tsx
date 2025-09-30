@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bookmark, Link, MapPin, ChevronDown } from "lucide-react"
+import { Bookmark, Link, MapPin, ChevronDown, Edit, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -22,6 +22,9 @@ interface DishCardProps {
   deliveryApps?: string[]
   isBookmarked?: boolean
   onBookmarkToggle?: (id: string) => void
+  showActions?: boolean
+  onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
 export function DishCard({
@@ -41,6 +44,9 @@ export function DishCard({
   deliveryApps = [],
   isBookmarked = false,
   onBookmarkToggle,
+  showActions = false,
+  onEdit,
+  onDelete,
 }: DishCardProps) {
   const [bookmarked, setBookmarked] = useState(isBookmarked)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -204,6 +210,30 @@ export function DishCard({
             <MapPin className="mr-2 h-4 w-4" />
             Navigate
           </Button>
+        )}
+        
+        {/* Edit/Delete Actions - Only show when showActions is true */}
+        {showActions && (
+          <div className="flex gap-2 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit?.(id)}
+              className="flex-1"
+            >
+              <Edit className="w-4 h-4 mr-1" />
+              Edit
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onDelete?.(id)}
+              className="flex-1"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete
+            </Button>
+          </div>
         )}
         
         {/* Minimal expand button for comments */}

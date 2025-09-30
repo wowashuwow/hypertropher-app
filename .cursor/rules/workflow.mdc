@@ -70,6 +70,7 @@ Mark tasks complete only when:
 - **NEVER** commit changes without user approval
 - **NEVER** mark bugs as "Resolved" without user verification
 - **NEVER** claim functionality is working without user confirmation
+- **NEVER** proceed to git commit before user manually verifies implementation
 
 ## Testing & Approval Workflow
 1. **Implementation**: Complete the feature/change

@@ -1336,3 +1336,91 @@ Error adding to wishlist: {
 - The error message update improves user experience
 - **RLS policies have been created and are working correctly**
 - **Bug status is now "Resolved" after user verification confirms complete functionality**
+
+---
+
+## [BUG-009] - Edit Dish Form Field Order Inconsistency
+**Date:** 2025-01-30
+**Severity:** Medium (UX)
+**Priority:** Medium
+**Status:** Resolved
+**Reporter:** User
+
+### Description
+The edit dish form had a different field order compared to the add dish form, creating inconsistency in the user experience. Users would expect the same field order when editing a dish as when adding a new dish.
+
+### Steps to Reproduce
+1. Navigate to the Add Dish page
+2. Observe the field order: Source Type → Restaurant Name → Dish Name → Protein Source → Photo → Ratings → Comments
+3. Navigate to My Dishes page and click Edit on any dish
+4. Observe the different field order: Dish Name → Restaurant Name → City → Price → Protein Source → Availability → Delivery Apps → Ratings → Comments
+
+### Expected Behavior
+- Edit dish form should have the same field order as the add dish form
+- Users should have a consistent experience when adding or editing dishes
+- Field order should follow the logical flow: Source Type → Restaurant Name → Dish Name → Protein Source → Ratings → Comments
+
+### Actual Behavior
+- Edit dish form had a completely different field order
+- Field order was: Dish Name → Restaurant Name → City → Price → Protein Source → Availability → Delivery Apps → Ratings → Comments
+- This created confusion and inconsistency in the user experience
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+- **Files Affected**: 
+  - `app/edit-dish/[id]/page.tsx`
+
+### Error Details
+- **Root Cause**: Edit form was implemented with a different field order than the add form
+- **Impact**: Inconsistent user experience, confusion when switching between add and edit forms
+
+### Root Cause
+The edit dish form was implemented independently from the add dish form, resulting in a different field order. The developer didn't follow the established field order from the add dish form.
+
+### Resolution Steps
+1. **Analyzed Add Dish Form Field Order**:
+   - Source Type (In-Restaurant/Online)
+   - Restaurant Name (conditional on source type)
+   - Delivery Apps (Online only)
+   - Dish Name
+   - Protein Source
+   - Photo
+   - Taste
+   - Protein Content
+   - Price
+   - Overall Satisfaction
+   - Comments
+
+2. **Reordered Edit Dish Form Fields** to match add dish form:
+   - Moved Availability (Source Type) to the top
+   - Moved Delivery Apps to immediately follow Availability
+   - Moved Price into the ratings section
+   - Removed City field (hardcoded in add form)
+   - Updated form state and validation to remove city references
+
+3. **Updated Form State Management**:
+   - Removed `city` state variable and related logic
+   - Updated data submission to use original city value
+   - Updated validation to remove city requirements
+
+### Testing Results
+- ✅ Edit dish form now matches add dish form field order
+- ✅ Conditional fields (Delivery Apps) appear in correct position
+- ✅ Form validation and submission logic unchanged
+- ✅ No linting errors remain
+- ✅ User experience is now consistent between add and edit forms
+
+### Prevention Measures
+- Always follow established patterns when creating similar forms
+- Test form consistency across different user flows
+- Use the same field order for related forms to maintain user experience
+- Review form layouts for consistency during development
+
+### Notes
+- This fix ensures consistent user experience across add and edit forms
+- The field order now follows the logical flow established in the add dish form
+- All functionality remains intact while improving user experience
+- The fix maintains all existing validation and submission logic

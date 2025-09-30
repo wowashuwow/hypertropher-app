@@ -81,3 +81,112 @@ export async function GET() {
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
 }
+
+// PUT handler for updating a dish
+export async function PUT(request: NextRequest) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "You must be logged in to update a dish." }, { status: 401 });
+  }
+
+  try {
+    const { id, ...updateData } = await request.json();
+
+    if (!id) {
+      return NextResponse.json({ error: "Dish ID is required." }, { status: 400 });
+    }
+
+    // First, verify the dish exists and belongs to the user
+    const { data: existingDish, error: fetchError } = await supabase
+      .from("dishes")
+      .select("user_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching dish:", fetchError);
+      return NextResponse.json({ error: "Dish not found." }, { status: 404 });
+    }
+
+    if (existingDish.user_id !== user.id) {
+      return NextResponse.json({ error: "You can only update your own dishes." }, { status: 403 });
+    }
+
+    // Update the dish
+    const { data, error } = await supabase
+      .from("dishes")
+      .update(updateData)
+      .eq("id", id)
+      .eq("user_id", user.id) // Double-check ownership
+      .select();
+
+    if (error) {
+      console.error("Error updating dish:", error);
+      return NextResponse.json({ error: "Failed to update dish." }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Server Error:", error);
+    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
+  }
+}
+
+// DELETE handler for deleting a dish
+export async function DELETE(request: NextRequest) {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "You must be logged in to delete a dish." }, { status: 401 });
+  }
+
+  try {
+    const { id } = await request.json();
+
+    if (!id) {
+      return NextResponse.json({ error: "Dish ID is required." }, { status: 400 });
+    }
+
+    // First, verify the dish exists and belongs to the user
+    const { data: existingDish, error: fetchError } = await supabase
+      .from("dishes")
+      .select("user_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching dish:", fetchError);
+      return NextResponse.json({ error: "Dish not found." }, { status: 404 });
+    }
+
+    if (existingDish.user_id !== user.id) {
+      return NextResponse.json({ error: "You can only delete your own dishes." }, { status: 403 });
+    }
+
+    // Delete the dish
+    const { error } = await supabase
+      .from("dishes")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id); // Double-check ownership
+
+    if (error) {
+      console.error("Error deleting dish:", error);
+      return NextResponse.json({ error: "Failed to delete dish." }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: "Dish deleted successfully." });
+  } catch (error) {
+    console.error("Server Error:", error);
+    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
+  }
+}

@@ -9,6 +9,7 @@ This document outlines the database schema for the Hypertropher application, bui
     - [2. `dishes` table](#2-dishes-table)
     - [3. `invite_codes` table](#3-invite_codes-table)
     - [4. `wishlist_items` table](#4-wishlist_items-table)
+      - [Row Level Security (RLS) Policies](#row-level-security-rls-policies)
 
 ---
 
@@ -47,6 +48,13 @@ The core table containing all user-contributed dish information.
 | `delivery_app_url`| `TEXT` | Nullable | The URL to the dish on the delivery app (for online). |
 | `delivery_apps` | `JSONB` | Default: `'[]'::jsonb` | Array of delivery app names (e.g., ["Swiggy", "Zomato"]) for online dishes. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the dish was added. |
+
+#### Row Level Security (RLS) Policies
+The `dishes` table has RLS enabled with the following policies:
+- **SELECT**: Users can view all dishes (`true`) - for discovery functionality
+- **INSERT**: Users can add their own dishes (`auth.uid() = user_id`)
+- **UPDATE**: Users can update their own dishes (`auth.uid() = user_id`)
+- **DELETE**: Users can delete their own dishes (`auth.uid() = user_id`)
 
 ### 3. `invite_codes` table
 Manages the invite code system for new user registration.

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { MainLayout } from "@/components/main-layout"
 import { DishCard } from "@/components/dish-card"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
@@ -36,6 +37,7 @@ export default function MyDishesPage() {
   
   const { user } = useSession()
   const currentUserId = user?.id
+  const router = useRouter()
 
   // Fetch user profile data
   useEffect(() => {
@@ -115,6 +117,37 @@ export default function MyDishesPage() {
     })
   }
 
+  const handleEdit = (dishId: string) => {
+    router.push(`/edit-dish/${dishId}`)
+  }
+
+  const handleDelete = async (dishId: string) => {
+    if (!confirm('Are you sure you want to delete this dish? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/dishes', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: dishId }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete dish')
+      }
+
+      // Remove the dish from local state
+      setDishes((prev) => prev.filter((dish) => dish.id !== dishId))
+    } catch (error) {
+      console.error('Error deleting dish:', error)
+      alert(error instanceof Error ? error.message : 'Failed to delete dish')
+    }
+  }
+
   const filteredDishes = dishes.filter((dish) => {
     const cityMatch = dish.city === userCity
     const userMatch = dish.user_id === currentUserId
@@ -161,6 +194,9 @@ export default function MyDishesPage() {
                   deliveryApps={dish.delivery_apps}
                   isBookmarked={bookmarkedDishes.has(dish.id)}
                   onBookmarkToggle={handleBookmarkToggle}
+                  showActions={true}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>

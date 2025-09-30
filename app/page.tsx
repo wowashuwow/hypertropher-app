@@ -299,6 +299,7 @@ export default function HomePage() {
                 deliveryApps={dish.delivery_apps}
                 isBookmarked={bookmarkedDishes.has(dish.id)}
                 onBookmarkToggle={handleBookmarkToggle}
+                showActions={false}
               />
             ))}
           </div>
