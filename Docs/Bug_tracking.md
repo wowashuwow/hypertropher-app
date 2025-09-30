@@ -648,6 +648,58 @@ restaurant_name: sourceType === "Online" ? onlineRestaurant : restaurant,
 
 ---
 
+## [FEATURE-002] - Make URL Field Optional in Online Dish Form
+**Date:** 2024-12-19
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** Add Dish Form
+
+### Description
+The "Paste Link to Dish" field in the online dish form was marked as required, but users should be able to submit dishes without providing a URL. This field should be optional to improve user experience and reduce friction in dish submission.
+
+### Root Cause
+The form field had the `required` attribute and no visual indication that it was optional, making it mandatory for users to provide a URL even when they might not have one readily available.
+
+### Resolution Steps
+1. **Updated Form Field**
+   - Removed `required` attribute from the URL input field
+   - Updated label to include "(Optional)" to clearly indicate the field is not mandatory
+   - Maintained URL input type for validation when a value is provided
+
+2. **Verified Data Handling**
+   - Confirmed API already handles empty URLs with `dishLink || null`
+   - Verified database schema supports nullable URL fields
+   - No changes needed to backend data processing
+
+### Code Changes
+```typescript
+// Updated label
+<Label htmlFor="dishLink">Paste Link to Dish (Optional)</Label>
+
+// Updated input field (removed required attribute)
+<Input
+  id="dishLink"
+  type="url"
+  placeholder="https://..."
+  value={dishLink}
+  onChange={(e) => setDishLink(e.target.value)}
+  // required attribute removed
+/>
+```
+
+### Testing Results
+- ✅ Form can be submitted without URL
+- ✅ URL validation still works when provided
+- ✅ Clear visual indication that field is optional
+- ✅ No breaking changes to existing functionality
+
+### Impact
+- **User Experience**: Reduced friction in dish submission process
+- **Flexibility**: Users can add dishes without needing to find URLs
+- **Data Quality**: Still captures URLs when available for better discoverability
+
+---
+
 ### Proposed Implementation
 ```typescript
 // Future server-side implementation

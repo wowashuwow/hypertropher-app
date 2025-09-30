@@ -223,14 +223,13 @@ export default function AddDishPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="dishLink">Paste Link to Dish</Label>
+                    <Label htmlFor="dishLink">Paste Link to Dish (Optional)</Label>
                     <Input
                       id="dishLink"
                       type="url"
                       placeholder="https://..."
                       value={dishLink}
                       onChange={(e) => setDishLink(e.target.value)}
-                      required
                     />
                   </div>
                 </>

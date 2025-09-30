@@ -104,6 +104,7 @@
 
 #### Sub-steps:
 - [x] Add restaurant name field to online dish form
+- [x] Make URL field optional in online dish form
 - [ ] Integrate Google Maps Places API for restaurant search
 - [ ] Implement dish update and delete functionality
 - [ ] Add advanced filtering and sorting options
