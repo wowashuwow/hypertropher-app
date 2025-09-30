@@ -700,6 +700,92 @@ The form field had the `required` attribute and no visual indication that it was
 
 ---
 
+## [FEATURE-003] - Remove URL Field and Add Delivery App Display
+**Date:** 2024-12-19
+**Status:** ✅ Resolved
+**Priority:** High
+**Component:** Add Dish Form, Dish Card
+
+### Description
+Most delivery apps (except Zomato) don't provide direct links to specific dishes, making the URL field unnecessary. Additionally, users wanted to see the specific delivery app name in the dish card instead of generic "Online" text, and have buttons that open the specific delivery app.
+
+### Root Cause
+1. URL field was capturing data that wasn't useful for most delivery apps
+2. Dish cards showed generic "Online" text instead of specific app names
+3. Buttons showed generic "View on Delivery App" text instead of specific app names
+4. No deep linking functionality to open specific delivery apps
+
+### Resolution Steps
+1. **Database Schema Update**
+   - Added `delivery_app_name` column to `dishes` table
+   - Updated API to store and return delivery app names
+
+2. **Form Updates**
+   - Removed URL input field from online dish form
+   - Removed `dishLink` state and related logic
+   - Updated form submission to include `delivery_app_name`
+   - Set `delivery_app_url` to always null
+
+3. **Dish Card Updates**
+   - Added `deliveryAppName` prop to `DishCardProps`
+   - Updated pill display to show specific app name instead of "Online"
+   - Updated button text to show "Open [App Name]" instead of "View on Delivery App"
+   - Implemented deep linking functionality for mobile and web
+
+4. **Deep Linking Implementation**
+   - Added deep link mappings for Swiggy, Zomato, Uber Eats, DoorDash
+   - Implemented mobile detection and app opening logic
+   - Added fallback to web versions when apps aren't installed
+   - Used 1-second timeout for deep link failure detection
+
+### Code Changes
+```typescript
+// Form submission updates
+const dishData = {
+  // ... existing fields
+  delivery_app_name: sourceType === "Online" ? deliveryApp : null,
+  delivery_app_url: null, // Always null since we removed URL field
+};
+
+// Dish card updates
+interface DishCardProps {
+  // ... existing props
+  deliveryAppName?: string | null;
+}
+
+// Pill display
+{availability === "Online" ? deliveryAppName || "Online" : availability}
+
+// Button text and action
+<Button onClick={handleDeliveryAppClick}>
+  <Link className="mr-2 h-4 w-4" />
+  Open {deliveryAppName || "Delivery App"}
+</Button>
+
+// Deep linking logic
+const deliveryAppDeepLinks = {
+  "Swiggy": { mobile: "swiggy://", web: "https://www.swiggy.com" },
+  "Zomato": { mobile: "zomato://", web: "https://www.zomato.com" },
+  "Uber Eats": { mobile: "uber://", web: "https://www.ubereats.com" },
+  "DoorDash": { mobile: "doordash://", web: "https://www.doordash.com" }
+};
+```
+
+### Testing Results
+- ✅ Form submission works without URL field
+- ✅ Delivery app names display correctly in dish cards
+- ✅ Deep linking works on mobile devices
+- ✅ Web fallback works on desktop
+- ✅ No breaking changes to existing functionality
+
+### Impact
+- **User Experience**: Cleaner form and more informative dish cards
+- **Functionality**: Direct app opening improves user workflow
+- **Data Quality**: Removed unnecessary URL field, added useful app name data
+- **Mobile Experience**: Native app opening provides better user experience
+
+---
+
 ### Proposed Implementation
 ```typescript
 // Future server-side implementation

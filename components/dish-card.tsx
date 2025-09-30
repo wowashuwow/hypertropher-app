@@ -97,6 +97,7 @@ export function DishCard({
     return emojiMap[satisfaction as keyof typeof emojiMap] || "👍"
   }
 
+
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md relative flex flex-col h-full">
       {/* Image Section */}
@@ -186,6 +187,7 @@ export function DishCard({
           </div>
         ) : availability === "Online" ? (
           <Button 
+            onClick={handleDeliveryAppClick}
             className={cn(
               "w-full bg-green-600 hover:bg-green-700 text-white border-0"
             )}

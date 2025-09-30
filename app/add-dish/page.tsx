@@ -185,7 +185,7 @@ export default function AddDishPage() {
 
               {sourceType === "In-Restaurant" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="restaurant">Restaurant</Label>
+                  <Label htmlFor="restaurant">Restaurant Name</Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                     <Input
@@ -220,7 +220,7 @@ export default function AddDishPage() {
                     <Input
                       id="onlineRestaurant"
                       type="text"
-                      placeholder="Enter Outlet Name"
+                      placeholder="Enter Restaurant Name"
                       value={onlineRestaurant}
                       onChange={(e) => setOnlineRestaurant(e.target.value)}
                       required
