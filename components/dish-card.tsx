@@ -187,7 +187,6 @@ export function DishCard({
           </div>
         ) : availability === "Online" ? (
           <Button 
-            onClick={handleDeliveryAppClick}
             className={cn(
               "w-full bg-green-600 hover:bg-green-700 text-white border-0"
             )}

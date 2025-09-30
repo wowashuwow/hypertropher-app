@@ -270,6 +270,8 @@ Add Dish → Select Source Type → Enter Details → Upload Photo → Add Ratin
 - Image upload with preview
 - Rating system with emoji feedback
 - Form validation and error handling
+- Clear error messages for API failures (no mock data fallbacks)
+- Proper empty states when no data is available
 
 ## Responsive Design Requirements
 

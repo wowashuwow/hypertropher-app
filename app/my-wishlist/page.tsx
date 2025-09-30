@@ -6,33 +6,6 @@ import { DishCard } from "@/components/dish-card"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { useSession } from "@/lib/auth/session-provider"
 
-// Mock saved dishes data
-const mockSavedDishes = [
-  {
-    id: "1",
-    dishName: "Grilled Chicken Bowl",
-    restaurantName: "Healthy Bites",
-    city: "Mumbai",
-    price: "₹320",
-    protein: "Overloaded" as const,
-    taste: "Amazing" as const,
-    addedBy: "Rohan K.",
-    availability: "In-Store" as const,
-    imageUrl: "/grilled-chicken-vegetable-bowl.png",
-  },
-  {
-    id: "3",
-    dishName: "Fish Curry with Rice",
-    restaurantName: "Coastal Kitchen",
-    city: "Mumbai",
-    price: "₹420",
-    protein: "Overloaded" as const,
-    taste: "Amazing" as const,
-    addedBy: "Aditya M.",
-    availability: "In-Store" as const,
-    imageUrl: "/fish-curry-with-rice-indian-cuisine.jpg",
-  },
-]
 
 interface Dish {
   id: string
@@ -48,6 +21,7 @@ interface Dish {
   availability: "In-Store" | "Online"
   image_url: string
   protein_source: string
+  delivery_apps?: string[]
   users: { name: string }
 }
 
@@ -87,13 +61,12 @@ export default function MyListPage() {
     const fetchWishlistDishes = async () => {
       try {
         setLoading(true)
-        // For now, we'll use mock data since wishlist functionality isn't implemented yet
         // TODO: Implement wishlist API endpoint
-        setSavedDishes(mockSavedDishes)
+        setSavedDishes([])
       } catch (err) {
         console.error('Error fetching wishlist dishes:', err)
-        setError('Failed to load wishlist')
-        setSavedDishes(mockSavedDishes)
+        setError('Failed to load wishlist. Please try again later.')
+        setSavedDishes([])
       } finally {
         setLoading(false)
       }
@@ -140,7 +113,7 @@ export default function MyListPage() {
                   availability={dish.availability}
                   imageUrl={dish.image_url}
                   proteinSource={dish.protein_source}
-                  deliveryAppName={dish.delivery_app_name}
+                  deliveryApps={dish.delivery_apps}
                   isBookmarked={true} 
                   onBookmarkToggle={handleBookmarkToggle} 
                 />

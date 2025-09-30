@@ -7,72 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 import { useSession } from "@/lib/auth/session-provider"
 
-const mockDishes = [
-  {
-    id: "1",
-    dish_name: "Grilled Chicken Bowl",
-    restaurant_name: "Healthy Bites",
-    city: "Mumbai",
-    price: "₹320",
-    protein: "💪 Overloaded" as const,
-    taste: "🤤 Amazing" as const,
-    satisfaction: "🤩 Would Eat Everyday" as const,
-    comment: "The chicken was perfectly grilled and very juicy. Great portion size!",
-    addedBy: "Rohan K.",
-    availability: "In-Store" as const,
-    image_url: "/grilled-chicken-vegetable-bowl.png",
-    protein_source: "Chicken" as const,
-    users: { name: "Rohan K." },
-  },
-  {
-    id: "2",
-    dish_name: "Paneer Tikka Salad",
-    restaurant_name: "Green Garden",
-    city: "Mumbai", // Changed to Mumbai so it shows in filtered results
-    price: "₹199",
-    protein: "👍 Great" as const,
-    taste: "👍 Great" as const,
-    satisfaction: "👍 Great" as const,
-    addedBy: "Priya S.",
-    availability: "Online" as const,
-    image_url: "/paneer-tikka-salad-with-fresh-greens.jpg",
-    protein_source: "Paneer" as const,
-    delivery_apps: ["Swiggy", "Zomato"],
-    users: { name: "Priya S." },
-  },
-  {
-    id: "3",
-    dish_name: "Fish Curry with Rice",
-    restaurant_name: "Coastal Kitchen",
-    city: "Mumbai",
-    price: "₹420",
-    protein: "💪 Overloaded" as const,
-    taste: "🤤 Amazing" as const,
-    satisfaction: "🤩 Would Eat Everyday" as const,
-    comment: "A bit spicy, but the fish was fresh and flavorful. Perfect with rice!",
-    addedBy: "Aditya M.",
-    availability: "In-Store" as const,
-    image_url: "/fish-curry-with-rice-indian-cuisine.jpg",
-    protein_source: "Fish" as const,
-    users: { name: "Aditya M." },
-  },
-  {
-    id: "4",
-    dish_name: "Egg White Omelette",
-    restaurant_name: "Morning Fresh",
-    city: "Mumbai", // Changed to Mumbai so it shows in filtered results
-    price: "₹150",
-    protein: "👍 Great" as const,
-    taste: "👍 Great" as const,
-    satisfaction: "👍 Great" as const,
-    addedBy: "Sneha R.",
-    availability: "Online" as const,
-    image_url: "/vegetable-egg-white-omelette.png",
-    protein_source: "Eggs" as const,
-    delivery_apps: ["Zomato"],
-    users: { name: "Sneha R." },
-  },
-]
 
 type ProteinSource = "All" | "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other"
 
@@ -163,9 +97,8 @@ export default function HomePage() {
         setDishes(transformedDishes)
       } catch (err) {
         console.error('Error fetching dishes:', err)
-        setError('Failed to load dishes')
-        // Fallback to mock data
-        setDishes(mockDishes)
+        setError('Failed to load dishes. Please try again later.')
+        setDishes([])
       } finally {
         setLoading(false)
       }

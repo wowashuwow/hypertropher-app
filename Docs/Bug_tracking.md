@@ -991,3 +991,95 @@ The multi-select dropdown for delivery apps in the add-dish form had styling iss
 - The styling now matches other form elements for consistency
 - Alignment issues still need to be addressed in a future update
 - The fix maintains all existing functionality while improving visual consistency
+
+## [BUG-006] - Mock Data Removal and Data Quality Issues
+**Date:** 2025-01-30
+**Severity:** High (Data Quality)
+**Priority:** High
+**Status:** Resolved
+**Reporter:** Development Team
+
+### Description
+The application was using mock data as fallbacks in multiple pages, causing inconsistent data display and the "Online" button issue. Mock dishes were appearing instead of real database data, leading to confusion about data sources and validation.
+
+### Steps to Reproduce
+1. Navigate to any page (homepage, my-dishes, my-wishlist)
+2. Observe that mock dishes were being displayed
+3. Notice the "Online" button appearing for dishes without delivery apps
+4. Check that form validation was working but mock data was still showing
+
+### Expected Behavior
+- Application should use only database data
+- No mock dishes should appear anywhere
+- Clear error messages when API calls fail
+- Proper empty states when no data is available
+- Consistent data source across all pages
+
+### Actual Behavior
+- Mock dishes were being displayed as fallbacks
+- "Online" button issue was caused by mock data inconsistencies
+- Mixed data sources (database + mock data)
+- Inconsistent user experience
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+- **Files Affected**: 
+  - `app/page.tsx`
+  - `app/my-dishes/page.tsx`
+  - `app/my-wishlist/page.tsx`
+
+### Error Details
+- **Root Cause**: Mock data arrays and fallback logic in multiple components
+- **Impact**: Data quality issues, inconsistent user experience, "Online" button bug
+
+### Root Cause
+1. **Mock Data Arrays**: Multiple files contained hardcoded mock dish data
+2. **Fallback Logic**: Error handling was falling back to mock data instead of showing proper errors
+3. **Data Inconsistency**: Mixed use of database and mock data
+4. **Interface Mismatch**: Mock data didn't match current database schema
+
+### Resolution Steps
+1. **Removed Mock Data Arrays** from all files:
+   - `app/page.tsx`: Removed `mockDishes` array (65+ lines)
+   - `app/my-dishes/page.tsx`: Removed `mockDishes` array (65+ lines)
+   - `app/my-wishlist/page.tsx`: Removed `mockSavedDishes` array (25+ lines)
+
+2. **Updated Error Handling**:
+   - Replaced `setDishes(mockDishes)` with `setDishes([])`
+   - Added proper error messages: "Failed to load dishes. Please try again later."
+   - Removed fallback to mock data in error scenarios
+
+3. **Fixed Interface Definitions**:
+   - Added `delivery_apps?: string[]` to all Dish interfaces
+   - Updated prop names from `deliveryAppName` to `deliveryApps`
+   - Ensured consistency across all components
+
+4. **Cleaned Up Comments**:
+   - Removed "Mock saved dishes data" comment
+   - Updated TODO comments to reflect current state
+
+### Testing Results
+- ✅ No mock dishes appear anywhere in the application
+- ✅ Clear error messages when API calls fail
+- ✅ Proper empty states when no data is available
+- ✅ Consistent database-only data source
+- ✅ "Online" button issue resolved (was caused by mock data)
+- ✅ No linting errors remain
+- ✅ All pages load correctly without mock data
+
+### Prevention Measures
+- Never use mock data as fallbacks in production code
+- Always show proper error messages instead of mock data
+- Ensure consistent data sources across all components
+- Test error scenarios to verify proper error handling
+- Use TypeScript interfaces to prevent data structure mismatches
+
+### Notes
+- This fix ensures data quality and consistency across the entire application
+- The "Online" button issue was resolved as a side effect of removing mock data
+- All pages now use only database data, providing a consistent user experience
+- Error handling is now more user-friendly and informative
+- The application is ready for production deployment with clean data sources
