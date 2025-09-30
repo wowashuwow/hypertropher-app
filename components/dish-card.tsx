@@ -19,6 +19,7 @@ interface DishCardProps {
   addedBy: string
   availability: "Online" | "In-Store"
   proteinSource?: string
+  deliveryApps?: string[]
   isBookmarked?: boolean
   onBookmarkToggle?: (id: string) => void
 }
@@ -37,6 +38,7 @@ export function DishCard({
   addedBy,
   availability,
   proteinSource,
+  deliveryApps = [],
   isBookmarked = false,
   onBookmarkToggle,
 }: DishCardProps) {
@@ -46,6 +48,34 @@ export function DishCard({
   const handleBookmarkClick = () => {
     setBookmarked(!bookmarked)
     onBookmarkToggle?.(id)
+  }
+
+  const getDeepLinkUrl = (appName: string) => {
+    const deepLinks = {
+      'Swiggy': 'swiggy://',
+      'Zomato': 'zomato://',
+      'Uber Eats': 'ubereats://',
+      'DoorDash': 'doordash://'
+    }
+    return deepLinks[appName as keyof typeof deepLinks] || `https://${appName.toLowerCase().replace(' ', '')}.com`
+  }
+
+  const getWebFallbackUrl = (appName: string) => {
+    const webUrls = {
+      'Swiggy': 'https://www.swiggy.com',
+      'Zomato': 'https://www.zomato.com',
+      'Uber Eats': 'https://www.ubereats.com',
+      'DoorDash': 'https://www.doordash.com'
+    }
+    return webUrls[appName as keyof typeof webUrls] || `https://${appName.toLowerCase().replace(' ', '')}.com`
+  }
+
+  const handleDeliveryAppClick = (appName: string) => {
+    const webUrl = getWebFallbackUrl(appName)
+    
+    // Simply open the web URL directly on desktop
+    // On mobile, users can install the app from the website
+    window.open(webUrl, '_blank')
   }
 
   const toggleExpanded = () => {
@@ -84,14 +114,27 @@ export function DishCard({
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-start justify-between mb-1 gap-2">
           <h2 className="text-xl font-semibold text-card-foreground">{dishName}</h2>
-          <span
-            className={cn(
-              "inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap self-start",
-              availability === "Online" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
+          <div className="flex flex-wrap gap-1 self-start">
+            {availability === "Online" && deliveryApps.length > 0 ? (
+              deliveryApps.map((app) => (
+                <span
+                  key={app}
+                  className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-green-100 text-green-800"
+                >
+                  {app}
+                </span>
+              ))
+            ) : (
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
+                  availability === "Online" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
+                )}
+              >
+                {availability === "Online" ? "Online" : "In-Store"}
+              </span>
             )}
-          >
-            {availability}
-          </span>
+          </div>
         </div>
         <p className="text-sm text-muted-foreground mb-3">
           {restaurantName} - {city}
@@ -126,14 +169,30 @@ export function DishCard({
 
       {/* Action Section - Fixed Bottom */}
       <div className="p-4 pt-0 space-y-3 mt-auto">
-        {availability === "Online" ? (
+        {availability === "Online" && deliveryApps.length > 0 ? (
+          <div className="space-y-2">
+            {deliveryApps.map((app) => (
+              <Button 
+                key={app}
+                onClick={() => handleDeliveryAppClick(app)}
+                className={cn(
+                  "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm"
+                )}
+              >
+                <Link className="mr-2 h-4 w-4" />
+                Open {app}
+              </Button>
+            ))}
+          </div>
+        ) : availability === "Online" ? (
           <Button 
             className={cn(
               "w-full bg-green-600 hover:bg-green-700 text-white border-0"
             )}
+            disabled
           >
             <Link className="mr-2 h-4 w-4" />
-            View on Delivery App
+            Online
           </Button>
         ) : (
           <Button 

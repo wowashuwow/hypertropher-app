@@ -79,7 +79,7 @@ Build a valuable and trusted, community-sourced database of high-protein dishes 
 ### 4.3. Dish Creation & Data Capture
 * **FR-ADD-01:** The "Add Dish" form must capture a `sourceType` of either "In-Restaurant" or "Online".
 * **FR-ADD-02:** If "In-Restaurant", the form must use the Google Maps Places API to autocomplete restaurant names, scoped to the user's city. It must store the restaurant's name, address, and coordinates (latitude/longitude).
-* **FR-ADD-03:** If "Online", the form must provide a dropdown for delivery apps and a URL input field.
+* **FR-ADD-03:** If "Online", the form must provide a multi-select dropdown for delivery apps (allowing multiple selections) and a restaurant name field. The URL input field is optional.
 * **FR-ADD-04:** The form must require a `dishName`, a numerical `price`, and a `proteinSource` selection.
 * **FR-ADD-05:** The form must allow for an optional photo upload, which will be stored in Supabase Storage.
 * **FR-ADD-06:** The form must capture ratings for Taste, Protein Content, and Overall Satisfaction via button selectors.
@@ -89,7 +89,7 @@ Build a valuable and trusted, community-sourced database of high-protein dishes 
 * **FR-CARD-01:** The card must display the dish photo, name, restaurant, city, price, availability, and contributor.
 * **FR-CARD-02:** The card must display the ratings for Protein, Taste, and Satisfaction using the specified emoji system.
 * **FR-CARD-03:** The card must contain a bookmark icon for adding/removing the dish from the user's "Wishlist".
-* **FR-CARD-04:** The card must display a conditional action button ("Navigate" for In-Store, "View on Delivery App" for Online).
+* **FR-CARD-04:** The card must display conditional action buttons ("Navigate" for In-Store, multiple "Open [App Name]" buttons for Online dishes with multiple delivery apps).
 * **FR-CARD-05:** If a dish has a comment, the entire card will be expandable via the Shadcn UI Accordion component to show the comment text. Clicks on internal buttons must not trigger the expansion.
 
 ---
@@ -121,6 +121,7 @@ Build a valuable and trusted, community-sourced database of high-protein dishes 
 * `latitude`: Numeric (nullable)
 * `longitude`: Numeric (nullable)
 * `delivery_app_url`: Text (nullable)
+* `delivery_apps`: JSONB (array of delivery app names, e.g., ["Swiggy", "Zomato"])
 * `created_at`: Timestamp
 
 ### `invite_codes` table:

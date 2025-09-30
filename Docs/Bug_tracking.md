@@ -813,3 +813,95 @@ The homepage was using `user?.user_metadata?.name` from the session instead of f
 - This fix works in conjunction with the security fix for phone number exposure
 - The user name is now fetched securely from the profile API
 - Maintains consistent user experience across the application
+
+---
+
+## [BUG-005] - Multi-Select Delivery Apps Styling and Alignment Issues
+
+### Bug Details
+- **Bug ID**: BUG-005
+- **Title**: Multi-Select Delivery Apps Styling and Alignment Issues
+- **Severity**: Medium (UX)
+- **Priority**: Medium
+- **Status**: Partially Resolved
+- **Date Reported**: 2025-01-30
+- **Assigned To**: Development Team
+
+### Description
+The multi-select dropdown for delivery apps in the add-dish form had styling issues:
+1. Selected delivery app pills were cyan-colored instead of matching the design system
+2. Pills were not properly aligned within the dropdown selection frame
+3. Vertical padding was uneven (less on top, more on bottom)
+4. Pills were not horizontally aligned to the left edge of the dropdown
+
+### Steps to Reproduce
+1. Navigate to the Add Dish page
+2. Select "Online" as the source type
+3. Open the "Delivery Apps" multi-select dropdown
+4. Select multiple delivery apps (e.g., "Zomato", "Uber Eats")
+5. Observe the styling and alignment of the selected pills
+
+### Expected Behavior
+- Selected delivery app pills should match the design system (light gray background, dark text, border)
+- Pills should be properly aligned within the dropdown frame
+- Vertical alignment should be centered
+- Horizontal alignment should be flush to the left edge
+- Styling should be consistent with other form elements like "Protein Source" pills
+
+### Actual Behavior
+- Selected pills were cyan-colored and didn't match the design system
+- Pills were misaligned within the dropdown frame
+- Uneven vertical padding (more space below than above)
+- Pills were not flush to the left edge of the dropdown
+- Inconsistent styling compared to other form elements
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+- **Component**: Add Dish Form (`app/add-dish/page.tsx`)
+- **UI Component**: Multi-Select (`components/ui/multi-select.tsx`)
+
+### Error Details
+- **Component**: `MultiSelect` component in `components/ui/multi-select.tsx`
+- **Issue**: Badge styling and container alignment
+- **Root Cause**: Incorrect Badge variant and missing alignment classes
+
+### Root Cause
+1. **Badge Styling**: The Badge component was using `variant="outline"` with custom classes that didn't properly override the default styling
+2. **Design System Mismatch**: The styling didn't match the Button `outline` variant used elsewhere in the design system
+
+### Resolution Steps
+1. **Updated Badge Styling** in `components/ui/multi-select.tsx`:
+   ```typescript
+   // Changed from:
+   className="mr-1 mb-1 bg-secondary text-secondary-foreground hover:bg-secondary/80"
+   
+   // To:
+   className="mr-1 mb-1 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
+   ```
+
+2. **Matched Design System**:
+   - Used `border border-input bg-background text-foreground` to match Button outline variant
+   - Added `hover:bg-accent hover:text-accent-foreground` for consistent hover states
+
+### Testing Results
+- ✅ Selected delivery app pills now have white background with dark text and border
+- ✅ Styling matches the "Protein Source" pills and other form elements
+- ✅ Hover states work correctly
+- ✅ X icon for removal remains functional
+- ✅ No breaking changes to existing functionality
+- ❌ Alignment issues remain (pills still not properly centered or flush to left edge)
+
+### Prevention Measures
+- Always test UI components against the design system
+- Use consistent styling patterns across similar components
+- Test alignment and spacing in different screen sizes
+- Verify hover states and interactive elements work correctly
+
+### Notes
+- This fix ensures the multi-select component follows the established design system
+- The styling now matches other form elements for consistency
+- Alignment issues still need to be addressed in a future update
+- The fix maintains all existing functionality while improving visual consistency

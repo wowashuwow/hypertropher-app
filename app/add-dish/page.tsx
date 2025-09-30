@@ -10,13 +10,13 @@ import { Label } from "@/components/ui/label"
 // import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { MultiSelect } from "@/components/ui/multi-select"
 import { createClient } from "@/lib/supabase/client"
 
 export default function AddDishPage() {
   const [sourceType, setSourceType] = useState<"In-Restaurant" | "Online">("In-Restaurant")
-  const [deliveryApp, setDeliveryApp] = useState("")
+  const [deliveryApps, setDeliveryApps] = useState<string[]>([])
   const [onlineRestaurant, setOnlineRestaurant] = useState("")
-  const [dishLink, setDishLink] = useState("")
   const [restaurant, setRestaurant] = useState("")
   const [dishName, setDishName] = useState("")
   const [proteinSource, setProteinSource] = useState<
@@ -45,6 +45,10 @@ export default function AddDishPage() {
     }
     if (sourceType === "Online" && !onlineRestaurant) {
       alert("Restaurant name is required for online dishes.");
+      return;
+    }
+    if (sourceType === "Online" && deliveryApps.length === 0) {
+      alert("At least one delivery app is required for online dishes.");
       return;
     }
     setIsLoading(true);
@@ -87,7 +91,7 @@ export default function AddDishPage() {
       protein_content: protein.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
       satisfaction: satisfaction.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
       comment,
-      delivery_app_url: dishLink || null,
+      delivery_apps: sourceType === "Online" ? deliveryApps : [],
       restaurant_address: null, // Will add later with Google Maps API
       latitude: null,
       longitude: null,
@@ -198,18 +202,18 @@ export default function AddDishPage() {
               ) : (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="deliveryApp">Delivery App</Label>
-                    <Select value={deliveryApp} onValueChange={setDeliveryApp} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select delivery app" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Swiggy">Swiggy</SelectItem>
-                        <SelectItem value="Zomato">Zomato</SelectItem>
-                        <SelectItem value="Uber Eats">Uber Eats</SelectItem>
-                        <SelectItem value="DoorDash">DoorDash</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>Delivery Apps *</Label>
+                    <MultiSelect
+                      options={[
+                        { label: "Swiggy", value: "Swiggy" },
+                        { label: "Zomato", value: "Zomato" },
+                        { label: "Uber Eats", value: "Uber Eats" },
+                        { label: "DoorDash", value: "DoorDash" },
+                      ]}
+                      selected={deliveryApps}
+                      onChange={setDeliveryApps}
+                      placeholder="Select delivery apps..."
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="onlineRestaurant">Restaurant Name</Label>
@@ -220,16 +224,6 @@ export default function AddDishPage() {
                       value={onlineRestaurant}
                       onChange={(e) => setOnlineRestaurant(e.target.value)}
                       required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dishLink">Paste Link to Dish (Optional)</Label>
-                    <Input
-                      id="dishLink"
-                      type="url"
-                      placeholder="https://..."
-                      value={dishLink}
-                      onChange={(e) => setDishLink(e.target.value)}
                     />
                   </div>
                 </>
@@ -339,7 +333,7 @@ export default function AddDishPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource || !price}>
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource || !price || (sourceType === "Online" && deliveryApps.length === 0)}>
                 {isLoading ? "Submitting..." : "Submit Dish"}
               </Button>
             </form>

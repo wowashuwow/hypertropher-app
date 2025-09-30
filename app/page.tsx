@@ -37,6 +37,7 @@ const mockDishes = [
     availability: "Online" as const,
     image_url: "/paneer-tikka-salad-with-fresh-greens.jpg",
     protein_source: "Paneer" as const,
+    delivery_apps: ["Swiggy", "Zomato"],
     users: { name: "Priya S." },
   },
   {
@@ -68,6 +69,7 @@ const mockDishes = [
     availability: "Online" as const,
     image_url: "/vegetable-egg-white-omelette.png",
     protein_source: "Eggs" as const,
+    delivery_apps: ["Zomato"],
     users: { name: "Sneha R." },
   },
 ]
@@ -88,6 +90,7 @@ interface Dish {
   availability: "In-Store" | "Online"
   image_url: string
   protein_source: string
+  delivery_apps?: string[]
   users: { name: string }
 }
 
@@ -153,6 +156,7 @@ export default function HomePage() {
           availability: dish.availability as "In-Store" | "Online",
           image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
           protein_source: dish.protein_source,
+          delivery_apps: dish.delivery_apps || [],
           users: dish.users
         }))
         
@@ -303,6 +307,7 @@ export default function HomePage() {
                 availability={dish.availability}
                 imageUrl={dish.image_url}
                 proteinSource={dish.protein_source}
+                deliveryApps={dish.delivery_apps}
                 isBookmarked={bookmarkedDishes.has(dish.id)}
                 onBookmarkToggle={handleBookmarkToggle}
               />

@@ -105,6 +105,11 @@
 #### Sub-steps:
 - [x] Add restaurant name field to online dish form
 - [x] Make URL field optional in online dish form
+- [x] Implement multi-select delivery apps functionality
+- [x] Create custom MultiSelect UI component with Shadcn UI
+- [x] Update dish card to display multiple delivery app pills and buttons
+- [x] Implement deep linking with web fallbacks for delivery apps
+- [x] Fix multi-select styling and alignment issues (BUG-005)
 - [ ] Integrate Google Maps Places API for restaurant search
 - [ ] Implement dish update and delete functionality
 - [ ] Add advanced filtering and sorting options
@@ -144,7 +149,12 @@
 - **Dynamic Data**: Live API connections, session handling, route protection
 - **Security & UX**: Phone number protection, personalized greetings, bug fixes
 
-### 🚧 In Progress (Stage 5)
+### ✅ Completed (Stage 5 - Partial)
+- **Multi-Select Delivery Apps**: Custom MultiSelect component, multiple app selection, deep linking
+- **UI/UX Improvements**: Styling fixes, alignment improvements, design system consistency
+- **Form Enhancements**: Restaurant name field, optional URL field
+
+### 🚧 In Progress (Stage 5 - Remaining)
 - **Advanced Features**: Google Maps integration, dish management, filtering
 
 ### 📋 Next Steps
@@ -154,8 +164,8 @@
 - Deploy to Vercel
 - Conduct comprehensive testing
 
-### 🎯 MVP Status: ~90% Complete
-The core functionality is working and secure. The application is ready for user testing and deployment preparation.
+### 🎯 MVP Status: ~95% Complete
+The core functionality is working and secure. Multi-select delivery apps feature is complete with proper styling and deep linking. The application is ready for user testing and deployment preparation.
 
 #### Sub-steps:
 - [ ] Deploy to Vercel with environment configuration

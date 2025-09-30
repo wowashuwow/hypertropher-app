@@ -66,6 +66,15 @@ Mark tasks complete only when:
 - **NEVER** fix errors without checking Bug_tracking.md first
 - **ALWAYS** document errors and solutions
 - **ALWAYS** follow the established workflow process
+- **ALWAYS** test functionality before presenting to user
+- **NEVER** commit changes without user approval
+
+## Testing & Approval Workflow
+1. **Implementation**: Complete the feature/change
+2. **Testing**: Test functionality manually in browser
+3. **User Review**: Present changes to user for approval
+4. **Approval**: Wait for user confirmation before proceeding
+5. **Commit**: Only commit after user approval
 
 Remember: Build a cohesive, well-documented, and maintainable project. Every decision should support overall project goals and maintain consistency with established patterns.# Development Agent Workflow - Cursor Rules
 
