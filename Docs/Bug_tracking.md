@@ -506,6 +506,187 @@ The GET handler in `/api/users/route.ts` uses `.select("*")` instead of selectin
 
 ---
 
+## [BUG-004] - Client-Side Sorting Performance Limitation
+
+### Bug Details
+- **Bug ID**: BUG-004
+- **Title**: Client-Side Sorting Performance Limitation
+- **Severity**: Medium (Performance)
+- **Priority**: Medium
+- **Status**: Deferred to V2
+- **Date Reported**: 2025-01-30
+- **Assigned To**: Development Team
+
+### Description
+Current price sorting is implemented client-side, which will not scale well with large datasets. All dishes are fetched from the database and sorted in the browser, causing performance issues as the database grows.
+
+### Steps to Reproduce
+1. Navigate to the homepage
+2. Use the "Sort by Price" dropdown
+3. Select "Price: Low to High" or "Price: High to Low"
+4. Observe that sorting happens in the browser after all data is loaded
+
+### Expected Behavior
+- Sorting should be performed at the database level for optimal performance
+- Only relevant data should be fetched based on filters and sorting
+- Large datasets should not impact browser performance
+
+### Actual Behavior
+- All dishes are fetched from the database regardless of sorting preference
+- Sorting is performed client-side using JavaScript
+- Browser performance degrades with large datasets
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+
+### Error Details
+- **Component**: Homepage (`app/page.tsx`)
+- **Current Implementation**: Client-side sorting in lines 191-212
+- **API Endpoint**: GET `/api/dishes` returns all dishes
+- **Performance Issue**: O(n log n) sorting in browser vs O(n) database sorting
+
+### Root Cause
+The current implementation prioritizes MVP functionality over performance optimization. Client-side sorting was chosen for simplicity and rapid development, but it doesn't scale with database growth.
+
+### Current Implementation
+```typescript
+// Client-side sorting in app/page.tsx (lines 191-212)
+const filteredDishes = dishes
+  .filter((dish) => {
+    const cityMatch = dish.city === userCity
+    const proteinMatch = selectedProteinFilter === "All" || dish.protein_source === selectedProteinFilter
+    return cityMatch && proteinMatch
+  })
+  .sort((a, b) => {
+    // Price parsing and sorting logic
+    const parsePrice = (p: string | undefined) => {
+      if (!p) return NaN
+      const n = Number(String(p).replace(/[^0-9.]/g, ""))
+      return isNaN(n) ? NaN : n
+    }
+    // ... sorting logic
+  })
+```
+
+### Future Solution
+- **Server-Side Sorting**: Use Supabase's built-in sorting capabilities
+- **Database Indexing**: Add indexes on price, city, and protein_source columns
+- **Pagination**: Implement pagination for large result sets
+- **Query Optimization**: Use Supabase client for direct database queries
+
+---
+
+## [FEATURE-001] - Add Restaurant Name Field to Online Dish Form
+**Date:** 2024-12-19
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** Add Dish Form
+
+### Description
+The online dish form was missing a restaurant name field, which is essential for identifying where the dish was found. Users could only select a delivery app and provide a URL, but not specify the restaurant name.
+
+### Root Cause
+The form implementation only captured restaurant names for "In-Restaurant" dishes but not for "Online" dishes, despite the database schema supporting restaurant names for both types.
+
+### Resolution Steps
+1. **Added State Management**
+   - Added `onlineRestaurant` state variable to track restaurant name for online dishes
+   - Updated form validation to require restaurant name for online dishes
+
+2. **Updated Form UI**
+   - Added restaurant name input field in the online section
+   - Positioned between delivery app selection and URL input
+   - Used placeholder "Enter Outlet Name" as requested
+   - Made field required for online dishes
+
+3. **Updated Data Submission**
+   - Modified `dishData` object to use `onlineRestaurant` for online dishes
+   - Maintained existing `restaurant` state for in-restaurant dishes
+   - Added validation to prevent submission without restaurant name
+
+### Code Changes
+```typescript
+// Added state variable
+const [onlineRestaurant, setOnlineRestaurant] = useState("")
+
+// Added validation
+if (sourceType === "Online" && !onlineRestaurant) {
+  alert("Restaurant name is required for online dishes.");
+  return;
+}
+
+// Updated data submission
+restaurant_name: sourceType === "Online" ? onlineRestaurant : restaurant,
+
+// Added form field
+<div className="space-y-2">
+  <Label htmlFor="onlineRestaurant">Restaurant Name</Label>
+  <Input
+    id="onlineRestaurant"
+    type="text"
+    placeholder="Enter Outlet Name"
+    value={onlineRestaurant}
+    onChange={(e) => setOnlineRestaurant(e.target.value)}
+    required
+  />
+</div>
+```
+
+### Testing Results
+- ✅ Form validation works correctly for online dishes
+- ✅ Restaurant name is properly captured and submitted
+- ✅ UI follows existing design patterns
+- ✅ No breaking changes to existing functionality
+
+### Impact
+- **User Experience**: Users can now properly identify restaurants for online dishes
+- **Data Quality**: Improved data completeness for online dish entries
+- **Consistency**: Both in-restaurant and online dishes now capture restaurant names
+
+---
+
+### Proposed Implementation
+```typescript
+// Future server-side implementation
+const { data, error } = await supabase
+  .from('dishes')
+  .select('*')
+  .eq('city', userCity)
+  .eq('protein_source', selectedProteinFilter)
+  .order('price', { ascending: priceSort === 'low-to-high' })
+  .range(0, 19) // Pagination
+```
+
+### Impact Assessment
+- **Current**: Works fine with small datasets (< 100 dishes)
+- **Future**: Will need server-side implementation for scalability
+- **Performance**: Client-side sorting is O(n log n) vs database O(n)
+- **Network**: Unnecessary data transfer for large datasets
+- **Memory**: High browser memory usage with large datasets
+
+### Prevention Measures
+- Plan for scalability from the beginning
+- Consider performance implications of client-side operations
+- Implement server-side sorting for production applications
+- Add database indexing for frequently queried columns
+
+### Testing
+- [ ] Test current implementation with small dataset (< 50 dishes)
+- [ ] Monitor performance with medium dataset (50-200 dishes)
+- [ ] Document performance degradation with large datasets
+- [ ] Plan server-side implementation for V2
+
+### Notes
+- This is a known limitation, not a bug
+- Current implementation is acceptable for MVP
+- Server-side sorting will be implemented in V2 for performance optimization
+- Consider implementing pagination alongside server-side sorting
+
+---
+
 ## [BUG-003] - Homepage Greeting Shows Placeholder Instead of User Name
 
 ### Bug Details

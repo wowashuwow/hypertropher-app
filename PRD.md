@@ -160,6 +160,12 @@ Build a valuable and trusted, community-sourced database of high-protein dishes 
 
 * **V2 - High Priority:** Sharable Public User Profiles (e.g., "Protein Linktree"): A public, shareable link for each user that showcases their top-rated contributed dishes.
 * **V2 - High Priority:** Highlighting Exceptional Dishes: A visual system (e.g., icon overlays on the dish image) to make dishes with the highest ratings stand out.
+* **V2 - High Priority:** Server-Side Sorting & Filtering: Implement database-level sorting and filtering for better performance with large datasets. This includes:
+  - Server-side price sorting (low-to-high, high-to-low)
+  - Server-side protein source filtering
+  - Server-side city filtering
+  - Pagination support for large result sets
+  - Query optimization and indexing strategies
 * **V2:** Advanced Sorting: Implementing the "Sort by Distance" functionality.
 * **Future:** Data Verification: A system for users to report incorrect dish entries.
 * **Future:** Social Features: A "Thanks" button or other social feedback mechanisms.

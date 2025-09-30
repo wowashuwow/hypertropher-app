@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/client"
 export default function AddDishPage() {
   const [sourceType, setSourceType] = useState<"In-Restaurant" | "Online">("In-Restaurant")
   const [deliveryApp, setDeliveryApp] = useState("")
+  const [onlineRestaurant, setOnlineRestaurant] = useState("")
   const [dishLink, setDishLink] = useState("")
   const [restaurant, setRestaurant] = useState("")
   const [dishName, setDishName] = useState("")
@@ -40,6 +41,10 @@ export default function AddDishPage() {
     e.preventDefault();
     if (!proteinSource || !price) {
       alert("Protein source and price are required.");
+      return;
+    }
+    if (sourceType === "Online" && !onlineRestaurant) {
+      alert("Restaurant name is required for online dishes.");
       return;
     }
     setIsLoading(true);
@@ -72,7 +77,7 @@ export default function AddDishPage() {
     // 2. Prepare Dish Data for API
     const dishData = {
       dish_name: dishName,
-      restaurant_name: restaurant,
+      restaurant_name: sourceType === "Online" ? onlineRestaurant : restaurant,
       city: "Pune", // Hardcoded for now, will be dynamic later
       availability: sourceType === 'In-Restaurant' ? 'In-Store' : sourceType,
       image_url: imageUrl,
@@ -205,6 +210,17 @@ export default function AddDishPage() {
                         <SelectItem value="DoorDash">DoorDash</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="onlineRestaurant">Restaurant Name</Label>
+                    <Input
+                      id="onlineRestaurant"
+                      type="text"
+                      placeholder="Enter Outlet Name"
+                      value={onlineRestaurant}
+                      onChange={(e) => setOnlineRestaurant(e.target.value)}
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="dishLink">Paste Link to Dish</Label>

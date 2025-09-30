@@ -103,14 +103,36 @@
 **Dependencies:** Stage 4.5 completion
 
 #### Sub-steps:
+- [x] Add restaurant name field to online dish form
 - [ ] Integrate Google Maps Places API for restaurant search
 - [ ] Implement dish update and delete functionality
 - [ ] Add advanced filtering and sorting options
+- [ ] **Deferred:** Server-side sorting and filtering (moved to V2 for performance optimization)
 - [ ] Create wishlist management system
 
 ### Stage 6: Polish & Deployment
 **Duration:** 2-3 days
 **Dependencies:** Stage 5 completion
+
+#### Sub-steps:
+- [ ] Deploy to Vercel with environment configuration
+- [ ] Add invite code verification feedback
+- [ ] Implement secure invite code passing
+- [ ] Add UX improvements to auth flow
+- [ ] Conduct comprehensive testing
+- [ ] Optimize performance and fix bugs
+
+### Stage 7: Performance Optimization (V2)
+**Duration:** 3-4 days
+**Dependencies:** Stage 6 completion
+
+#### Sub-steps:
+- [ ] Implement server-side sorting and filtering
+- [ ] Add database indexing for performance
+- [ ] Implement pagination for large datasets
+- [ ] Optimize query performance
+- [ ] Add caching strategies
+- [ ] Performance testing and monitoring
 
 ## Current Status Summary
 
