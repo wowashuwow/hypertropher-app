@@ -9,6 +9,7 @@ import { useSession } from "@/lib/auth/session-provider"
 
 interface Dish {
   id: string
+  user_id: string
   dish_name: string
   restaurant_name: string
   city: string
@@ -34,7 +35,7 @@ export default function MyDishesPage() {
   const [loadingProfile, setLoadingProfile] = useState(true)
   
   const { user } = useSession()
-  const currentUser = user?.user_metadata?.name || "User"
+  const currentUserId = user?.id
 
   // Fetch user profile data
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function MyDishesPage() {
         // Transform API data to match component interface
         const transformedDishes = data.map((dish: any) => ({
           id: dish.id,
+          user_id: dish.user_id,
           dish_name: dish.dish_name,
           restaurant_name: dish.restaurant_name,
           city: dish.city,
@@ -84,6 +86,7 @@ export default function MyDishesPage() {
           availability: dish.availability as "In-Store" | "Online",
           image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
           protein_source: dish.protein_source,
+          delivery_apps: dish.delivery_apps || [],
           users: dish.users
         }))
         
@@ -114,7 +117,7 @@ export default function MyDishesPage() {
 
   const filteredDishes = dishes.filter((dish) => {
     const cityMatch = dish.city === userCity
-    const userMatch = dish.addedBy === currentUser
+    const userMatch = dish.user_id === currentUserId
     return cityMatch && userMatch
   })
 

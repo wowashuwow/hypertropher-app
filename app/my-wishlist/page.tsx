@@ -59,10 +59,17 @@ export default function MyListPage() {
   // Fetch wishlist dishes from API
   useEffect(() => {
     const fetchWishlistDishes = async () => {
+      if (!user) return
+      
       try {
         setLoading(true)
-        // TODO: Implement wishlist API endpoint
-        setSavedDishes([])
+        const response = await fetch('/api/wishlist')
+        if (response.ok) {
+          const wishlistDishes = await response.json()
+          setSavedDishes(wishlistDishes)
+        } else {
+          throw new Error('Failed to fetch wishlist')
+        }
       } catch (err) {
         console.error('Error fetching wishlist dishes:', err)
         setError('Failed to load wishlist. Please try again later.')
@@ -73,10 +80,28 @@ export default function MyListPage() {
     }
 
     fetchWishlistDishes()
-  }, [])
+  }, [user])
 
-  const handleBookmarkToggle = (dishId: string) => {
-    setSavedDishes((prev) => prev.filter((dish) => dish.id !== dishId))
+  const handleBookmarkToggle = async (dishId: string) => {
+    try {
+      // Remove from wishlist via API
+      const response = await fetch('/api/wishlist', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dish_id: dishId }),
+      })
+      
+      if (response.ok) {
+        // Update local state
+        setSavedDishes((prev) => prev.filter((dish) => dish.id !== dishId))
+      } else {
+        console.error('Failed to remove from wishlist')
+      }
+    } catch (error) {
+      console.error('Error removing from wishlist:', error)
+    }
   }
 
   return (
@@ -93,7 +118,7 @@ export default function MyListPage() {
           ) : error ? (
             <div className="text-center py-16">
               <p className="text-destructive text-lg mb-4">{error}</p>
-              <p className="text-muted-foreground">Using sample data for now.</p>
+              <p className="text-muted-foreground">Please check your internet connection or try again later.</p>
             </div>
           ) : savedDishes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

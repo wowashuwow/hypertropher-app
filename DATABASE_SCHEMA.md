@@ -67,3 +67,9 @@ A junction table to manage the many-to-many relationship between users and their
 | `user_id` | `UUID` | **Primary Key**, Foreign Key to `users.id` | The ID of the user. |
 | `dish_id` | `UUID` | **Primary Key**, Foreign Key to `dishes.id` | The ID of the wishlisted dish. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the dish was wishlisted. |
+
+#### Row Level Security (RLS) Policies
+The `wishlist_items` table has RLS enabled with the following policies:
+- **SELECT**: Users can view their own wishlist items (`auth.uid() = user_id`)
+- **INSERT**: Users can add items to their own wishlist (`auth.uid() = user_id`)
+- **DELETE**: Users can remove items from their own wishlist (`auth.uid() = user_id`)

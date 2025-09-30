@@ -68,13 +68,23 @@ Mark tasks complete only when:
 - **ALWAYS** follow the established workflow process
 - **ALWAYS** test functionality before presenting to user
 - **NEVER** commit changes without user approval
+- **NEVER** mark bugs as "Resolved" without user verification
+- **NEVER** claim functionality is working without user confirmation
 
 ## Testing & Approval Workflow
 1. **Implementation**: Complete the feature/change
 2. **Testing**: Test functionality manually in browser
 3. **User Review**: Present changes to user for approval
-4. **Approval**: Wait for user confirmation before proceeding
-5. **Commit**: Only commit after user approval
+4. **User Verification**: Wait for user to test and confirm functionality works
+5. **Bug Status**: Only mark bugs as "Resolved" after user verification
+6. **Approval**: Wait for user confirmation before proceeding
+7. **Commit**: Only commit after user approval
+
+## Bug Resolution Protocol
+- **NEVER** mark bugs as "Resolved" in Bug_tracking.md without user verification
+- **ALWAYS** wait for user to test and confirm the fix works
+- **ALWAYS** update bug status to "In Progress" or "Pending User Verification" until confirmed
+- **NEVER** claim "Testing Results" without actual user testing
 
 Remember: Build a cohesive, well-documented, and maintainable project. Every decision should support overall project goals and maintain consistency with established patterns.# Development Agent Workflow - Cursor Rules
 

@@ -107,16 +107,72 @@ export default function HomePage() {
     fetchDishes()
   }, [])
 
-  const handleBookmarkToggle = (dishId: string) => {
-    setBookmarkedDishes((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(dishId)) {
-        newSet.delete(dishId)
-      } else {
-        newSet.add(dishId)
+  // Fetch user's wishlist to populate bookmarked dishes
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!user) return
+      
+      try {
+        const response = await fetch('/api/wishlist')
+        if (response.ok) {
+          const wishlistDishes = await response.json()
+          const wishlistIds = new Set<string>(wishlistDishes.map((dish: any) => dish.id as string))
+          setBookmarkedDishes(wishlistIds)
+        }
+      } catch (error) {
+        console.error('Error fetching wishlist:', error)
       }
-      return newSet
-    })
+    }
+
+    fetchWishlist()
+  }, [user])
+
+  const handleBookmarkToggle = async (dishId: string) => {
+    const isCurrentlyBookmarked = bookmarkedDishes.has(dishId)
+    
+    try {
+      if (isCurrentlyBookmarked) {
+        // Remove from wishlist
+        const response = await fetch('/api/wishlist', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ dish_id: dishId }),
+        })
+        
+        if (response.ok) {
+          setBookmarkedDishes((prev) => {
+            const newSet = new Set(prev)
+            newSet.delete(dishId)
+            return newSet
+          })
+        } else {
+          console.error('Failed to remove from wishlist')
+        }
+      } else {
+        // Add to wishlist
+        const response = await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ dish_id: dishId }),
+        })
+        
+        if (response.ok) {
+          setBookmarkedDishes((prev) => {
+            const newSet = new Set(prev)
+            newSet.add(dishId)
+            return newSet
+          })
+        } else {
+          console.error('Failed to add to wishlist')
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error)
+    }
   }
 
   const filteredDishes = dishes
