@@ -19,6 +19,7 @@ interface DishCardProps {
   addedBy: string
   availability: "Online" | "In-Store"
   proteinSource?: string
+  deliveryAppName?: string | null
   isBookmarked?: boolean
   onBookmarkToggle?: (id: string) => void
 }
@@ -37,6 +38,7 @@ export function DishCard({
   addedBy,
   availability,
   proteinSource,
+  deliveryAppName,
   isBookmarked = false,
   onBookmarkToggle,
 }: DishCardProps) {
@@ -67,6 +69,50 @@ export function DishCard({
     return emojiMap[satisfaction as keyof typeof emojiMap] || "👍"
   }
 
+  const handleDeliveryAppClick = () => {
+    if (!deliveryAppName) return
+
+    const deliveryAppDeepLinks = {
+      "Swiggy": {
+        mobile: "swiggy://",
+        web: "https://www.swiggy.com",
+        fallback: "https://www.swiggy.com"
+      },
+      "Zomato": {
+        mobile: "zomato://",
+        web: "https://www.zomato.com",
+        fallback: "https://www.zomato.com"
+      },
+      "Uber Eats": {
+        mobile: "uber://",
+        web: "https://www.ubereats.com",
+        fallback: "https://www.ubereats.com"
+      },
+      "DoorDash": {
+        mobile: "doordash://",
+        web: "https://www.doordash.com",
+        fallback: "https://www.doordash.com"
+      }
+    }
+
+    const appConfig = deliveryAppDeepLinks[deliveryAppName as keyof typeof deliveryAppDeepLinks]
+    if (!appConfig) return
+
+    // Check if mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    
+    if (isMobile) {
+      // Try deep link first, fallback to web
+      window.location.href = appConfig.mobile
+      setTimeout(() => {
+        window.open(appConfig.fallback, '_blank')
+      }, 1000)
+    } else {
+      // Desktop - open web version
+      window.open(appConfig.web, '_blank')
+    }
+  }
+
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md relative flex flex-col h-full">
       {/* Image Section */}
@@ -90,7 +136,7 @@ export function DishCard({
               availability === "Online" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
             )}
           >
-            {availability}
+            {availability === "Online" ? deliveryAppName || "Online" : availability}
           </span>
         </div>
         <p className="text-sm text-muted-foreground mb-3">
@@ -128,12 +174,13 @@ export function DishCard({
       <div className="p-4 pt-0 space-y-3 mt-auto">
         {availability === "Online" ? (
           <Button 
+            onClick={handleDeliveryAppClick}
             className={cn(
               "w-full bg-green-600 hover:bg-green-700 text-white border-0"
             )}
           >
             <Link className="mr-2 h-4 w-4" />
-            View on Delivery App
+            Open {deliveryAppName || "Delivery App"}
           </Button>
         ) : (
           <Button 

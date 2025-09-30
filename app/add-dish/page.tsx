@@ -16,7 +16,6 @@ export default function AddDishPage() {
   const [sourceType, setSourceType] = useState<"In-Restaurant" | "Online">("In-Restaurant")
   const [deliveryApp, setDeliveryApp] = useState("")
   const [onlineRestaurant, setOnlineRestaurant] = useState("")
-  const [dishLink, setDishLink] = useState("")
   const [restaurant, setRestaurant] = useState("")
   const [dishName, setDishName] = useState("")
   const [proteinSource, setProteinSource] = useState<
@@ -87,7 +86,8 @@ export default function AddDishPage() {
       protein_content: protein.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
       satisfaction: satisfaction.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
       comment,
-      delivery_app_url: dishLink || null,
+      delivery_app_name: sourceType === "Online" ? deliveryApp : null,
+      delivery_app_url: null, // Always null since we removed URL field
       restaurant_address: null, // Will add later with Google Maps API
       latitude: null,
       longitude: null,
@@ -181,7 +181,7 @@ export default function AddDishPage() {
 
               {sourceType === "In-Restaurant" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="restaurant">Restaurant</Label>
+                  <Label htmlFor="restaurant">Restaurant Name</Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                     <Input
@@ -216,20 +216,10 @@ export default function AddDishPage() {
                     <Input
                       id="onlineRestaurant"
                       type="text"
-                      placeholder="Enter Outlet Name"
+                      placeholder="Enter Restaurant Name"
                       value={onlineRestaurant}
                       onChange={(e) => setOnlineRestaurant(e.target.value)}
                       required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dishLink">Paste Link to Dish (Optional)</Label>
-                    <Input
-                      id="dishLink"
-                      type="url"
-                      placeholder="https://..."
-                      value={dishLink}
-                      onChange={(e) => setDishLink(e.target.value)}
                     />
                   </div>
                 </>

@@ -37,6 +37,7 @@ const mockDishes = [
     availability: "Online" as const,
     image_url: "/paneer-tikka-salad-with-fresh-greens.jpg",
     protein_source: "Paneer" as const,
+    delivery_app_name: "Swiggy",
     users: { name: "Priya S." },
   },
   {
@@ -88,6 +89,7 @@ interface Dish {
   availability: "In-Store" | "Online"
   image_url: string
   protein_source: string
+  delivery_app_name?: string | null
   users: { name: string }
 }
 
@@ -303,6 +305,7 @@ export default function HomePage() {
                 availability={dish.availability}
                 imageUrl={dish.image_url}
                 proteinSource={dish.protein_source}
+                deliveryAppName={dish.delivery_app_name}
                 isBookmarked={bookmarkedDishes.has(dish.id)}
                 onBookmarkToggle={handleBookmarkToggle}
               />

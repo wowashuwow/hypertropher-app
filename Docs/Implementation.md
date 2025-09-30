@@ -105,6 +105,10 @@
 #### Sub-steps:
 - [x] Add restaurant name field to online dish form
 - [x] Make URL field optional in online dish form
+- [x] Remove URL field from online dish form (most apps don't support dish-specific URLs)
+- [x] Add delivery app name display in dish cards
+- [x] Update dish card buttons to show specific delivery app names
+- [x] Implement deep linking for delivery apps
 - [ ] Integrate Google Maps Places API for restaurant search
 - [ ] Implement dish update and delete functionality
 - [ ] Add advanced filtering and sorting options

@@ -219,6 +219,7 @@ export default function MyDishesPage() {
                   availability={dish.availability}
                   imageUrl={dish.image_url}
                   proteinSource={dish.protein_source}
+                  deliveryAppName={dish.delivery_app_name}
                   isBookmarked={bookmarkedDishes.has(dish.id)}
                   onBookmarkToggle={handleBookmarkToggle}
                 />

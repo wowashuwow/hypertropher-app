@@ -140,6 +140,7 @@ export default function MyListPage() {
                   availability={dish.availability}
                   imageUrl={dish.image_url}
                   proteinSource={dish.protein_source}
+                  deliveryAppName={dish.delivery_app_name}
                   isBookmarked={true} 
                   onBookmarkToggle={handleBookmarkToggle} 
                 />
