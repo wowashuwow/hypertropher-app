@@ -113,6 +113,8 @@
 - [ ] Integrate Google Maps Places API for restaurant search
 - [x] Implement dish update and delete functionality
 - [x] Fix edit dish form field order to match add dish form
+- [x] Implement RLS policies for invite_codes table
+- [x] Fix invite codes display and status indicators
 - [ ] Add advanced filtering and sorting options
 - [ ] **Deferred:** Server-side sorting and filtering (moved to V2 for performance optimization)
 - [x] Create wishlist management system
@@ -157,6 +159,8 @@
 - **Data Quality**: Removed all mock data, improved error handling, database-only data source
 - **Wishlist Management**: Complete wishlist API, bookmark persistence, My Dishes filtering fix, RLS policies
 - **Dish Management**: Edit and delete functionality with conditional UI, ownership validation, RLS policies, form field order consistency
+- **Invite Codes Security**: RLS policies implemented for invite_codes table to prevent unauthorized access
+- **Invite Codes Display**: Complete invite codes functionality with status indicators, visual feedback, and proper API integration
 
 ### 🚧 In Progress (Stage 5 - Remaining)
 - **Advanced Features**: Google Maps integration, dish management, filtering
@@ -168,7 +172,7 @@
 - Conduct comprehensive testing
 
 ### 🎯 MVP Status: ~99% Complete
-The core functionality is working and secure. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is now fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. The application is ready for user testing and deployment preparation.
+The core functionality is working and secure. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is now fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is fully functional with automatic generation, status indicators, and secure access controls. The application is ready for user testing and deployment preparation.
 
 #### Sub-steps:
 - [ ] Deploy to Vercel with environment configuration

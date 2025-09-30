@@ -1424,3 +1424,106 @@ The edit dish form was implemented independently from the add dish form, resulti
 - The field order now follows the logical flow established in the add dish form
 - All functionality remains intact while improving user experience
 - The fix maintains all existing validation and submission logic
+
+---
+
+## [BUG-010] - Invite Codes Not Displaying on Account Page
+**Date:** 2025-01-30
+**Severity:** High (Core Functionality)
+**Priority:** High
+**Status:** Resolved
+**Reporter:** User
+
+### Description
+Invite codes were not showing up on the account settings page due to missing RLS policies on the `invite_codes` table. Users could not view their generated invite codes, and the account page showed "No invite codes available" even when codes existed.
+
+### Steps to Reproduce
+1. Navigate to the Account page
+2. Observe that no invite codes are displayed
+3. Check browser console for 401 errors
+4. Verify that invite codes exist in the database but are not accessible
+
+### Expected Behavior
+- Account page should display all user's invite codes (both used and unused)
+- Used codes should be visually distinguished from unused codes
+- Copy functionality should work for available codes
+- Status indicators should clearly show code availability
+
+### Actual Behavior
+- Account page showed "No invite codes available"
+- API calls to `/api/invite-codes` returned 401 errors
+- Users could not view or manage their invite codes
+- No visual status indicators for code usage
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+- **Error Code**: 401 (Unauthorized)
+- **Files Affected**: 
+  - `app/api/invite-codes/route.ts`
+  - `app/account/page.tsx`
+
+### Error Details
+```
+GET /api/invite-codes 401 in 44ms
+{"error":"You are not authorized."}
+```
+
+### Root Cause
+The `invite_codes` table had RLS enabled but no policies allowing authenticated users to access their own invite codes. This caused all API calls to return 401 errors.
+
+### Resolution Steps
+1. **Created RLS Policies** for `invite_codes` table:
+   ```sql
+   -- Enable RLS on invite_codes table
+   ALTER TABLE invite_codes ENABLE ROW LEVEL SECURITY;
+
+   -- Policy 1: Allow users to SELECT their own invite codes (both used and unused)
+   CREATE POLICY "Users can view their own invite codes" ON invite_codes
+       FOR SELECT USING (auth.uid() = generated_by_user_id);
+
+   -- Policy 2: Allow system to INSERT invite codes for users
+   CREATE POLICY "System can create invite codes for users" ON invite_codes
+       FOR INSERT WITH CHECK (auth.uid() = generated_by_user_id);
+
+   -- Policy 3: Allow system to UPDATE invite codes (mark as used)
+   CREATE POLICY "System can update invite codes" ON invite_codes
+       FOR UPDATE USING (auth.uid() = generated_by_user_id);
+   ```
+
+2. **Updated Invite Codes API** (`/api/invite-codes/route.ts`):
+   - Removed `is_used: false` filter to return all codes (used and unused)
+   - Updated comment to reflect new behavior
+   - Maintained existing functionality for signup flow
+
+3. **Enhanced Account Page UI** (`app/account/page.tsx`):
+   - Added visual status indicators for used/unused codes
+   - Used codes: grayed out with "Used" label and disabled copy button
+   - Unused codes: normal styling with "Available" label and active copy button
+   - Removed created date display for cleaner UI
+   - Added proper styling with `bg-muted/50 opacity-75` for used codes
+
+### Testing Results
+- ✅ Account page displays all invite codes with correct status
+- ✅ Used codes are grayed out with "Used" label
+- ✅ Unused codes show "Available" label with active copy button
+- ✅ Copy functionality works for available codes
+- ✅ No 401 errors on invite codes API
+- ✅ RLS policies prevent unauthorized access
+- ✅ Signup flow remains unaffected
+- ✅ No linting errors remain
+
+### Prevention Measures
+- Always implement RLS policies when enabling RLS on tables
+- Test API endpoints with actual data to catch access issues
+- Verify that joins work correctly with the database schema
+- Test both authenticated and unauthenticated access scenarios
+
+### Notes
+- The RLS policies ensure secure access to invite codes
+- The visual status indicators improve user experience
+- The API now returns all codes for better account management
+- The signup flow remains completely unaffected by these changes
+- **Bug status is now "Resolved" after user verification confirms complete functionality**

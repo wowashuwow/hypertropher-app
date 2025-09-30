@@ -7,9 +7,15 @@ This document outlines the database schema for the Hypertropher application, bui
   - [Table of Contents](#table-of-contents)
     - [1. `users` table](#1-users-table)
     - [2. `dishes` table](#2-dishes-table)
-    - [3. `invite_codes` table](#3-invite_codes-table)
-    - [4. `wishlist_items` table](#4-wishlist_items-table)
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies)
+    - [3. `invite_codes` table](#3-invite_codes-table)
+      - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-1)
+    - [4. `wishlist_items` table](#4-wishlist_items-table)
+      - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-2)
+  - [Custom Functions](#custom-functions)
+    - [`get_user_name_by_id(user_id_input UUID)`](#get_user_name_by_iduser_id_input-uuid)
+  - [Custom Types](#custom-types)
+    - [`availability_type` ENUM](#availability_type-enum)
 
 ---
 
@@ -67,6 +73,12 @@ Manages the invite code system for new user registration.
 | `used_by_user_id` | `UUID` | Foreign Key to `users.id`, Nullable | The user who signed up with this code. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the code was generated. |
 
+#### Row Level Security (RLS) Policies
+The `invite_codes` table has RLS enabled with the following policies:
+- **SELECT**: Users can view their own invite codes (`auth.uid() = generated_by_user_id`)
+- **INSERT**: System can create invite codes for users (`auth.uid() = generated_by_user_id`)
+- **UPDATE**: System can update invite codes (mark as used) (`auth.uid() = generated_by_user_id`)
+
 ### 4. `wishlist_items` table
 A junction table to manage the many-to-many relationship between users and their bookmarked (wishlisted) dishes.
 
@@ -81,3 +93,30 @@ The `wishlist_items` table has RLS enabled with the following policies:
 - **SELECT**: Users can view their own wishlist items (`auth.uid() = user_id`)
 - **INSERT**: Users can add items to their own wishlist (`auth.uid() = user_id`)
 - **DELETE**: Users can remove items from their own wishlist (`auth.uid() = user_id`)
+
+---
+
+## Custom Functions
+
+### `get_user_name_by_id(user_id_input UUID)`
+A secure function that returns the name of a user by their ID. This function is used by the dishes API to safely fetch user names without exposing sensitive data.
+
+**Parameters:**
+- `user_id_input`: The UUID of the user
+
+**Returns:** `TEXT` - The user's name, or `NULL` if not found
+
+**Usage:** Called by the dishes API to populate the `users.name` field in dish queries.
+
+---
+
+## Custom Types
+
+### `availability_type` ENUM
+Defines the possible values for dish availability.
+
+**Values:**
+- `'Online'` - Dish is available through delivery apps
+- `'In-Store'` - Dish is available at physical restaurant locations
+
+**Usage:** Used by the `dishes.availability` column to ensure data consistency.

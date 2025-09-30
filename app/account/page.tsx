@@ -255,17 +255,26 @@ export default function AccountPage() {
               ) : inviteCodes.length > 0 ? (
                 <div className="space-y-2">
                   {inviteCodes.map((inviteCode) => (
-                    <div key={inviteCode.code} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={inviteCode.code} className={`flex items-center justify-between p-3 border rounded-lg ${
+                      inviteCode.is_used ? 'bg-muted/50 opacity-75' : ''
+                    }`}>
                       <div>
-                        <p className="font-mono text-lg font-semibold">{inviteCode.code}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Created: {new Date(inviteCode.created_at).toLocaleDateString()}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono text-lg font-semibold">{inviteCode.code}</p>
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            inviteCode.is_used 
+                              ? 'bg-gray-100 text-gray-600' 
+                              : 'bg-green-100 text-green-600'
+                          }`}>
+                            {inviteCode.is_used ? 'Used' : 'Available'}
+                          </span>
+                        </div>
                       </div>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => copyInviteCode(inviteCode.code)}
+                        disabled={inviteCode.is_used}
                       >
                         Copy
                       </Button>
