@@ -12,7 +12,7 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
     <header className="w-full py-4 px-6 border-b border-border bg-card">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo/App Name */}
-        <Link href="/" className="text-2xl font-bold text-foreground">
+        <Link href="/" className="text-3xl sm:text-2xl font-extrabold text-foreground uppercase">
           HYPERTROPHER
         </Link>
 

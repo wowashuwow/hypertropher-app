@@ -80,8 +80,8 @@ Hypertropher follows a modern, mobile-first design approach with a focus on acce
 
 ### Font Stack
 ```css
-/* Primary Font - Geist */
-font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+/* Primary Font - Rethink Sans */
+font-family: 'Rethink Sans', ui-sans-serif, system-ui, sans-serif;
 
 /* Monospace Font - Geist Mono */
 font-family: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
@@ -103,11 +103,28 @@ font-family: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', mo
 ```
 
 ### Font Weights
-- **Light**: 300 - For large display text
 - **Regular**: 400 - Default body text
 - **Medium**: 500 - Emphasized text, labels
 - **Semibold**: 600 - Subheadings, buttons
 - **Bold**: 700 - Main headings, important text
+- **Extrabold**: 800 - App title, major headings
+
+### Responsive Typography
+```css
+/* App Title - Responsive sizing */
+.app-title {
+  font-size: 1.875rem; /* 30px on mobile */
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: normal;
+}
+
+@media (min-width: 640px) {
+  .app-title {
+    font-size: 1.5rem; /* 24px on desktop */
+  }
+}
+```
 
 ## Component Library
 

@@ -9,33 +9,91 @@ hypertropher-app/
 ├── app/                          # Next.js App Router pages and API routes
 │   ├── account/                  # User account management
 │   ├── add-dish/                 # Dish contribution form
+│   │   └── loading.tsx           # Loading state for add dish page
 │   ├── api/                      # API routes
 │   │   ├── auth/                 # Authentication endpoints
+│   │   │   ├── login/            # User login
+│   │   │   └── signup/           # User registration
 │   │   ├── dishes/               # Dish CRUD operations
-│   │   └── users/                # User management
+│   │   ├── invite-codes/         # Invite code management
+│   │   ├── users/                # User management
+│   │   └── wishlist/             # Wishlist management
 │   ├── complete-profile/         # User onboarding
+│   ├── edit-dish/                # Dish editing functionality
+│   │   └── [id]/                 # Dynamic route for dish editing
+│   │       ├── loading.tsx       # Loading state for edit dish page
+│   │       └── page.tsx          # Edit dish form
 │   ├── my-dishes/                # User's contributed dishes
 │   ├── my-wishlist/              # User's saved dishes
 │   ├── signup/                   # Authentication pages
+│   ├── fonts/                    # Custom fonts
+│   │   ├── GeistMonoVF.woff      # Geist Mono font
+│   │   └── GeistVF.woff          # Geist font
+│   ├── favicon.ico               # App favicon
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout component
+│   ├── loading.tsx               # Global loading states
 │   └── page.tsx                  # Homepage
 ├── components/                   # Reusable UI components
 │   ├── ui/                       # Shadcn UI components
+│   │   ├── badge.tsx             # Status and category badges
+│   │   ├── button.tsx            # Button variants and states
+│   │   ├── card.tsx              # Card container components
+│   │   ├── command.tsx           # Command palette component
+│   │   ├── dialog.tsx            # Modal dialog components
+│   │   ├── input.tsx             # Form input components
+│   │   ├── label.tsx             # Form labels
+│   │   ├── multi-select.tsx      # Multi-selection dropdown
+│   │   ├── popover.tsx           # Popover components
+│   │   └── select.tsx            # Dropdown selection components
 │   ├── bottom-navigation.tsx     # Mobile navigation
 │   ├── dish-card.tsx             # Dish display component
 │   ├── header.tsx                # App header
 │   └── main-layout.tsx           # Layout wrapper
 ├── lib/                          # Utility libraries and configurations
+│   ├── auth/                     # Authentication utilities
+│   │   ├── route-protection.tsx  # Route protection component
+│   │   └── session-provider.tsx  # Session context provider
 │   ├── supabase/                 # Supabase client configurations
+│   │   ├── client.ts             # Browser-side Supabase client
+│   │   └── server.ts             # Server-side Supabase client
 │   └── utils.ts                  # Shared utilities
 ├── public/                       # Static assets
+│   ├── logos/                    # Delivery app logos
+│   │   ├── doordash.svg          # DoorDash logo
+│   │   ├── swiggy.svg            # Swiggy logo
+│   │   ├── ubereats.svg          # Uber Eats logo
+│   │   └── zomato.svg            # Zomato logo
+│   ├── delicious-high-protein-meal.jpg
+│   ├── fish-curry-with-rice-indian-cuisine.jpg
+│   ├── grilled-chicken-vegetable-bowl.png
+│   ├── paneer-tikka-salad-with-fresh-greens.jpg
+│   ├── placeholder-logo.png      # Placeholder logo
+│   ├── placeholder-logo.svg      # Placeholder logo SVG
+│   ├── placeholder-user.jpg      # Placeholder user image
+│   ├── placeholder.jpg           # General placeholder
+│   ├── placeholder.svg           # General placeholder SVG
+│   └── vegetable-egg-white-omelette.png
 ├── styles/                       # Additional stylesheets
+│   └── globals.css               # Additional global styles
 ├── Docs/                         # Project documentation
+│   ├── Bug_tracking.md           # Error tracking and resolution
+│   ├── Implementation.md         # Development roadmap and tasks
+│   ├── project_structure.md      # This file - project organization
+│   └── UI_UX_doc.md              # Design system and UX guidelines
 ├── .cursor/                      # Cursor IDE rules
+├── components.json               # Shadcn UI configuration
 ├── DATABASE_SCHEMA.md            # Database design documentation
+├── next-env.d.ts                 # Next.js TypeScript definitions
+├── next.config.mjs               # Next.js configuration
+├── package.json                  # Dependencies and scripts
+├── package-lock.json             # Dependency lock file
+├── postcss.config.mjs            # PostCSS configuration
 ├── PRD.md                        # Product Requirements Document
-└── package.json                  # Dependencies and scripts
+├── README.md                     # Project readme
+├── tailwind.config.ts            # Tailwind CSS configuration
+├── tsconfig.json                 # TypeScript configuration
+└── tsconfig.tsbuildinfo          # TypeScript build cache
 ```
 
 ## Detailed Structure
@@ -52,14 +110,18 @@ The main application directory using Next.js 14 App Router conventions:
 - **`/account`**: User profile and settings management
 - **`/add-dish`**: Form for contributing new dishes
 - **`/complete-profile`**: User onboarding after signup
+- **`/edit-dish/[id]`**: Dynamic route for editing existing dishes
 - **`/my-dishes`**: User's contributed dishes
 - **`/my-wishlist`**: User's bookmarked dishes
 - **`/signup`**: Authentication and user registration
 
 #### API Routes (`/app/api`)
+- **`/auth/login`**: User authentication and login
 - **`/auth/signup`**: User registration with invite code validation
-- **`/dishes`**: CRUD operations for dishes (POST, GET)
-- **`/users`**: User profile management (POST for profile completion)
+- **`/dishes`**: CRUD operations for dishes (GET, POST, PUT, DELETE)
+- **`/invite-codes`**: Invite code management and retrieval
+- **`/users`**: User profile management (GET, POST, PUT)
+- **`/wishlist`**: Wishlist management (GET, POST, DELETE)
 
 ### `/components` - UI Components
 Reusable React components following atomic design principles:
@@ -72,26 +134,46 @@ Reusable React components following atomic design principles:
 
 #### UI Components (`/components/ui`)
 Shadcn UI components for consistent design:
+- **`badge.tsx`**: Status and category badges
 - **`button.tsx`**: Button variants and states
 - **`card.tsx`**: Card container components
+- **`command.tsx`**: Command palette component
+- **`dialog.tsx`**: Modal dialog components
 - **`input.tsx`**: Form input components
-- **`select.tsx`**: Dropdown selection components
-- **`badge.tsx`**: Status and category badges
 - **`label.tsx`**: Form labels
+- **`multi-select.tsx`**: Multi-selection dropdown component
+- **`popover.tsx`**: Popover components
+- **`select.tsx`**: Dropdown selection components
 
 ### `/lib` - Utilities and Configuration
 Shared libraries and configurations:
 
-- **`supabase/client.ts`**: Browser-side Supabase client
-- **`supabase/server.ts`**: Server-side Supabase client
+#### Authentication (`/lib/auth`)
+- **`route-protection.tsx`**: Component for protecting authenticated routes
+- **`session-provider.tsx`**: React context provider for user session management
+
+#### Supabase (`/lib/supabase`)
+- **`client.ts`**: Browser-side Supabase client configuration
+- **`server.ts`**: Server-side Supabase client configuration
+
+#### Utilities
 - **`utils.ts`**: Shared utility functions (cn, etc.)
 
 ### `/public` - Static Assets
 Static files served directly:
 
-- **Images**: Placeholder images for dishes and UI
-- **Icons**: App icons and favicons
-- **Assets**: Any other static resources
+#### Images
+- **Dish Images**: High-quality food photography for dish displays
+- **Placeholder Images**: Default images for missing content
+- **User Images**: Placeholder user avatars
+
+#### Logos (`/public/logos`)
+- **Delivery App Logos**: SVG logos for Swiggy, Zomato, DoorDash, Uber Eats
+- **App Logos**: Application branding assets
+
+#### Icons
+- **Favicon**: App icon for browser tabs
+- **App Icons**: Various sizes for different platforms
 
 ### `/Docs` - Documentation
 Project documentation and specifications:
@@ -112,8 +194,10 @@ Project documentation and specifications:
 ### Configuration Files
 - **Environment**: `.env.local` (gitignored)
 - **Package Management**: `package.json`, `package-lock.json`
-- **Build Configuration**: `next.config.mjs`, `tailwind.config.ts`
-- **TypeScript**: `tsconfig.json`
+- **Build Configuration**: `next.config.mjs`, `tailwind.config.ts`, `postcss.config.mjs`
+- **TypeScript**: `tsconfig.json`, `next-env.d.ts`, `tsconfig.tsbuildinfo`
+- **UI Components**: `components.json` (Shadcn UI configuration)
+- **Documentation**: `README.md`, `PRD.md`, `DATABASE_SCHEMA.md`
 
 ## Module Organization Patterns
 
@@ -221,7 +305,8 @@ import { cn } from "@/lib/utils"
 - **Local State**: `useState` for component-level state
 - **Server State**: Supabase queries for data fetching
 - **Form State**: Controlled components with React state
-- **Global State**: Context API for user session (future)
+- **Session State**: Context API for user session management
+- **Authentication State**: Supabase Auth with session provider
 
 ## Asset Organization
 
@@ -249,6 +334,8 @@ import { cn } from "@/lib/utils"
 - **Environment Variables**: Sensitive data in environment variables
 - **Database Security**: Row Level Security (RLS) in Supabase
 - **File Uploads**: Secure image upload to Supabase Storage
-- **Invite Codes**: Single-use validation system
+- **Invite Codes**: Single-use validation system with RLS policies
+- **Session Management**: Secure authentication with Supabase Auth
+- **Route Protection**: Client-side and server-side route protection
 
 This structure supports scalable development, clear separation of concerns, and maintainable code organization following Next.js and React best practices.
