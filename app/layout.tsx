@@ -25,8 +25,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  
+  // Debug API key loading
+  console.log('Google Maps API Key loaded:', googleMapsApiKey ? 'Present' : 'Missing')
+  
+  if (!googleMapsApiKey) {
+    console.error('❌ Google Maps API Key is missing! Please check your .env.local file')
+  }
+
   return (
     <html lang="en">
+      <head>
+        {googleMapsApiKey && (
+          <script
+            async
+            src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`}
+          />
+        )}
+        {!googleMapsApiKey && (
+          <script dangerouslySetInnerHTML={{
+            __html: `console.error('❌ Google Maps API Key not found - check your .env.local file')`
+          }} />
+        )}
+      </head>
       <body className={`font-sans ${rethinkSans.variable} ${GeistMono.variable}`}>
         <SessionProvider>
           <Suspense fallback={null}>{children}</Suspense>

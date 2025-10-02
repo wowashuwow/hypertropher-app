@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Search, Upload } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Upload, MapPin, AlertCircle } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,9 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/ui/multi-select"
+import { RestaurantSearchInput } from "@/components/ui/restaurant-search-input"
+import { useGeolocation } from "@/lib/hooks/use-geolocation"
+import { RestaurantResult } from "@/lib/hooks/use-google-places"
 import { createClient } from "@/lib/supabase/client"
 
 export default function AddDishPage() {
@@ -18,6 +21,8 @@ export default function AddDishPage() {
   const [deliveryApps, setDeliveryApps] = useState<string[]>([])
   const [onlineRestaurant, setOnlineRestaurant] = useState("")
   const [restaurant, setRestaurant] = useState("")
+  const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantResult | null>(null)
+  const [userCity, setUserCity] = useState("Mumbai")
   const [dishName, setDishName] = useState("")
   const [proteinSource, setProteinSource] = useState<
     "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other" | ""
@@ -29,6 +34,40 @@ export default function AddDishPage() {
   const [comment, setComment] = useState("")
   const [satisfaction, setSatisfaction] = useState<"🤩 Would Eat Everyday" | "👍 Great" | "">("")
   const [isLoading, setIsLoading] = useState(false)
+
+  // Geolocation hooks
+  const {
+    userLocation,
+    locationPermissionGranted,
+    locationPermissionRequested,
+    locationError,
+    loading: locationLoading,
+    requestLocationPermission,
+    checkGeolocationSupport,
+  } = useGeolocation()
+
+  // Fetch user's profile data to get their selected city
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch('/api/users')
+        if (response.ok) {
+          const data = await response.json()
+          setUserCity(data.city || "Mumbai")
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+      }
+    }
+
+    fetchUserProfile()
+  }, [])
+
+  // Handle restaurant selection
+  const handleRestaurantSelect = (restaurant: RestaurantResult) => {
+    setSelectedRestaurant(restaurant)
+    setRestaurant(restaurant.name)
+  }
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -49,6 +88,10 @@ export default function AddDishPage() {
     }
     if (sourceType === "Online" && deliveryApps.length === 0) {
       alert("At least one delivery app is required for online dishes.");
+      return;
+    }
+    if (sourceType === "In-Restaurant" && !restaurant) {
+      alert("Please search for and select a restaurant.");
       return;
     }
     setIsLoading(true);
@@ -81,8 +124,8 @@ export default function AddDishPage() {
     // 2. Prepare Dish Data for API
     const dishData = {
       dish_name: dishName,
-      restaurant_name: sourceType === "Online" ? onlineRestaurant : restaurant,
-      city: "Pune", // Hardcoded for now, will be dynamic later
+      restaurant_name: sourceType === "Online" ? onlineRestaurant : (selectedRestaurant?.name || restaurant),
+      city: userCity,
       availability: sourceType === 'In-Restaurant' ? 'In-Store' : sourceType,
       image_url: imageUrl,
       price: parseFloat(price),
@@ -92,9 +135,9 @@ export default function AddDishPage() {
       satisfaction: satisfaction.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
       comment,
       delivery_apps: sourceType === "Online" ? deliveryApps : [],
-      restaurant_address: null, // Will add later with Google Maps API
-      latitude: null,
-      longitude: null,
+      restaurant_address: selectedRestaurant?.formatted_address || null,
+      latitude: selectedRestaurant?.geometry.location.lat || null,
+      longitude: selectedRestaurant?.geometry.location.lng || null,
     };
 
     // 3. Submit Dish Data to our API
@@ -152,7 +195,7 @@ export default function AddDishPage() {
   return (
     <ProtectedRoute>
       <MainLayout>
-        <div className="max-w-2xl mx-auto py-8 px-6">
+        <div className="max-w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Add a Dish You Found</CardTitle>
@@ -183,22 +226,52 @@ export default function AddDishPage() {
                 </div>
               </div>
 
-              {sourceType === "In-Restaurant" ? (
-                <div className="space-y-2">
-                  <Label htmlFor="restaurant">Restaurant Name</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                    <Input
-                      id="restaurant"
-                      type="text"
-                      placeholder="Search for Restaurant"
-                      value={restaurant}
-                      onChange={(e) => setRestaurant(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
+              {/* Location Permission Request */}
+              {sourceType === "In-Restaurant" && 
+               (!locationPermissionRequested || !locationPermissionGranted) && 
+               checkGeolocationSupport && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mx-0">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="font-medium text-blue-900 text-sm">Find restaurants near you</h3>
+                      <p className="text-blue-800 text-xs mt-1">
+                        Allow location access to search restaurants closest to your current location. 
+                        Otherwise, we'll search within your selected city ({userCity}).
+                      </p>
+                      <div className="mt-3">
+                        <Button 
+                          size="sm" 
+                          onClick={requestLocationPermission}
+                          disabled={locationLoading}
+                          className="text-xs"
+                        >
+                          {locationLoading ? "Requesting..." : "Allow Location"}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {/* Location Error Display */}
+              {locationError && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+                    <span className="text-yellow-800 text-sm">{locationError}</span>
+                  </div>
+                </div>
+              )}
+
+              {sourceType === "In-Restaurant" ? (
+                <RestaurantSearchInput
+                  value={restaurant}
+                  onChange={setRestaurant}
+                  onSelect={handleRestaurantSelect}
+                  userCity={userCity}
+                  userLocation={userLocation}
+                />
               ) : (
                 <>
                   <div className="space-y-2">

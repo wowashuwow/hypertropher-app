@@ -28,7 +28,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <Header isLoggedIn={isLoggedIn} />
-      <main className="pb-20 lg:pb-0">{children}</main>
+      <main className="pb-20 lg:pb-0 overflow-x-hidden">{children}</main>
       <BottomNavigation />
     </div>
   )

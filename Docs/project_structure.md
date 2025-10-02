@@ -45,6 +45,7 @@ hypertropher-app/
 │   │   ├── label.tsx             # Form labels
 │   │   ├── multi-select.tsx      # Multi-selection dropdown
 │   │   ├── popover.tsx           # Popover components
+│   │   ├── restaurant-search-input.tsx # Google Maps restaurant search component
 │   │   └── select.tsx            # Dropdown selection components
 │   ├── bottom-navigation.tsx     # Mobile navigation
 │   ├── dish-card.tsx             # Dish display component
@@ -54,6 +55,9 @@ hypertropher-app/
 │   ├── auth/                     # Authentication utilities
 │   │   ├── route-protection.tsx  # Route protection component
 │   │   └── session-provider.tsx  # Session context provider
+│   ├── hooks/                    # Custom React hooks
+│   │   ├── use-geolocation.ts    # Location permission and user location
+│   │   └── use-google-places.ts  # Google Places API service integration
 │   ├── supabase/                 # Supabase client configurations
 │   │   ├── client.ts             # Browser-side Supabase client
 │   │   └── server.ts             # Server-side Supabase client
@@ -93,7 +97,9 @@ hypertropher-app/
 ├── README.md                     # Project readme
 ├── tailwind.config.ts            # Tailwind CSS configuration
 ├── tsconfig.json                 # TypeScript configuration
-└── tsconfig.tsbuildinfo          # TypeScript build cache
+├── tsconfig.tsbuildinfo          # TypeScript build cache
+└── types/                        # TypeScript type definitions
+    └── google-maps.d.ts          # Google Maps API type definitions
 ```
 
 ## Detailed Structure
@@ -151,6 +157,10 @@ Shared libraries and configurations:
 #### Authentication (`/lib/auth`)
 - **`route-protection.tsx`**: Component for protecting authenticated routes
 - **`session-provider.tsx`**: React context provider for user session management
+
+#### Custom Hooks (`/lib/hooks`)
+- **`use-geolocation.ts`**: Location permission handling and user location management
+- **`use-google-places.ts`**: Google Places API integration and restaurant search services
 
 #### Supabase (`/lib/supabase`)
 - **`client.ts`**: Browser-side Supabase client configuration
