@@ -92,7 +92,7 @@
 **Duration:** 1 day
 **Dependencies:** Stage 4 completion
 
-#### Sub-steps:
+#### SUB-STEPS:
 - [x] Fix phone number exposure in user profile API (BUG-002)
 - [x] Implement personalized user greetings on homepage (BUG-003)
 - [x] Fix city update persistence across app (BUG-001)
@@ -151,6 +151,7 @@
 ### ✅ Completed (Stages 1-4.5)
 - **Foundation & Setup**: Supabase integration, database schema, authentication
 - **Core Authentication**: Phone-based OTP, invite codes, user management
+
 - **Dish Functionality**: CRUD operations, image uploads, data validation
 - **Dynamic Data**: Live API connections, session handling, route protection
 - **Security & UX**: Phone number protection, personalized greetings, bug fixes
@@ -179,8 +180,18 @@
 - Conduct comprehensive testing
 - Performance optimization and bug fixes
 
-### 🎯 MVP Status: ~100% Complete
-The core functionality is working and secure. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is now fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is fully functional with automatic generation, status indicators, and secure access controls. The application is now production-ready with comprehensive feature set.
+### 🚧 Critical Bug Fixed (January 30, 2025)
+**What We Actually Fixed Today:**
+- **Invite Code System Restored**: Fixed critical 404 errors preventing user signup
+- **Modern Security Implementation**: Implemented Secret API key replacing legacy service role approach
+- **Database Policies Fixed**: Created missing INSERT policy for users table  
+- **Service Architecture**: Added new service client pattern for admin operations
+- **Signup Flow Verified**: Complete end-to-end user onboarding confirmed working
+
+**Current Status**: Critical blocking bug resolved. Application can accept new users again.
+
+### 🎯 MVP Status: ~95% Complete - Critical System Restored
+The core functionality is working and secure. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Critical issue resolved**: User signup flow restored with modern Secret API key security.
 
 #### Sub-steps:
 - [ ] Deploy to Vercel with environment configuration

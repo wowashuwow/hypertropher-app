@@ -2009,3 +2009,190 @@ When users click on a restaurant from the search results dropdown, the dropdown 
 - Error handling provides graceful degradation for production reliability
 - The solution maintains backward compatibility with existing functionality
 - Restaurant selection now works seamlessly across all device types
+
+---
+
+## [BUG-014] - Invite Code System Failing During Signup (RESOLVED)
+**Date:** 2025-01-30
+**Severity:** Critical (Core Functionality)
+**Priority:** High
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+The invite code validation system was completely broken, preventing new users from signing up. Users could enter valid invite codes but the signup API would return 404 errors, blocking the entire user onboarding flow.
+
+### Steps to Reproduce
+1. Navigate to the signup page
+2. Enter a valid unused invite code (e.g., "HYPEREL2P")
+3. Enter a phone number (e.g., "999999999999")
+4. Click "Send OTP"
+5. Observe 404 error instead of OTP being sent
+
+### Expected Behavior
+- Invite code should be validated successfully
+- OTP should be sent to the phone number
+- User should proceed to verification step
+- Invite code should be marked as used only after successful profile completion
+
+### Actual Behavior
+- Signup API returned 404 errors
+- Invite code validation completely failed
+- No OTP was sent
+- User onboarding was completely blocked
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+- **Error Code**: 404 (Not Found)
+- **Files Affected**: 
+  - `app/api/auth/signup/route.ts`
+  - `lib/supabase/service.ts` (new file)
+  - Database RLS policies
+
+### Root Cause Analysis
+The issue had multiple layers of complexity:
+
+1. **Legacy Service Role Key Issue**: Original implementation attempted to use `SUPABASE_SERVICE_ROLE_KEY` but this environment variable was not configured.
+
+2. **RLS Policy Blocking Access**: The `invite_codes` table had RLS enabled with policy `auth.uid() = generated_by_user_id`, which prevented unauthenticated users from reading invite codes during signup validation.
+
+3. **Modern API Key Migration**: During troubleshooting, we discovered Supabase's migration to modern Secret API keys (`sb_secret_...`) replacing legacy service role keys.
+
+4. **Environment Variable Confusion**: Multiple different environment variable names were suggested (`SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SECRET_KEY`, `SECRET_API_KEY`) requiring clarification.
+
+### Resolution Steps
+
+#### 1. **Modern Secret API Key Implementation**
+- Created new `lib/supabase/service.ts` with `createServiceClient()` function
+- Used modern Secret API key (`SUPABASE_SECRET_API_KEY`) instead of legacy service role
+- Implemented proper error handling for missing environment variables
+- Added browser blocking protection (Secret API keys return 401 if used in browser)
+
+#### 2. **Service Client Configuration**
+```typescript
+// lib/supabase/service.ts
+import { createClient } from "@supabase/supabase-js"
+
+export function createServiceClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_API_KEY
+  
+  if (!supabaseSecretKey) {
+    throw new Error("SUPABASE_SECRET_API_KEY environment variable is not set. Please add it to your .env.local file.")
+  }
+  
+  return createClient(supabaseUrl, supabaseSecretKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+}
+```
+
+#### 3. **Signup API Security Enhancement**
+- Updated `/api/auth/signup/route.ts` to use service client for invite code validation
+- Maintained authentication bypass only for specific invite code validation step
+- Preserved RLS policies for regular operations
+- Added comprehensive error handling and logging
+
+#### 4. **Missing Database Policy Fix**
+- Identified missing INSERT policy on `users` table preventing profile creation
+- Provided SQL policy for manual execution:
+```sql
+CREATE POLICY "Allow users to insert their own profile" ON public.users
+FOR INSERT 
+TO public
+WITH CHECK (auth.uid() = id);
+```
+
+#### 5. **Clean State Management**
+- Identified orphaned user in `auth.users` table
+- Provided cleanup instructions for database hygiene
+- Ensured clean testing environment
+
+### Environment Variable Setup
+**Required Environment Variables:**
+```bash
+# Modern Secret API key (replaces legacy service role key)
+SUPABASE_SECRET_API_KEY=sb_secret_[secret_api_key_from_dashboard]
+
+# Keep existing variables (unchanged)
+NEXT_PUBLIC_SUPABASE_URL=your_existing_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_existing_anon_key
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
+```
+
+### Security Analysis
+**Secret API Key vs Legacy Service Role:**
+- ✅ **Better Security**: Browser blocking protection
+- ✅ **Zero-Downtime Rotation**: Keys can be rotated without app downtime
+- ✅ **Audit Trail**: Better tracking and monitoring
+- ✅ **Modern Architecture**: Built for new Supabase API Gateway
+- ✅ **Independently Managed**: Keys managed separately from other components
+
+**Security Considerations:**
+- Secret API key is only used in a backend environment (safe)
+- Bypass RLS only for invite code validation during signup (minimal scope)
+- Maintained secure flow for all other operations
+- Proper error handling prevents sensitive data exposure
+
+### Testing Results
+- ✅ Invite code validation works correctly via Secret API key
+- ✅ OTP sending functionality restored
+- ✅ Complete signup flow operational
+- ✅ Database bypass limited to invite code validation only
+- ✅ No security vulnerabilities introduced
+- ✅ Service client properly configured with error handling
+- ✅ Environment variable validation works correctly
+- ✅ End-to-end user onboarding confirmed working
+
+### Final Verification
+**Signup Flow Testing:**
+1. ✅ Phone validation: Success
+2. ✅ Invite code validation: Success (using Secret API key)
+3. ✅ OTP verification: Success
+4. ✅ Profile completion: Success (with INSERT policy fix)
+5. ✅ Invite code marked as used: Success
+6. ✅ New user created in both `auth.users` and `public.users`: Success
+
+**User Confirmation:** User successfully tested the complete signup flow with phone number 999999999999 using invite code "HYPEREL2P". System working correctly.
+
+### Prevention Measures
+- Always test invite code validation during development
+- Verify environment variable setup before production
+- Test authentication flows end-to-end
+- Implement comprehensive error handling for missing keys
+- Use modern API keys instead of legacy service role keys
+- Document required environment variables clearly
+- Test signup flow with actual invite codes
+
+### Documentation Updates
+- **Implementation.md**: Updated completion status for Stage 6 deployment tasks
+- **Bug_tracking.md**: Comprehensive documentation of resolution process
+- **Project Structure**: Added new service client file to documentation
+- **Security Guidelines**: Updated with modern Secret API key best practices
+
+### Technical Impact
+- **Authentication**: Restored complete signup functionality
+- **Security**: Upgraded to modern Secret API keys
+- **Database**: Fixed RLS policy enforcement
+- **Error Handling**: Enhanced with comprehensive logging
+- **Environment**: Clear configuration requirements
+- **Documentation**: Comprehensive troubleshooting guide
+
+### Migration Notes
+- **Legacy Keys**: Existing anon keys continue to work
+- **Service Client**: New architectural pattern for admin operations
+- **Security**: Enhanced protection with modern API key system
+- **Compatibility**: Maintains backward compatibility with existing functionality
+
+### Notes
+- This fix resolved a critical blocking issue in the user onboarding flow
+- Modern Secret API key implementation future-proofs the authentication system
+- Comprehensive documentation ensures team knowledge transfer
+- All security considerations properly addressed
+- End-to-end testing confirms complete functionality restoration

@@ -6,16 +6,19 @@ This document outlines the database schema for the Hypertropher application, bui
 - [Hypertropher Database Schema](#hypertropher-database-schema)
   - [Table of Contents](#table-of-contents)
     - [1. `users` table](#1-users-table)
-    - [2. `dishes` table](#2-dishes-table)
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies)
-    - [3. `invite_codes` table](#3-invite_codes-table)
+    - [2. `dishes` table](#2-dishes-table)
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-1)
-    - [4. `wishlist_items` table](#4-wishlist_items-table)
+    - [3. `invite_codes` table](#3-invite_codes-table)
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-2)
+    - [4. `wishlist_items` table](#4-wishlist_items-table)
+      - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-3)
   - [Custom Functions](#custom-functions)
     - [`get_user_name_by_id(user_id_input UUID)`](#get_user_name_by_iduser_id_input-uuid)
   - [Custom Types](#custom-types)
     - [`availability_type` ENUM](#availability_type-enum)
+  - [Administrative Operations](#administrative-operations)
+    - [Environment Configuration for Service Operations](#environment-configuration-for-service-operations)
 
 ---
 
@@ -29,6 +32,12 @@ Stores user profile information. Linked to Supabase Auth via the `id` field.
 | `name` | `TEXT` | | The user's full name. |
 | `city` | `TEXT` | Not Null | The user's selected primary city. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the user account was created. |
+
+#### Row Level Security (RLS) Policies
+The `users` table has RLS enabled with the following policies:
+- **SELECT**: "Allow users to read their own profile details" (`auth.uid() = id`)
+- **INSERT**: "Allow users to insert their own profile" (`auth.uid() = id`)
+- **UPDATE**: "Allow users to update their own profile" (`auth.uid() = id`)
 
 ### 2. `dishes` table
 The core table containing all user-contributed dish information.
@@ -57,10 +66,10 @@ The core table containing all user-contributed dish information.
 
 #### Row Level Security (RLS) Policies
 The `dishes` table has RLS enabled with the following policies:
-- **SELECT**: Users can view all dishes (`true`) - for discovery functionality
-- **INSERT**: Users can add their own dishes (`auth.uid() = user_id`)
-- **UPDATE**: Users can update their own dishes (`auth.uid() = user_id`)
-- **DELETE**: Users can delete their own dishes (`auth.uid() = user_id`)
+- **SELECT**: "Allow public read access" (`true`) - for discovery functionality
+- **INSERT**: "Allow authenticated users to add dishes" (`auth.role() = 'authenticated'`)
+- **UPDATE**: "Users can update their own dishes" (`auth.uid() = user_id`)
+- **DELETE**: "Users can delete their own dishes" (`auth.uid() = user_id`)
 
 ### 3. `invite_codes` table
 Manages the invite code system for new user registration.
@@ -75,9 +84,9 @@ Manages the invite code system for new user registration.
 
 #### Row Level Security (RLS) Policies
 The `invite_codes` table has RLS enabled with the following policies:
-- **SELECT**: Users can view their own invite codes (`auth.uid() = generated_by_user_id`)
-- **INSERT**: System can create invite codes for users (`auth.uid() = generated_by_user_id`)
-- **UPDATE**: System can update invite codes (mark as used) (`auth.uid() = generated_by_user_id`)
+- **SELECT**: "Users can view their own invite codes" (`auth.uid() = generated_by_user_id`)
+- **INSERT**: "System can create invite codes for users" (`auth.uid() = generated_by_user_id`)
+- **UPDATE**: "System can update invite codes" (`auth.uid() = generated_by_user_id`)
 
 ### 4. `wishlist_items` table
 A junction table to manage the many-to-many relationship between users and their bookmarked (wishlisted) dishes.
@@ -90,9 +99,9 @@ A junction table to manage the many-to-many relationship between users and their
 
 #### Row Level Security (RLS) Policies
 The `wishlist_items` table has RLS enabled with the following policies:
-- **SELECT**: Users can view their own wishlist items (`auth.uid() = user_id`)
-- **INSERT**: Users can add items to their own wishlist (`auth.uid() = user_id`)
-- **DELETE**: Users can remove items from their own wishlist (`auth.uid() = user_id`)
+- **SELECT**: "Users can view their own wishlist items" (`auth.uid() = user_id`)
+- **INSERT**: "Users can add to their own wishlist" (`auth.uid() = user_id`)
+- **DELETE**: "Users can remove from their own wishlist" (`auth.uid() = user_id`)
 
 ---
 
@@ -120,3 +129,20 @@ Defines the possible values for dish availability.
 - `'In-Store'` - Dish is available at physical restaurant locations
 
 **Usage:** Used by the `dishes.availability` column to ensure data consistency.
+
+---
+
+## Administrative Operations
+
+### Environment Configuration for Service Operations
+
+The application requires a Secret API key for administrative operations that bypass Row Level Security (RLS). This is required for invite code validation during signup.
+
+**Required Environment Variable:**
+```bash
+SUPABASE_SECRET_API_KEY=sb_secret_[secret_api_key_from_dashboard]
+```
+
+**Usage:** Service client (`lib/supabase/service.ts`) uses this key to bypass RLS for invite code validation during unauthenticated signup operations only.
+
+**Security:** Secret API keys have browser blocking protection and should only be used in backend/server environments.

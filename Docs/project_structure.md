@@ -60,7 +60,8 @@ hypertropher-app/
 │   │   └── use-google-places.ts  # Google Places API service integration
 │   ├── supabase/                 # Supabase client configurations
 │   │   ├── client.ts             # Browser-side Supabase client
-│   │   └── server.ts             # Server-side Supabase client
+│   │   ├── server.ts             # Server-side Supabase client
+│   │   └── service.ts            # Service role client for admin operations
 │   └── utils.ts                  # Shared utilities
 ├── public/                       # Static assets
 │   ├── logos/                    # Delivery app logos
@@ -165,6 +166,7 @@ Shared libraries and configurations:
 #### Supabase (`/lib/supabase`)
 - **`client.ts`**: Browser-side Supabase client configuration
 - **`server.ts`**: Server-side Supabase client configuration
+- **`service.ts`**: Service role client for admin operations (bypasses RLS)
 
 #### Utilities
 - **`utils.ts`**: Shared utility functions (cn, etc.)
@@ -266,7 +268,10 @@ export default function PageName() {
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# Google Maps API (for future use)
+# Supabase Secret API Key (for admin operations)
+SUPABASE_SECRET_API_KEY=sb_secret_[secret_api_key_from_dashboard]
+
+# Google Maps API
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
 ```
 

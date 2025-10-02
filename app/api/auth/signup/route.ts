@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
@@ -17,7 +18,9 @@ export async function POST(request: NextRequest) {
 
   try {
     // 1. Check if the invite code is valid and not used
-    const { data: codeData, error: codeError } = await supabase
+    // Use service role to bypass RLS since user is not authenticated yet
+    const serviceSupabase = createServiceClient();
+    const { data: codeData, error: codeError } = await serviceSupabase
       .from("invite_codes")
       .select("*")
       .eq("code", inviteCode)
