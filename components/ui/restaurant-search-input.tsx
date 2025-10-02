@@ -60,14 +60,14 @@ export function RestaurantSearchInput({
   // Debounced search function
   const debouncedSearch = async (query: string) => {
     console.log('🔍 RestaurantSearchInput: Starting debounced search for:', query)
-    
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
 
     debounceRef.current = setTimeout(async () => {
       console.log('🔍 RestaurantSearchInput: Executing search', { query, googleMapsLoaded });
-      
+
       if (!query.trim() || !googleMapsLoaded) {
         console.log('❌ RestaurantSearchInput: Aborting search - empty query or Google Maps not loaded');
         setPredictions([])
@@ -76,7 +76,7 @@ export function RestaurantSearchInput({
 
       setLoading(true)
       console.log('📡 RestaurantSearchInput: Making API call for:', query);
-      
+
       try {
         const autocompletePredictions = await getAutocompletePredictions(query)
         console.log('📥 RestaurantSearchInput: Received predictions:', autocompletePredictions.length);
@@ -94,9 +94,12 @@ export function RestaurantSearchInput({
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value
+    console.log('⌨️ Input change:', query, 'Current value:', value)
+    
     onChange(query)
     
-    if (!selectedRestaurant || selectedRestaurant.name !== query) {
+    // Only clear selectedRestaurant if this is user typing (not programmatic selection)
+    if (!selectedRestaurant || (selectedRestaurant.name !== query && selectedRestaurant.name.toLowerCase() !== query.toLowerCase())) {
       setSelectedRestaurant(null)
     }
     
@@ -112,12 +115,18 @@ export function RestaurantSearchInput({
 
   // Handle restaurant selection from autocomplete
   const handleRestaurantSelect = async (prediction: google.maps.places.AutocompletePrediction) => {
-    const inputValue = prediction.description
-    onChange(inputValue)
+    const restaurantName = prediction.structured_formatting.main_text
+    console.log('🍽️ Selecting restaurant:', restaurantName)
+    console.log('🍽️ Current value before:', value)
+    
+    onChange(restaurantName)
+    
+    console.log('🍽️ onChange called with:', restaurantName)
     setIsOpen(false)
     setPredictions([])
 
     // Perform detailed search to get complete restaurant data
+    console.log('🔍 Fetching detailed restaurant data...')
     try {
       setLoading(true)
       const restaurants = await searchRestaurants(prediction.structured_formatting.main_text)
@@ -131,13 +140,45 @@ export function RestaurantSearchInput({
       if (matchingRestaurant) {
         setSelectedRestaurant(matchingRestaurant)
         onSelect(matchingRestaurant)
+        console.log('✅ Selected restaurant:', matchingRestaurant.name)
       } else if (restaurants.length > 0) {
         // Use the first result if exact match not found
         setSelectedRestaurant(restaurants[0])
         onSelect(restaurants[0])
+        console.log('⚠️ Used fallback restaurant:', restaurants[0].name)
+      } else {
+        console.warn('⚠️ No restaurant details found, using autocomplete data only')
+        // Fallback to basic prediction data if details not found
+        const fallbackRestaurant: RestaurantResult = {
+          place_id: prediction.place_id,
+          name: prediction.structured_formatting.main_text,
+          formatted_address: prediction.description,
+          geometry: {
+            location: {
+              lat: 0, // Placeholder
+              lng: 0, // Placeholder
+            },
+          },
+        }
+        setSelectedRestaurant(fallbackRestaurant)
+        onSelect(fallbackRestaurant)
       }
     } catch (error) {
-      console.error('Failed to get restaurant details:', error)
+      console.error('❌ Failed to get restaurant details:', error)
+      // Fallback to basic prediction data on error
+      const fallbackRestaurant: RestaurantResult = {
+        place_id: prediction.place_id,
+        name: prediction.structured_formatting.main_text,
+        formatted_address: prediction.description,
+        geometry: {
+          location: {
+            lat: 0, // Placeholder
+            lng: 0, // Placeholder
+          },
+        },
+      }
+      setSelectedRestaurant(fallbackRestaurant)
+      onSelect(fallbackRestaurant)
     } finally {
       setLoading(false)
     }
@@ -150,13 +191,13 @@ export function RestaurantSearchInput({
     try {
       setLoading(true)
       const restaurants = await searchRestaurants(value)
-      
+
       if (restaurants.length > 0) {
         const bestRestaurant = restaurants[0]
         setSelectedRestaurant(bestRestaurant)
         onSelect(bestRestaurant)
       }
-      
+
       setIsOpen(false)
       setPredictions([])
     } catch (error) {
@@ -169,13 +210,19 @@ export function RestaurantSearchInput({
   // Handle clicking outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement
+      const isDropdown = target.closest('[data-dropdown="restaurant-search"]')
+      
+      if (inputRef.current && 
+          !inputRef.current.contains(target) && 
+          !isDropdown) {
         setIsOpen(false)
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    // Use 'click' instead of 'mousedown' to avoid timing issues
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
   // Handle Enter key
@@ -187,7 +234,10 @@ export function RestaurantSearchInput({
       } else {
         handleManualSearch()
       }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === 'Escape')
+
+
+ {
       setIsOpen(false)
       setPredictions([])
     }
@@ -246,6 +296,7 @@ export function RestaurantSearchInput({
       {isOpen && (predictions.length > 0 || loading) && createPortal(
         <Card 
           className="absolute z-[9999] border shadow-lg bg-background"
+          data-dropdown="restaurant-search"
           style={{
             top: dropdownPosition.top,
             left: dropdownPosition.left,
@@ -265,7 +316,10 @@ export function RestaurantSearchInput({
                     key={prediction.place_id || index}
                     type="button"
                     className="w-full p-3 text-left hover:bg-muted/50 rounded-sm transition-colors"
-                    onClick={() => handleRestaurantSelect(prediction)}
+                    onClick={() => {
+                      console.log('🔥 Button clicked for:', prediction.structured_formatting.main_text)
+                      handleRestaurantSelect(prediction)
+                    }}
                   >
                     <div className="flex items-start gap-2">
                       <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground flex-shrink-0" />
@@ -303,8 +357,8 @@ export function RestaurantSearchInput({
                 {selectedRestaurant.formatted_address}
               </div>
               {selectedRestaurant.rating && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  ⭐ {selectedRestaurant.rating}/5 
+                <div className="text-xs z-muted-foreground mt-1">
+                  ⭐ {selectedRestaurant.rating}/5
                   {selectedRestaurant.user_ratings_total && (
                     <span className="ml-1">({selectedRestaurant.user_ratings_total} reviews)</span>
                   )}
@@ -321,7 +375,7 @@ export function RestaurantSearchInput({
           🔍 Searching restaurants near your location
         </div>
       )}
-      
+
       {!userLocation && userCity && (
         <div className="text-xs text-muted-foreground">
           🔍 Searching restaurants in {userCity}

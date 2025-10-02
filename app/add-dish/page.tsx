@@ -65,8 +65,11 @@ export default function AddDishPage() {
 
   // Handle restaurant selection
   const handleRestaurantSelect = (restaurant: RestaurantResult) => {
+    console.log('🏗️ AddDish: Restaurant selected:', restaurant.name)
+    console.log('🏗️ AddDish: Current restaurant state:', restaurant)
     setSelectedRestaurant(restaurant)
     setRestaurant(restaurant.name)
+    console.log('🏗️ AddDish: Called setRestaurant with:', restaurant.name)
   }
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -267,7 +270,10 @@ export default function AddDishPage() {
               {sourceType === "In-Restaurant" ? (
                 <RestaurantSearchInput
                   value={restaurant}
-                  onChange={setRestaurant}
+                  onChange={(value) => {
+                    console.log('🏗️ AddDish: onChange called with:', value)
+                    setRestaurant(value)
+                  }}
                   onSelect={handleRestaurantSelect}
                   userCity={userCity}
                   userLocation={userLocation}
