@@ -2413,6 +2413,89 @@ Enhanced Toaster configuration in `app/layout.tsx`:
 
 ---
 
+## [BUG-015] - Non-Logged-In Users City Filtering Issue
+**Date:** 2025-01-30
+**Severity:** High (Core Functionality)
+**Priority:** High
+**Status:** Resolved
+**Reporter:** User
+
+### Description
+Non-logged-in users were not seeing dishes from all cities as intended. The filtering logic was incorrectly applying city filtering even for unauthenticated users, causing them to only see dishes from Mumbai (the default city) instead of dishes from all cities.
+
+### Steps to Reproduce
+1. Log out of the application
+2. Navigate to homepage (/)
+3. Observe that only dishes from Mumbai are displayed
+4. Notice that dishes from other cities are filtered out
+
+### Expected Behavior
+- Non-logged-in users should see dishes from all cities
+- Only logged-in users should have city filtering applied
+- Non-logged-in users should see the greeting "Discover high-protein meals from restaurants everywhere"
+
+### Actual Behavior
+- Non-logged-in users only saw dishes from Mumbai
+- City filtering was applied to all users regardless of authentication status
+- This prevented users from seeing the full value of the app
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+- **Files Affected**: 
+  - `app/page.tsx`
+
+### Root Cause
+The filtering logic in `app/page.tsx` was using:
+```typescript
+const cityMatch = dish.city === userCity
+```
+
+This applied city filtering to all users, including non-logged-in users who had `userCity` set to "Mumbai" by default.
+
+### Resolution Steps
+1. **Updated Filtering Logic** in `app/page.tsx`:
+   ```typescript
+   // Before:
+   const cityMatch = dish.city === userCity
+   
+   // After:
+   const cityMatch = user ? dish.city === userCity : true
+   ```
+
+2. **Added Clear Comments**:
+   ```typescript
+   // For non-logged-in users, show dishes from all cities
+   // For logged-in users, filter by their selected city
+   const cityMatch = user ? dish.city === userCity : true
+   ```
+
+3. **Added Future Enhancement Task** to Implementation.md:
+   - Task: Allow non-logged-in users to select a city if dishes exist for that city
+   - This will help convey the app's value by showing location-specific content
+
+### Testing Results
+- ✅ Non-logged-in users now see dishes from all cities
+- ✅ Logged-in users still see dishes filtered by their selected city
+- ✅ Greeting message displays correctly for both user types
+- ✅ No breaking changes to existing functionality
+- ✅ No linting errors introduced
+
+### Prevention Measures
+- Always consider authentication state when implementing filtering logic
+- Test functionality for both logged-in and non-logged-in users
+- Add clear comments explaining conditional logic
+- Document expected behavior for different user states
+
+### Notes
+- This fix restores the intended behavior where non-logged-in users can see the full value of the app
+- The future enhancement task has been added to allow city selection for non-logged-in users
+- This maintains the app's value proposition by showing dishes from multiple cities to potential users
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

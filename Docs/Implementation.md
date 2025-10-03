@@ -137,12 +137,7 @@
   - Add city filtering to dishes API (Discover and My Dishes) ✅
   - Preserve existing RPC functionality for author names ✅
 
-- [ ] Implement multiple protein source simultaneous filtering
-  - Update discover page to allow multiple protein selection
-  - Modify filtering logic to handle multiple protein sources
-  - Update UI to show selected multiple protein types
-
-- [ ] Update dish card contributor display format
+- [x] Update dish card contributor display format
   - Change from "<profile picture> Added by your friend <name>" format
   - Update to "Added by <name> <profile picture>" format
   - Ensure proper alignment and styling consistency
@@ -270,6 +265,10 @@ The core functionality is working and secure. Google Maps Places API integration
 - [ ] Add UX improvements to auth flow
 - [ ] Conduct comprehensive testing
 - [ ] Optimize performance and fix bugs
+- [ ] **Future Enhancement**: Add city selection for non-logged-in users
+  - Allow non-logged-in users to select a city if at least one dish exists for that city
+  - This will help convey the real value of the app by showing users dishes in their specific city
+  - Brainstorm implementation approach (dropdown, location detection, etc.)
 
 ## Resource Links
 - [Next.js 14 Documentation](https://nextjs.org/docs)

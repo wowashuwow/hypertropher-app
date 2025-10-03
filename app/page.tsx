@@ -182,7 +182,9 @@ export default function HomePage() {
 
   const filteredDishes = dishes
     .filter((dish) => {
-      const cityMatch = dish.city === userCity
+      // For non-logged-in users, show dishes from all cities
+      // For logged-in users, filter by their selected city
+      const cityMatch = user ? dish.city === userCity : true
       const proteinMatch = selectedProteinFilter === "All" || dish.protein_source === selectedProteinFilter
       return cityMatch && proteinMatch
     })

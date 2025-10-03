@@ -166,11 +166,11 @@ export function DishCard({
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-muted-foreground">Added by {addedBy}</p>
           <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
             <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
           </div>
-          <p className="text-sm text-muted-foreground">Added by your friend {addedBy}</p>
         </div>
       </div>
 
