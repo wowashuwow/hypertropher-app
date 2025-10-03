@@ -233,33 +233,10 @@ export default function AccountPage() {
           <h1 className="text-3xl font-bold text-foreground mb-8">Your Account</h1>
 
           <div className="space-y-6">
-            {/* User Info */}
-            <div className="space-y-2">
-              <Label className="text-base font-medium">Phone Number</Label>
-              <p className="text-muted-foreground">{user?.phone}</p>
-            </div>
-
-            {/* Profile Picture */}
-            <div className="space-y-2">
-              <Label className="text-base font-medium">Profile Picture</Label>
-              {loadingProfile ? (
-                <div className="p-3 border rounded-lg bg-muted animate-pulse">
-                  <p className="text-muted-foreground">Loading profile picture...</p>
-                </div>
-              ) : (
-                <ProfilePictureUpload
-                  currentImageUrl={profilePictureUrl}
-                  onImageChange={setProfilePictureUrl}
-                  disabled={updatingCity}
-                  className="w-full"
-                />
-              )}
-            </div>
-
             {/* City Selector */}
             <div className="space-y-2">
               <Label htmlFor="city-select" className="text-base font-medium">
-                Your City
+                Your Current City
               </Label>
               {loadingProfile ? (
                 <div className="p-3 border rounded-lg bg-muted animate-pulse">
@@ -322,6 +299,29 @@ export default function AccountPage() {
               ) : (
                 <p className="text-muted-foreground">No invite codes available.</p>
               )}
+            </div>
+
+            {/* Profile Picture */}
+            <div className="space-y-2">
+              <Label className="text-base font-medium">Profile Picture</Label>
+              {loadingProfile ? (
+                <div className="p-3 border rounded-lg bg-muted animate-pulse">
+                  <p className="text-muted-foreground">Loading profile picture...</p>
+                </div>
+              ) : (
+                <ProfilePictureUpload
+                  currentImageUrl={profilePictureUrl}
+                  onImageChange={setProfilePictureUrl}
+                  disabled={updatingCity}
+                  className="w-full"
+                />
+              )}
+            </div>
+
+            {/* User Info */}
+            <div className="space-y-2">
+              <Label className="text-base font-medium">Phone Number</Label>
+              <p className="text-muted-foreground">{user?.phone}</p>
             </div>
 
             {/* Action Buttons */}

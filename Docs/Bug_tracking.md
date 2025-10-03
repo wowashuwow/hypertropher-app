@@ -2850,6 +2850,111 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 ---
 
+## [FEATURE-009] - Account Settings Page Reordering
+**Date:** 2025-01-30
+**Status:** ✅ Resolved
+**Priority:** Low
+**Component:** User Interface & User Experience
+
+### Description
+Reordered the account settings page to improve user experience by prioritizing the most important and actionable settings at the top, followed by less critical personalization options, and static information at the bottom.
+
+### Problem Statement
+- **Poor Information Hierarchy**: Important settings like city selection were buried below less critical options
+- **User Experience**: Users had to scroll down to find the most commonly used settings
+- **UI Clarity**: The title "Your City" was not descriptive enough for the current context
+
+### Implementation Details
+
+#### 1. **Section Reordering**
+- **City Selector**: Moved to top position as the most important setting
+- **Invite Codes**: Moved to second position as actionable feature
+- **Profile Picture**: Moved to third position as personalization option
+- **Phone Number**: Moved to bottom as static, read-only information
+- **Logout Button**: Remains at the very bottom
+
+#### 2. **Title Improvement**
+- **Updated Label**: Changed "Your City" to "Your Current City" for better clarity
+- **Context Clarity**: Makes it clear this is the user's current location setting
+
+#### 3. **User Experience Benefits**
+- **Logical Flow**: Settings now follow a logical hierarchy from most to least important
+- **Quick Access**: Most commonly used settings are immediately visible
+- **Reduced Scrolling**: Users can access key settings without scrolling
+- **Clear Purpose**: Each section's importance is reflected in its position
+
+### Technical Implementation
+```typescript
+// Reordered sections in account/page.tsx
+<div className="space-y-6">
+  {/* City Selector - Now first */}
+  <div className="space-y-2">
+    <Label htmlFor="city-select" className="text-base font-medium">
+      Your Current City {/* Updated title */}
+    </Label>
+    {/* ... city selector component */}
+  </div>
+
+  {/* Invite Codes - Now second */}
+  <div className="space-y-2">
+    <Label className="text-base font-medium">Your Invite Codes</Label>
+    {/* ... invite codes component */}
+  </div>
+
+  {/* Profile Picture - Now third */}
+  <div className="space-y-2">
+    <Label className="text-base font-medium">Profile Picture</Label>
+    {/* ... profile picture component */}
+  </div>
+
+  {/* Phone Number - Now last */}
+  <div className="space-y-2">
+    <Label className="text-base font-medium">Phone Number</Label>
+    {/* ... phone number display */}
+  </div>
+</div>
+```
+
+### Key Features
+- **Improved Hierarchy**: Settings ordered by importance and frequency of use
+- **Better UX**: Most actionable settings are immediately accessible
+- **Clear Labeling**: More descriptive titles for better user understanding
+- **Maintained Functionality**: All existing features work exactly as before
+
+### Testing Results
+- ✅ All sections display in correct order
+- ✅ City selector works correctly in new position
+- ✅ Invite codes functionality unchanged
+- ✅ Profile picture upload works as expected
+- ✅ Phone number display remains accurate
+- ✅ All styling and spacing maintained
+- ✅ No functionality broken by reordering
+
+### User Experience Benefits
+- **Faster Access**: Users can immediately see and change their city
+- **Logical Flow**: Settings follow a natural progression from important to informational
+- **Reduced Cognitive Load**: Important settings are prominently placed
+- **Better Discoverability**: Users are more likely to find and use key features
+
+### Security Considerations
+- **No Security Impact**: Pure UI reordering with no functional changes
+- **Maintained Access Control**: All existing authentication and authorization remain intact
+- **Data Integrity**: No changes to data handling or validation
+
+### Prevention Measures
+- **Consistent Ordering**: Established clear hierarchy for future settings additions
+- **User Testing**: Layout follows common UX patterns for settings pages
+- **Documentation**: Changes are well-documented for future reference
+
+### Notes
+- This is a simple UI improvement that significantly enhances user experience
+- The reordering follows established UX best practices for settings pages
+- All existing functionality remains completely unchanged
+- The new order prioritizes actionable settings over informational ones
+- Future settings additions should follow this established hierarchy
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
