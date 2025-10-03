@@ -2292,3 +2292,127 @@ if (!rateLimitResult.allowed) {
 - The rate limiting is transparent to legitimate users and only affects malicious usage
 - Cost protection is significant (99%+ reduction in abuse scenarios)
 - The system is ready for production deployment with predictable OTP costs
+
+## BUG-006 - Homepage Loading State Issue for Unauthenticated Users
+**Date:** 2025-01-30
+**Severity:** High
+**Status:** Resolved
+**Reporter:** Development Team
+
+### Description
+The homepage (Discover page) was stuck in infinite loading state for non-logged-in users, showing "Loading..." message indefinitely and preventing dishes from displaying.
+
+### Steps to Reproduce
+1. Log out of the application
+2. Navigate to homepage (/)
+3. Observe infinite "Loading..." message
+4. Notice no dishes are displayed
+
+### Expected Behavior
+Non-logged-in users should see dishes from all cities with default greeting "Hey User! 👋"
+
+### Actual Behavior
+Homepage shows "Loading..." indefinitely, no dishes visible
+
+### Environment
+- **Browser:** Any
+- **Device:** Mobile/Desktop
+- **App Version:** Current development version
+- **User Role:** Not logged in
+
+### Root Cause
+The `fetchUserProfile` useEffect in `app/page.tsx` was guarded by `if (user)` condition. For unauthenticated users:
+- `loadingProfile` state remained `true` forever
+- `fetchUserProfile` never executed
+- No default values were set for username/city
+- UI remained in loading state
+
+### Resolution
+Modified `app/page.tsx` to handle unauthenticated users:
+```typescript
+if (user) {
+  fetchUserProfile()
+} else {
+  // For unauthenticated users, set default values and stop loading
+  setUserName("User")
+  setUserCity("Mumbai") 
+  setLoadingProfile(false)
+}
+```
+
+Also updated greeting message logic:
+```typescript
+{loadingProfile 
+  ? "Loading..." 
+  : user 
+    ? `Discover high-protein meals in ${userCity}` 
+    : "Discover high-protein meals from restaurants everywhere"
+}
+```
+
+### Testing Results
+- ✅ Unauthenticated users see default greeting
+- ✅ All dishes display properly (no city filtering)
+- ✅ Loading state resolves immediately
+- ✅ Authenticated users unaffected
+
+---
+
+## BUG-007 - Toast Notifications Blocking Bottom Navigation
+**Date:** 2025-01-30
+**Severity:** Medium
+**Status:** Resolved
+**Reporter:** Development Team
+
+### Description
+Toast notification "City updated successfully!" appeared at bottom-center position, overlapping with bottom navigation bar on mobile devices.
+
+### Steps to Reproduce
+1. Login to application
+2. Navigate to Account page
+3. Change city selection in dropdown
+4. Observe toast notification position
+
+### Expected Behavior
+Toast should appear in non-blocking position with smooth animations
+
+### Actual Behavior
+Toast appeared at bottom-center, overlapping bottom navigation with no smooth animations
+
+### Environment
+- **Browser:** Mobile browsers
+- **Device:** Mobile phones
+- **App Version:** Current development version
+- **User Role:** Logged in users
+
+### Root Cause
+Default `sonner` configuration:
+- `position="bottom-center"` overlapped mobile bottom nav
+- No animation enhancements configured
+- Missing accessibility improvements
+
+### Resolution
+Enhanced Toaster configuration in `app/layout.tsx`:
+```typescript
+<Toaster 
+  position="top-center"        // Avoids bottom nav overlap
+  duration={3000}             // 3 seconds visible time
+  expand={true}               // Smooth expand/collapse animation
+  gap={8}                     // Smooth gap transitions between toasts
+  offset="16px"               // Small buffer from top on mobile
+  richColors={true}           // Better color contrast (WCAG compliant)
+/>
+```
+
+### Testing Results
+- ✅ Toast appears at top-center with 16px offset
+- ✅ No overlap with bottom navigation
+- ✅ Smooth slide-in/out animations
+- ✅ Better accessibility with rich colors
+- ✅ Consistent 3-second duration
+
+---
+
+## Resource Links
+- [Sonner Toast Library](https://sonner.emilkowal.ski/)
+- [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

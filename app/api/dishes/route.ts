@@ -40,16 +40,44 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET handler for fetching all dishes
+// GET handler for fetching dishes filtered by user's city
 export async function GET() {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
 
+  // Get the currently authenticated user to fetch their city
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   try {
-    // 1. Fetch all dishes first
-    const { data: dishes, error: dishesError } = await supabase
+    // First, get the user's current city (if authenticated)
+    let userCity = null;
+    if (user) {
+      const { data: userProfile, error: profileError } = await supabase
+        .from("users")
+        .select("city")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        // Continue without city filtering if user profile fetch fails
+      } else {
+        userCity = userProfile.city;
+      }
+    }
+
+    // 1. Fetch dishes - filter by user's city if authenticated, otherwise fetch all
+    const query = supabase
       .from("dishes")
       .select(`*`);
+    
+    if (userCity) {
+      query.eq("city", userCity);
+    }
+
+    const { data: dishes, error: dishesError } = await query;
 
     if (dishesError) {
       console.error("Error fetching dishes:", dishesError);

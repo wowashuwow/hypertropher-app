@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { SessionProvider } from "@/lib/auth/session-provider"
+import { Toaster } from "sonner"
 import "./globals.css"
 
 const rethinkSans = Rethink_Sans({
@@ -53,6 +54,14 @@ export default function RootLayout({
         <SessionProvider>
           <Suspense fallback={null}>{children}</Suspense>
         </SessionProvider>
+        <Toaster 
+          position="top-center"
+          duration={3000}
+          expand={true}
+          gap={8}
+          offset="16px"
+          richColors={true}
+        />
         <Analytics />
       </body>
     </html>

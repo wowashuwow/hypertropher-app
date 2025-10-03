@@ -16,13 +16,27 @@ export async function GET() {
   }
 
   try {
-    // Fetch wishlist items for the current user
+    // First, get the user's current city
+    const { data: userProfile, error: profileError } = await supabase
+      .from("users")
+      .select("city")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      return NextResponse.json({ error: "Failed to fetch user profile." }, { status: 500 });
+    }
+
+    const userCity = userProfile.city;
+
+    // Fetch wishlist items for the current user, filtered by user's city
     const { data: wishlistItems, error: wishlistError } = await supabase
       .from("wishlist_items")
       .select(`
         dish_id,
         created_at,
-        dishes (
+        dishes!inner (
           id,
           dish_name,
           restaurant_name,
@@ -42,7 +56,8 @@ export async function GET() {
           )
         )
       `)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("dishes.city", userCity);
 
     if (wishlistError) {
       console.error("Error fetching wishlist:", wishlistError);

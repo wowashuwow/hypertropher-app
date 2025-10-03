@@ -122,9 +122,52 @@
 - [ ] **Deferred:** Server-side sorting and filtering (moved to V2 for performance optimization)
 - [x] Create wishlist management system
 
-### Stage 6: Polish & Deployment
+### Stage 6: Pre-Deployment UI/UX Enhancements
 **Duration:** 2-3 days
 **Dependencies:** Stage 5 completion
+
+#### Sub-steps:
+- [x] Implement auto-update city selection on account settings page ✅
+  - Remove "Save Changes" button from account settings ✅
+  - Make city dropdown auto-save when selection changes ✅
+  - Provide immediate user feedback on city change ✅
+
+- [x] Implement server-side city filtering for all pages ✅
+  - Add city filtering to wishlist API ✅
+  - Add city filtering to dishes API (Discover and My Dishes) ✅
+  - Preserve existing RPC functionality for author names ✅
+
+- [ ] Implement multiple protein source simultaneous filtering
+  - Update discover page to allow multiple protein selection
+  - Modify filtering logic to handle multiple protein sources
+  - Update UI to show selected multiple protein types
+
+- [ ] Update dish card contributor display format
+  - Change from "<profile picture> Added by your friend <name>" format
+  - Update to "Added by <name> <profile picture>" format
+  - Ensure proper alignment and styling consistency
+
+- [ ] Add clipboard copy functionality for online dishes
+  - Copy dish name to clipboard when "Open in <app>" button is clicked
+  - Show "Copied dish name to clipboard" feedback message
+  - Integrate with existing deep linking functionality
+
+- [ ] Implement profile picture functionality
+  - Add optional profile picture upload in signup/profile completion page
+  - Add profile picture update option in account settings
+  - Display profile picture in app header when available
+  - Show default placeholder when no profile picture is set
+  - Update user schema and Supabase storage integration
+
+- [ ] Implement region-based delivery app filtering
+  - Show only DoorDash and UberEats for US cities
+  - Show only Swiggy and Zomato for India cities
+  - Update add dish form delivery app options based on selected city
+  - Maintain existing multi-select functionality
+
+### Stage 7: Polish & Deployment
+**Duration:** 2-3 days
+**Dependencies:** Stage 6 completion
 
 #### Sub-steps:
 - [x] Implement OTP rate limiting to prevent abuse and control costs
@@ -135,9 +178,9 @@
 - [ ] Conduct comprehensive testing
 - [ ] Optimize performance and fix bugs
 
-### Stage 7: Performance Optimization (V2)
+### Stage 8: Performance Optimization (V2)
 **Duration:** 3-4 days
-**Dependencies:** Stage 6 completion
+**Dependencies:** Stage 7 completion
 
 #### Sub-steps:
 - [ ] Implement server-side sorting and filtering
@@ -173,16 +216,24 @@
 - **Location Services**: Geolocation permission handling with smart fallbacks
 - **Restaurant Search Component**: Advanced autocomplete with Google Maps data
 
+### ✅ Completed (Stage 6 - Recent Progress)
+- **Auto-Update City Selection**: Account settings now auto-save city changes without manual save button
+- **Server-Side City Filtering**: All pages (Discover, My Dishes, My Wishlist) now filter by user's current city
+- **Authentication Flow Fixes**: Resolved login/logout redirect issues and protected route handling
+- **Toast Notification Enhancement**: Fixed positioning and added smooth animations for city update feedback
+- **Homepage Loading Fix**: Resolved infinite loading state for non-logged-in users
+
 ### 🚧 In Progress (Stage 5 - Remaining)
 - **Advanced Features**: Advanced filtering and sorting (deferred to V2)
 
 ### 📋 Next Steps
+- Complete UI/UX pre-deployment enhancements (Stage 6)
 - Deploy to Vercel
 - Conduct comprehensive testing
 - Performance optimization and bug fixes
 
-### 🚧 Critical Bug Fixed (January 30, 2025)
-**What We Actually Fixed Today:**
+### 🚧 Critical Bug Fixed (January 30, 2025 - Morning)
+**What We Actually Fixed Today (Morning):**
 - **Invite Code System Restored**: Fixed critical 404 errors preventing user signup
 - **Modern Security Implementation**: Implemented Secret API key replacing legacy service role approach
 - **Database Policies Fixed**: Created missing INSERT policy for users table  
@@ -190,6 +241,24 @@
 - **Signup Flow Verified**: Complete end-to-end user onboarding confirmed working
 
 **Current Status**: Critical blocking bug resolved. Application can accept new users again.
+
+### 🎯 Major UI/UX Improvements Completed (January 30, 2025 - Afternoon)
+**Authentication Flow & User Experience Enhancements:**
+- **ProtectedRoute Enhancement**: Added `isRedirecting` state to prevent race conditions during authentication redirects
+- **Conditional Navigation**: Updated Header and BottomNavigation components to show appropriate links based on user authentication status
+- **Homepage Loading Fix**: Resolved infinite "Loading..." state for non-logged-in users by properly handling default states
+- **Environment-Aware Greeting**: Different messages for authenticated vs unauthenticated users on homepage
+
+**City Management & Filtering Improvements:**
+- **Auto-Update City Selection**: Removed manual "Save Changes" button from account settings, implemented optimistic updates with toast feedback
+- **Server-Side City Filtering**: Added city-based filtering to all APIs (Discover, My Dishes, My Wishlist) for consistent user experience
+- **RPC Authorization Fix**: Maintained existing `get_user_name_by_id` functionality while adding security with service key authorization
+
+**Toast Notification System Enhancement:**
+- **Positioning Fix**: Changed from `bottom-center` to `top-center` to prevent overlap with mobile bottom navigation
+- **Animation Enhancement**: Added smooth slide-in/out animations with `expand={true}` and optimized `gap` transitions
+- **Accessibility Compliance**: Implemented `richColors={true}` and proper `duration` for WCAG compliance
+- **Mobile-Friendly Offset**: Added 16px top offset for optimal mobile positioning
 
 ### 🎯 MVP Status: ~95% Complete - Critical System Restored
 The core functionality is working and secure. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Critical issue resolved**: User signup flow restored with modern Secret API key security.

@@ -61,6 +61,11 @@ export default function HomePage() {
 
     if (user) {
       fetchUserProfile()
+    } else {
+      // For unauthenticated users, set default values and stop loading
+      setUserName("User")
+      setUserCity("Mumbai")
+      setLoadingProfile(false)
     }
   }, [user])
 
@@ -221,7 +226,12 @@ export default function HomePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Hey {userName}! 👋</h1>
           <p className="text-lg text-muted-foreground">
-            {loadingProfile ? "Loading..." : `Discover high-protein meals in ${userCity}`}
+            {loadingProfile 
+              ? "Loading..." 
+              : user 
+                ? `Discover high-protein meals in ${userCity}` 
+                : "Discover high-protein meals from restaurants everywhere"
+            }
           </p>
         </div>
 

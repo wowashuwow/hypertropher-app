@@ -22,17 +22,21 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
             <Link href="/" className="text-primary hover:text-primary/80 font-medium">
               Discover
             </Link>
-            <Link href="/my-wishlist" className="text-primary hover:text-primary/80 font-medium">
-              My Wishlist
-            </Link>
-            <Link href="/my-dishes" className="text-primary hover:text-primary/80 font-medium">
-              My Dishes
-            </Link>
-            <Link href="/add-dish">
-              <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                Add Dish
-              </Button>
-            </Link>
+            {isLoggedIn && (
+              <>
+                <Link href="/my-wishlist" className="text-primary hover:text-primary/80 font-medium">
+                  My Wishlist
+                </Link>
+                <Link href="/my-dishes" className="text-primary hover:text-primary/80 font-medium">
+                  My Dishes
+                </Link>
+                <Link href="/add-dish">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    Add Dish
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
           {isLoggedIn ? (
             <Link href="/account">
@@ -41,9 +45,11 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
               </div>
             </Link>
           ) : (
-            <Link href="/signup">
-              <Button size="sm">Login</Button>
-            </Link>
+            <>
+              <Link href="/signup">
+                <Button size="sm">Login</Button>
+              </Link>
+            </>
           )}
         </div>
       </div>

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { useSession } from "@/lib/auth/session-provider"
+import { toast } from "sonner"
 
 const cities = [
   "Mumbai",
@@ -123,8 +124,7 @@ export default function AccountPage() {
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([])
   const [loadingCodes, setLoadingCodes] = useState(true)
   const [loadingProfile, setLoadingProfile] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState("")
+  const [updatingCity, setUpdatingCity] = useState(false)
   const { user, signOut } = useSession()
 
   // Fetch user's profile data
@@ -171,32 +171,46 @@ export default function AccountPage() {
     }
   }, [user])
 
-  const handleSaveChanges = async () => {
+  const handleCityChange = async (newCity: string) => {
+    if (newCity === selectedCity) return // No change needed
+    
+    const previousCity = selectedCity
+    
     try {
-      setSaving(true)
-      setSaveMessage("")
+      setUpdatingCity(true)
+      
+      // Optimistic update - immediately update UI
+      setSelectedCity(newCity)
       
       const response = await fetch('/api/users', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ city: selectedCity }),
+        body: JSON.stringify({ city: newCity }),
       })
 
       if (response.ok) {
-        setSaveMessage("City updated successfully!")
-        // Clear message after 3 seconds
-        setTimeout(() => setSaveMessage(""), 3000)
+        toast.success("City updated successfully!", {
+          duration: 4000,
+        })
       } else {
         const errorData = await response.json()
-        setSaveMessage(`Error: ${errorData.error}`)
+        // Revert optimistic update on failure
+        setSelectedCity(previousCity)
+        toast.error(`Failed to update city: ${errorData.error}`, {
+          duration: 5000,
+        })
       }
     } catch (error) {
-      console.error('Error saving city:', error)
-      setSaveMessage("Failed to save changes. Please try again.")
+      console.error('Error updating city:', error)
+      // Revert optimistic update on failure
+      setSelectedCity(previousCity)
+      toast.error("Failed to update city. Please try again.", {
+        duration: 5000,
+      })
     } finally {
-      setSaving(false)
+      setUpdatingCity(false)
     }
   }
 
@@ -232,7 +246,11 @@ export default function AccountPage() {
                   <p className="text-muted-foreground">Loading city...</p>
                 </div>
               ) : (
-                <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <Select 
+                  value={selectedCity} 
+                  onValueChange={handleCityChange}
+                  disabled={updatingCity}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select your city" />
                   </SelectTrigger>
@@ -286,27 +304,9 @@ export default function AccountPage() {
               )}
             </div>
 
-            {/* Save Message */}
-            {saveMessage && (
-              <div className={`p-3 rounded-lg text-center ${
-                saveMessage.includes("Error") || saveMessage.includes("Failed") 
-                  ? "bg-destructive/10 text-destructive" 
-                  : "bg-green-50 text-green-700"
-              }`}>
-                {saveMessage}
-              </div>
-            )}
-
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button 
-                onClick={handleSaveChanges} 
-                className="flex-1" 
-                disabled={saving || loadingProfile}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </Button>
-              <Button variant="outline" onClick={handleLogout} className="flex-1 bg-transparent">
+            <div className="pt-4">
+              <Button variant="outline" onClick={handleLogout} className="w-full bg-transparent">
                 Logout
               </Button>
             </div>
