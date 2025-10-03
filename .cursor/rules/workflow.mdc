@@ -51,6 +51,7 @@ Mark tasks complete only when:
 - UI/UX matches specifications (if applicable)
 - No errors or warnings remain
 - All task list items completed (if applicable)
+- If new files are created, or any changes to the project directory structure are made, document in `/Docs/project_structure.md`
 
 ### File Reference Priority
 1. `/Docs/Bug_tracking.md` - Check for known issues first

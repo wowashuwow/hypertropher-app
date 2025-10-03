@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Bookmark, Link, MapPin, ChevronDown, Edit, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import { copyToClipboard } from "@/lib/clipboard"
 
 interface DishCardProps {
   id: string
@@ -50,6 +52,7 @@ export function DishCard({
 }: DishCardProps) {
   const [bookmarked, setBookmarked] = useState(isBookmarked)
   const [isExpanded, setIsExpanded] = useState(false)
+  const [copyingStates, setCopyingStates] = useState<Record<string, boolean>>({})
 
   const handleBookmarkClick = () => {
     setBookmarked(!bookmarked)
@@ -76,12 +79,31 @@ export function DishCard({
     return webUrls[appName as keyof typeof webUrls] || `https://${appName.toLowerCase().replace(' ', '')}.com`
   }
 
-  const handleDeliveryAppClick = (appName: string) => {
-    const webUrl = getWebFallbackUrl(appName)
+  const handleDeliveryAppClick = async (appName: string) => {
+    // Set copying state for this specific app
+    setCopyingStates(prev => ({ ...prev, [appName]: true }))
     
-    // Simply open the web URL directly on desktop
-    // On mobile, users can install the app from the website
-    window.open(webUrl, '_blank')
+    try {
+      // Copy dish name to clipboard first
+      const copySuccess = await copyToClipboard(dishName)
+      
+      if (copySuccess) {
+        toast.success(`Copied "${dishName}" to clipboard`)
+      } else {
+        toast.error("Failed to copy dish name")
+      }
+      
+      // Proceed with opening the delivery app (existing functionality)
+      const webUrl = getWebFallbackUrl(appName)
+      window.open(webUrl, '_blank')
+      
+    } catch (error) {
+      console.error('Error in handleDeliveryAppClick:', error)
+      toast.error("Something went wrong")
+    } finally {
+      // Clear copying state for this app
+      setCopyingStates(prev => ({ ...prev, [appName]: false }))
+    }
   }
 
   const toggleExpanded = () => {
@@ -182,12 +204,14 @@ export function DishCard({
               <Button 
                 key={app}
                 onClick={() => handleDeliveryAppClick(app)}
+                disabled={copyingStates[app]}
                 className={cn(
-                  "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm"
+                  "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm",
+                  copyingStates[app] && "opacity-75 cursor-not-allowed"
                 )}
               >
                 <Link className="mr-2 h-4 w-4" />
-                Open {app}
+                {copyingStates[app] ? "Copying..." : `Open ${app}`}
               </Button>
             ))}
           </div>

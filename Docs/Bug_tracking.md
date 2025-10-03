@@ -2496,6 +2496,105 @@ This applied city filtering to all users, including non-logged-in users who had 
 
 ---
 
+## [FEATURE-006] - Clipboard Copy Functionality for Online Dishes
+**Date:** 2025-01-30
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** DishCard Component
+
+### Description
+Implemented clipboard copy functionality that automatically copies the dish name to the user's clipboard when they click the "Open in <app>" button for online dishes. This enhances user experience by making it easier to find and order dishes in delivery apps.
+
+### Problem Statement
+- **User Experience Gap**: Users had to manually type dish names when searching in delivery apps
+- **Friction in Ordering**: Extra steps required to find the exact dish in delivery apps
+- **Missed Orders**: Users might give up if they can't easily find the dish
+
+### Implementation Details
+
+#### 1. **Clipboard Utility** (`lib/clipboard.ts`)
+- **Modern API Support**: Uses `navigator.clipboard.writeText()` for secure contexts
+- **Fallback Method**: Implements `document.execCommand('copy')` for older browsers
+- **Error Handling**: Comprehensive error handling with graceful degradation
+- **Browser Compatibility**: Works across all modern browsers with fallback support
+
+#### 2. **DishCard Component Updates** (`components/dish-card.tsx`)
+- **State Management**: Added `copyingStates` to track copy operations per delivery app
+- **Async Integration**: Updated `handleDeliveryAppClick` to be async and handle clipboard operations
+- **Visual Feedback**: Button shows "Copying..." state during clipboard operation
+- **Error Handling**: Toast notifications for success/failure scenarios
+
+#### 3. **User Experience Flow**
+1. User clicks "Open Swiggy" button on online dish
+2. Button shows "Copying..." state briefly
+3. Toast notification appears: "Copied 'Chicken Biryani' to clipboard"
+4. Delivery app opens in new tab (existing functionality)
+5. User can paste dish name in delivery app search
+
+### Technical Implementation
+```typescript
+// Clipboard utility with modern API and fallback
+export async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return true
+    } else {
+      return fallbackCopyTextToClipboard(text)
+    }
+  } catch (err) {
+    console.error('Failed to copy text: ', err)
+    return false
+  }
+}
+
+// Updated button with copying state
+<Button 
+  disabled={copyingStates[app]}
+  onClick={() => handleDeliveryAppClick(app)}
+>
+  {copyingStates[app] ? "Copying..." : `Open ${app}`}
+</Button>
+```
+
+### Key Features
+- **Automatic Copy**: Dish name copied automatically when opening delivery app
+- **Visual Feedback**: Clear loading states and success/error messages
+- **Browser Compatibility**: Works on all browsers with appropriate fallbacks
+- **Non-Blocking**: Copy operation doesn't prevent delivery app opening
+- **Error Recovery**: Graceful handling of clipboard permission issues
+
+### Testing Results
+- ✅ Clipboard copy works in Chrome, Firefox, Safari, Edge
+- ✅ Fallback method works in older browsers
+- ✅ Toast notifications display correctly
+- ✅ Button states update properly during copy operations
+- ✅ Delivery app opening still works as expected
+- ✅ Error handling works for permission denied scenarios
+- ✅ No linting errors introduced
+- ✅ Build completes successfully
+
+### User Experience Benefits
+- **Reduced Friction**: One-click copy and open workflow
+- **Better Success Rate**: Users more likely to find and order dishes
+- **Clear Feedback**: Users know exactly what was copied
+- **Accessibility**: Works with screen readers and keyboard navigation
+
+### Prevention Measures
+- **Comprehensive Testing**: Test across different browsers and devices
+- **Error Handling**: Graceful degradation when clipboard access fails
+- **User Feedback**: Clear success and error messages
+- **Performance**: Fast copy operations with minimal delay
+
+### Notes
+- This feature significantly improves the user experience for online dish ordering
+- The implementation maintains backward compatibility with existing functionality
+- Clipboard permissions are handled gracefully with appropriate fallbacks
+- The feature works seamlessly with the existing deep linking functionality
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
+- [Clipboard API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API)

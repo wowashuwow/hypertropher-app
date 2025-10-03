@@ -142,7 +142,7 @@
   - Update to "Added by <name> <profile picture>" format
   - Ensure proper alignment and styling consistency
 
-- [ ] Add clipboard copy functionality for online dishes
+- [x] Add clipboard copy functionality for online dishes
   - Copy dish name to clipboard when "Open in <app>" button is clicked
   - Show "Copied dish name to clipboard" feedback message
   - Integrate with existing deep linking functionality

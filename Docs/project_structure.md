@@ -62,6 +62,7 @@ hypertropher-app/
 │   │   ├── client.ts             # Browser-side Supabase client
 │   │   ├── server.ts             # Server-side Supabase client
 │   │   └── service.ts            # Service role client for admin operations
+│   ├── clipboard.ts              # Clipboard API utility with fallback support
 │   ├── rate-limit.ts             # OTP rate limiting utility
 │   └── utils.ts                  # Shared utilities
 ├── public/                       # Static assets
@@ -170,6 +171,7 @@ Shared libraries and configurations:
 - **`service.ts`**: Service role client for admin operations (bypasses RLS)
 
 #### Utilities
+- **`clipboard.ts`**: Clipboard API utility with modern API support and fallback for older browsers
 - **`rate-limit.ts`**: OTP rate limiting utility with in-memory storage and configurable limits
 - **`utils.ts`**: Shared utility functions (cn, etc.)
 
