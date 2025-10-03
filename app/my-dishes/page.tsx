@@ -20,11 +20,12 @@ interface Dish {
   satisfaction: "🤩 Would Eat Everyday" | "👍 Great"
   comment?: string
   addedBy: string
+  addedByProfilePicture?: string | null
   availability: "In-Store" | "Online"
   image_url: string
   protein_source: string
   delivery_apps?: string[]
-  users: { name: string }
+  users: { name: string; profile_picture_url?: string | null }
 }
 
 export default function MyDishesPage() {
@@ -85,6 +86,7 @@ export default function MyDishesPage() {
           satisfaction: dish.satisfaction as "🤩 Would Eat Everyday" | "👍 Great",
           comment: dish.comment,
           addedBy: dish.users?.name || "Unknown",
+          addedByProfilePicture: dish.users?.profile_picture_url || null,
           availability: dish.availability as "In-Store" | "Online",
           image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
           protein_source: dish.protein_source,
@@ -188,6 +190,7 @@ export default function MyDishesPage() {
                   satisfaction={dish.satisfaction}
                   comment={dish.comment}
                   addedBy={dish.addedBy}
+                  addedByProfilePicture={dish.addedByProfilePicture}
                   availability={dish.availability}
                   imageUrl={dish.image_url}
                   proteinSource={dish.protein_source}

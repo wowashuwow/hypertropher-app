@@ -84,21 +84,24 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to fetch dishes." }, { status: 500 });
     }
 
-    // 2. Enhance each dish with the author's name using a secure RPC call
+    // 2. Enhance each dish with the author's profile using a secure RPC call
     const enhancedDishes = await Promise.all(
       dishes.map(async (dish) => {
-        const { data: authorName, error: nameError } = await supabase.rpc(
-          "get_user_name_by_id",
+        const { data: userProfile, error: profileError } = await supabase.rpc(
+          "get_user_profile_by_id",
           { user_id_input: dish.user_id }
         );
 
-        if (nameError) {
-          console.error(`Error fetching name for user ${dish.user_id}:`, nameError);
+        if (profileError) {
+          console.error(`Error fetching profile for user ${dish.user_id}:`, profileError);
         }
 
         return {
           ...dish,
-          users: { name: authorName || "A User" }, // Use a fallback name if fetch fails
+          users: { 
+            name: userProfile?.name || "A User", // Use a fallback name if fetch fails
+            profile_picture_url: userProfile?.profile_picture_url || null
+          },
         };
       })
     );

@@ -19,6 +19,7 @@ interface DishCardProps {
   satisfaction?: "🤩 Would Eat Everyday" | "👍 Great"
   comment?: string
   addedBy: string
+  addedByProfilePicture?: string | null
   availability: "Online" | "In-Store"
   proteinSource?: string
   deliveryApps?: string[]
@@ -41,6 +42,7 @@ export function DishCard({
   satisfaction = "👍 Great",
   comment,
   addedBy,
+  addedByProfilePicture,
   availability,
   proteinSource,
   deliveryApps = [],
@@ -190,7 +192,24 @@ export function DishCard({
 
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground">Added by {addedBy}</p>
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+          {addedByProfilePicture ? (
+            <img
+              src={addedByProfilePicture}
+              alt={`${addedBy}'s profile`}
+              className="w-6 h-6 rounded-full object-cover"
+              onError={(e) => {
+                // Fallback to initials if image fails to load
+                e.currentTarget.style.display = 'none'
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                if (fallback) fallback.style.display = 'flex'
+              }}
+            />
+          ) : null}
+          <div 
+            className={`w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center ${
+              addedByProfilePicture ? 'hidden' : ''
+            }`}
+          >
             <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
           </div>
         </div>

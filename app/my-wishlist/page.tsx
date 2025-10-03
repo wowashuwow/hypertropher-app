@@ -22,7 +22,7 @@ interface Dish {
   image_url: string
   protein_source: string
   delivery_apps?: string[]
-  users: { name: string }
+  users: { name: string; profile_picture_url?: string | null }
 }
 
 export default function MyListPage() {
@@ -135,6 +135,7 @@ export default function MyListPage() {
                   satisfaction={dish.satisfaction}
                   comment={dish.comment}
                   addedBy={dish.addedBy}
+                  addedByProfilePicture={dish.users?.profile_picture_url || null}
                   availability={dish.availability}
                   imageUrl={dish.image_url}
                   proteinSource={dish.protein_source}

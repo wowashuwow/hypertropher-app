@@ -2733,7 +2733,125 @@ FOR INSERT WITH CHECK (bucket_id = 'profile-pictures' AND auth.uid()::text = (st
 
 ---
 
+## [FEATURE-008] - Profile Pictures on Dish Cards
+**Date:** 2025-01-30
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** Dish Display & User Experience
+
+### Description
+Implemented profile picture display functionality on dish cards to show who added each dish. This enhances user experience by providing visual identification of dish contributors and makes the app feel more social and personalized.
+
+### Problem Statement
+- **Visual Identity**: Users couldn't visually identify who added dishes beyond seeing names
+- **Social Experience**: Missing visual elements that make the app feel more connected and personal
+- **User Recognition**: Harder to recognize familiar contributors across different dishes
+
+### Implementation Details
+
+#### 1. **Database Schema Updates**
+- **New RPC Function**: Created `get_user_profile_by_id` function to return both name and profile picture URL
+- **Function Cleanup**: Removed old `get_user_name_by_id` function to avoid confusion
+- **JSON Response**: Function returns structured JSON with `name` and `profile_picture_url` fields
+
+#### 2. **API Layer Updates** (`app/api/dishes/route.ts`)
+- **RPC Integration**: Updated to call new `get_user_profile_by_id` function
+- **Data Enhancement**: Enhanced dish data to include profile picture URLs
+- **Error Handling**: Maintained robust error handling with fallbacks
+- **Backward Compatibility**: Ensured existing functionality remains intact
+
+#### 3. **Component Interface Updates** (`components/dish-card.tsx`)
+- **New Prop**: Added `addedByProfilePicture?: string | null` to `DishCardProps` interface
+- **Display Logic**: Implemented conditional rendering of profile pictures
+- **Fallback System**: Graceful fallback to colored circle with initials when no picture exists
+- **Error Handling**: Image load error handling with automatic fallback to initials
+- **Styling**: Maintained consistent 6x6 size and rounded styling
+
+#### 4. **Frontend Integration**
+- **Homepage** (`app/page.tsx`): Updated data mapping and component props
+- **My Dishes** (`app/my-dishes/page.tsx`): Updated interface and component usage
+- **My Wishlist** (`app/my-wishlist/page.tsx`): Updated interface and component usage
+- **Type Safety**: Updated all TypeScript interfaces to include profile picture properties
+
+#### 5. **User Experience Enhancements**
+- **Visual Recognition**: Users can now visually identify dish contributors
+- **Social Connection**: Creates a more connected, community-focused experience
+- **Consistent Design**: Profile pictures integrate seamlessly with existing design
+- **Performance**: Efficient image loading with proper fallbacks
+
+### Technical Implementation
+```typescript
+// New RPC function
+CREATE OR REPLACE FUNCTION get_user_profile_by_id(user_id_input UUID)
+RETURNS JSON AS $$
+BEGIN
+  RETURN (
+    SELECT json_build_object(
+      'name', name,
+      'profile_picture_url', profile_picture_url
+    )
+    FROM users 
+    WHERE id = user_id_input
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+// Component usage
+<DishCard
+  addedBy={dish.addedBy}
+  addedByProfilePicture={dish.users?.profile_picture_url || null}
+  // ... other props
+/>
+```
+
+### Key Features
+- **Profile Picture Display**: Shows actual user profile pictures on dish cards
+- **Graceful Fallbacks**: Automatic fallback to initials when no picture is available
+- **Error Recovery**: Handles image load failures gracefully
+- **Type Safety**: Full TypeScript support with proper interfaces
+- **Performance**: Optimized image loading and caching
+
+### Testing Results
+- ✅ Profile pictures display correctly on dish cards
+- ✅ Fallback to initials works when no profile picture exists
+- ✅ Image load errors are handled gracefully
+- ✅ All pages (homepage, my-dishes, wishlist) work correctly
+- ✅ Build completes successfully without errors
+- ✅ No TypeScript compilation errors
+- ✅ API integration functions properly
+- ✅ RPC function returns correct data structure
+- ✅ User experience is enhanced and intuitive
+
+### User Experience Benefits
+- **Visual Identity**: Users can now recognize contributors visually
+- **Social Connection**: Creates a more engaging, community-focused experience
+- **Professional Appearance**: Makes the app look more polished and modern
+- **Consistency**: Maintains design consistency across all dish displays
+- **Accessibility**: Proper alt text and fallbacks for screen readers
+
+### Security Considerations
+- **RPC Security**: Function uses `SECURITY DEFINER` for controlled access
+- **Data Validation**: Proper null handling and type safety
+- **Error Handling**: Graceful degradation for all error scenarios
+- **Performance**: Efficient queries without exposing sensitive data
+
+### Prevention Measures
+- **Type Safety**: Comprehensive TypeScript interfaces prevent runtime errors
+- **Error Handling**: Robust fallback mechanisms for all failure scenarios
+- **Testing**: Thorough testing across all pages and scenarios
+- **Documentation**: Clear documentation of all changes and interfaces
+
+### Notes
+- This feature significantly enhances the social aspect of the app
+- The implementation maintains backward compatibility with existing functionality
+- Profile pictures are optional, so users without pictures still have a good experience
+- The fallback system ensures the app works well regardless of profile picture availability
+- All changes follow the established patterns and maintain code quality
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
 - [Clipboard API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API)
+- [Supabase RPC Functions](https://supabase.com/docs/guides/database/functions)

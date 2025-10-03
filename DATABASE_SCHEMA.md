@@ -17,7 +17,7 @@ This document outlines the database schema for the Hypertropher application, bui
     - [`dish-photos` Bucket](#dish-photos-bucket)
     - [`profile-pictures` Bucket](#profile-pictures-bucket)
   - [Custom Functions](#custom-functions)
-    - [`get_user_name_by_id(user_id_input UUID)`](#get_user_name_by_iduser_id_input-uuid)
+    - [`get_user_profile_by_id(user_id_input UUID)`](#get_user_profile_by_iduser_id_input-uuid)
   - [Custom Types](#custom-types)
     - [`availability_type` ENUM](#availability_type-enum)
   - [Administrative Operations](#administrative-operations)
@@ -137,15 +137,27 @@ Stores user profile pictures.
 
 ## Custom Functions
 
-### `get_user_name_by_id(user_id_input UUID)`
-A secure function that returns the name of a user by their ID. This function is used by the dishes API to safely fetch user names without exposing sensitive data.
+### `get_user_profile_by_id(user_id_input UUID)`
+A secure function that returns both the name and profile picture URL of a user by their ID. This function is used by the dishes API to safely fetch user profile information without exposing sensitive data.
 
 **Parameters:**
 - `user_id_input`: The UUID of the user
 
-**Returns:** `TEXT` - The user's name, or `NULL` if not found
+**Returns:** `JSON` - A JSON object containing:
+  - `name`: The user's name (TEXT)
+  - `profile_picture_url`: The user's profile picture URL (TEXT, can be NULL)
 
-**Usage:** Called by the dishes API to populate the `users.name` field in dish queries.
+**Example Return:**
+```json
+{
+  "name": "John Doe",
+  "profile_picture_url": "https://supabase.co/storage/v1/object/public/profile-pictures/user-123/profile.jpg"
+}
+```
+
+**Usage:** Called by the dishes API to populate both `users.name` and `users.profile_picture_url` fields in dish queries for displaying contributor information on dish cards.
+
+**Security:** Uses `SECURITY DEFINER` to ensure controlled access to user profile data.
 
 ---
 
