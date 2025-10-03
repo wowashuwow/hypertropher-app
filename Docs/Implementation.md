@@ -127,6 +127,7 @@
 **Dependencies:** Stage 5 completion
 
 #### Sub-steps:
+- [x] Implement OTP rate limiting to prevent abuse and control costs
 - [ ] Deploy to Vercel with environment configuration
 - [ ] Add invite code verification feedback
 - [ ] Implement secure invite code passing

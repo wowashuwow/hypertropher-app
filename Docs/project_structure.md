@@ -62,6 +62,7 @@ hypertropher-app/
 │   │   ├── client.ts             # Browser-side Supabase client
 │   │   ├── server.ts             # Server-side Supabase client
 │   │   └── service.ts            # Service role client for admin operations
+│   ├── rate-limit.ts             # OTP rate limiting utility
 │   └── utils.ts                  # Shared utilities
 ├── public/                       # Static assets
 │   ├── logos/                    # Delivery app logos
@@ -169,6 +170,7 @@ Shared libraries and configurations:
 - **`service.ts`**: Service role client for admin operations (bypasses RLS)
 
 #### Utilities
+- **`rate-limit.ts`**: OTP rate limiting utility with in-memory storage and configurable limits
 - **`utils.ts`**: Shared utility functions (cn, etc.)
 
 ### `/public` - Static Assets

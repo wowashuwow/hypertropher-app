@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
+import { checkRateLimit, getResetTimeString } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   const { phone } = await request.json();
@@ -12,6 +13,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "Phone number is required." },
       { status: 400 }
+    );
+  }
+
+  // Rate limiting check - 5 login attempts per 15 minutes per phone number
+  const rateLimitResult = checkRateLimit(phone, 5, 15 * 60 * 1000);
+  
+  if (!rateLimitResult.allowed) {
+    const resetTime = getResetTimeString(rateLimitResult.resetTime);
+    return NextResponse.json(
+      { 
+        error: `Too many login attempts. Please try again in ${resetTime}.` 
+      },
+      { status: 429 }
     );
   }
 
