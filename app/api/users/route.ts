@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
 
   const phone = user.phone;
 
-  // Get the name, city, and inviteCode from the request body
-  const { name, city, inviteCode } = await request.json();
+  // Get the name, city, inviteCode, and profilePictureUrl from the request body
+  const { name, city, inviteCode, profilePictureUrl } = await request.json();
 
   if (!name || !city || !inviteCode) {
     return NextResponse.json({ error: "Name, city, and invite code are required." }, { status: 400 });
@@ -32,7 +32,14 @@ export async function POST(request: NextRequest) {
   // Create the user's record in our public 'users' table
   const { data, error } = await supabase
     .from("users")
-    .insert({ id: user.id, phone: `+${user.phone}`, name, city })
+    .insert({ 
+      id: user.id, 
+      phone: `+${user.phone}`, 
+      name, 
+      city,
+      profile_picture_url: profilePictureUrl || null,
+      profile_picture_updated_at: profilePictureUrl ? new Date().toISOString() : null
+    })
     .select()
     .single();
 
@@ -88,7 +95,7 @@ export async function GET() {
   try {
     const { data, error } = await supabase
       .from("users")
-      .select("id, name, city, created_at")
+      .select("id, name, city, created_at, profile_picture_url, profile_picture_updated_at")
       .eq("id", user.id)
       .single();
 

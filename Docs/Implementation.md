@@ -147,7 +147,7 @@
   - Show "Copied dish name to clipboard" feedback message
   - Integrate with existing deep linking functionality
 
-- [ ] Implement profile picture functionality
+- [x] Implement profile picture functionality
   - Add optional profile picture upload in signup/profile completion page
   - Add profile picture update option in account settings
   - Display profile picture in app header when available

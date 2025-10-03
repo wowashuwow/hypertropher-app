@@ -2,12 +2,15 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useSession } from "@/lib/auth/session-provider"
 
 interface HeaderProps {
   isLoggedIn?: boolean
 }
 
 export function Header({ isLoggedIn = false }: HeaderProps) {
+  const { userProfile } = useSession()
+
   return (
     <header className="w-full py-4 px-6 border-b border-border bg-card">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -40,8 +43,25 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
           </div>
           {isLoggedIn ? (
             <Link href="/account">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
-                A
+              {userProfile?.profile_picture_url ? (
+                <img
+                  src={userProfile.profile_picture_url}
+                  alt={`${userProfile.name}'s profile`}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-border hover:border-primary/50 transition-colors"
+                  onError={(e) => {
+                    // Fallback to initials if image fails to load
+                    e.currentTarget.style.display = 'none'
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                    if (fallback) fallback.style.display = 'flex'
+                  }}
+                />
+              ) : null}
+              <div 
+                className={`w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm ${
+                  userProfile?.profile_picture_url ? 'hidden' : ''
+                }`}
+              >
+                {userProfile?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
             </Link>
           ) : (

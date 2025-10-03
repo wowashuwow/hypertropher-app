@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { useSession } from "@/lib/auth/session-provider"
+import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 import { toast } from "sonner"
 
 const cities = [
@@ -121,6 +122,7 @@ interface InviteCode {
 
 export default function AccountPage() {
   const [selectedCity, setSelectedCity] = useState("Mumbai")
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null)
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([])
   const [loadingCodes, setLoadingCodes] = useState(true)
   const [loadingProfile, setLoadingProfile] = useState(true)
@@ -136,6 +138,7 @@ export default function AccountPage() {
         if (response.ok) {
           const data = await response.json()
           setSelectedCity(data.city || "Mumbai")
+          setProfilePictureUrl(data.profile_picture_url || null)
         }
       } catch (error) {
         console.error('Error fetching user profile:', error)
@@ -234,6 +237,23 @@ export default function AccountPage() {
             <div className="space-y-2">
               <Label className="text-base font-medium">Phone Number</Label>
               <p className="text-muted-foreground">{user?.phone}</p>
+            </div>
+
+            {/* Profile Picture */}
+            <div className="space-y-2">
+              <Label className="text-base font-medium">Profile Picture</Label>
+              {loadingProfile ? (
+                <div className="p-3 border rounded-lg bg-muted animate-pulse">
+                  <p className="text-muted-foreground">Loading profile picture...</p>
+                </div>
+              ) : (
+                <ProfilePictureUpload
+                  currentImageUrl={profilePictureUrl}
+                  onImageChange={setProfilePictureUrl}
+                  disabled={updatingCity}
+                  className="w-full"
+                />
+              )}
             </div>
 
             {/* City Selector */}

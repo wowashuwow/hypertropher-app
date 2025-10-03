@@ -13,6 +13,9 @@ This document outlines the database schema for the Hypertropher application, bui
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-2)
     - [4. `wishlist_items` table](#4-wishlist_items-table)
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-3)
+  - [Storage Buckets](#storage-buckets)
+    - [`dish-photos` Bucket](#dish-photos-bucket)
+    - [`profile-pictures` Bucket](#profile-pictures-bucket)
   - [Custom Functions](#custom-functions)
     - [`get_user_name_by_id(user_id_input UUID)`](#get_user_name_by_iduser_id_input-uuid)
   - [Custom Types](#custom-types)
@@ -31,6 +34,8 @@ Stores user profile information. Linked to Supabase Auth via the `id` field.
 | `phone` | `TEXT` | Unique, Not Null | The user's phone number. |
 | `name` | `TEXT` | | The user's full name. |
 | `city` | `TEXT` | Not Null | The user's selected primary city. |
+| `profile_picture_url` | `TEXT` | | The URL of the user's profile picture stored in Supabase Storage. |
+| `profile_picture_updated_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the profile picture was last updated. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the user account was created. |
 
 #### Row Level Security (RLS) Policies
@@ -102,6 +107,31 @@ The `wishlist_items` table has RLS enabled with the following policies:
 - **SELECT**: "Users can view their own wishlist items" (`auth.uid() = user_id`)
 - **INSERT**: "Users can add to their own wishlist" (`auth.uid() = user_id`)
 - **DELETE**: "Users can remove from their own wishlist" (`auth.uid() = user_id`)
+
+---
+
+## Storage Buckets
+
+### `dish-photos` Bucket
+Stores dish images uploaded by users.
+
+**Configuration:**
+- **Public Access**: Yes (for displaying dish images)
+- **RLS Policies**: Users can upload their own dish images
+- **File Organization**: Files stored with user ID prefix for security
+
+### `profile-pictures` Bucket
+Stores user profile pictures.
+
+**Configuration:**
+- **Public Access**: Yes (for displaying profile pictures)
+- **RLS Policies**: 
+  - Users can upload their own profile pictures
+  - Users can update their own profile pictures
+  - Users can delete their own profile pictures
+  - Profile pictures are publicly accessible for display
+- **File Organization**: Files stored with user ID prefix for security
+- **Image Processing**: Automatic resizing to 400x400px with JPEG compression
 
 ---
 

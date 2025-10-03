@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 
 // NOTE: This is a simplified list. We can expand it later.
 const cities = [
@@ -16,6 +17,7 @@ const cities = [
 export default function CompleteProfilePage() {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
   const searchParams = useSearchParams();
@@ -47,7 +49,7 @@ export default function CompleteProfilePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, city, inviteCode }),
+        body: JSON.stringify({ name, city, inviteCode, profilePictureUrl }),
       });
 
       if (response.ok) {
@@ -106,6 +108,19 @@ export default function CompleteProfilePage() {
                     ))}
                   </SelectContent>
                 </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Profile Picture (Optional)</Label>
+              <ProfilePictureUpload
+                currentImageUrl={profilePictureUrl}
+                onImageChange={setProfilePictureUrl}
+                disabled={isLoading}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                You can always change this later in your account settings.
+              </p>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

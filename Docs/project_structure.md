@@ -16,6 +16,7 @@ hypertropher-app/
 │   │   │   └── signup/           # User registration
 │   │   ├── dishes/               # Dish CRUD operations
 │   │   ├── invite-codes/         # Invite code management
+│   │   ├── upload-profile-picture/ # Profile picture upload endpoint
 │   │   ├── users/                # User management
 │   │   └── wishlist/             # Wishlist management
 │   ├── complete-profile/         # User onboarding
@@ -45,6 +46,7 @@ hypertropher-app/
 │   │   ├── label.tsx             # Form labels
 │   │   ├── multi-select.tsx      # Multi-selection dropdown
 │   │   ├── popover.tsx           # Popover components
+│   │   ├── profile-picture-upload.tsx # Profile picture upload component
 │   │   ├── restaurant-search-input.tsx # Google Maps restaurant search component
 │   │   └── select.tsx            # Dropdown selection components
 │   ├── bottom-navigation.tsx     # Mobile navigation
