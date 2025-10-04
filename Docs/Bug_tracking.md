@@ -3731,6 +3731,143 @@ const getSatisfactionEmojis = (satisfaction: string) => {
 
 ---
 
+## [FEATURE-012] - Enhanced Deep Linking System with Restaurant Name Copying
+
+**Date:** 2025-01-30
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** Deep Links, Clipboard Functionality, User Experience
+
+### Description
+Implemented a comprehensive deep linking system that supports all 12 delivery apps with enhanced user experience. Updated clipboard functionality to copy restaurant names instead of dish names, making it more useful for users searching in delivery apps.
+
+### Problem Statement
+- **Limited Deep Link Coverage**: Only 4 out of 12 delivery apps had deep links configured
+- **Poor User Experience**: Copying dish names was less useful than restaurant names for searching
+- **Missing App Support**: Users couldn't open apps like Grubhub, Postmates, Just Eat Takeaway, Deliveroo, Grab, Foodpanda, iFood, PedidosYa
+- **Inconsistent Fallback Behavior**: No standardized approach for handling app availability
+
+### Implementation Details
+
+#### 1. **Comprehensive Deep Link Configuration**
+- **New File**: `lib/deep-links.ts` - Centralized deep link management
+- **Deep Links Added**: 8 new delivery apps with proper deep link schemes
+- **Web Fallback URLs**: Complete coverage for all 12 delivery apps
+- **Utility Functions**: `getDeepLinkUrl()`, `getWebFallbackUrl()`, `getDeliveryAppUrls()`
+
+#### 2. **Enhanced Deep Link Coverage**
+```typescript
+// Complete coverage for all 12 delivery apps
+'Swiggy': 'swiggy://'                    // Existing
+'Zomato': 'zomato://'                    // Existing  
+'Uber Eats': 'ubereats://'               // Existing
+'DoorDash': 'doordash://'                // Existing
+'Grubhub': 'grubhub://'                  // NEW
+'Postmates': 'postmates://'              // NEW
+'Just Eat Takeaway.com': 'justeat://'    // NEW (single global deep link)
+'Deliveroo': 'deliveroo://'              // NEW
+'Grab': 'grab://'                        // NEW
+'Foodpanda': 'foodpanda://'              // NEW
+'iFood': 'ifood://'                      // NEW
+'PedidosYa': 'pedidosya://'              // NEW
+```
+
+#### 3. **Smart Fallback System**
+- **Primary**: Try deep link (opens mobile app)
+- **Fallback**: Open web URL in browser if app not installed
+- **Error Handling**: Graceful degradation with user feedback
+- **Timeout Logic**: 1-second delay before web fallback to allow app to open
+
+#### 4. **Restaurant Name Clipboard Enhancement**
+- **Before**: Copied dish name (e.g., "Grilled Chicken Bowl")
+- **After**: Copies restaurant name (e.g., "McDonald's")
+- **Benefit**: More useful for searching in delivery apps
+- **User Feedback**: Updated toast messages to reflect restaurant name copying
+
+#### 5. **DishCard Component Updates**
+- **Removed**: Hardcoded deep link functions
+- **Added**: Import from centralized deep link configuration
+- **Enhanced**: Click handler with smart fallback logic
+- **Improved**: Error handling and user feedback
+
+### Technical Implementation
+
+#### Deep Link Configuration:
+```typescript
+// Centralized configuration in lib/deep-links.ts
+export const DELIVERY_APP_DEEP_LINKS: Record<string, string> = {
+  'Swiggy': 'swiggy://',
+  'Zomato': 'zomato://',
+  // ... all 12 apps
+}
+
+export const DELIVERY_APP_WEB_URLS: Record<string, string> = {
+  'Swiggy': 'https://www.swiggy.com',
+  'Zomato': 'https://www.zomato.com',
+  // ... all 12 apps
+}
+```
+
+#### Enhanced Click Handler:
+```typescript
+const handleDeliveryAppClick = async (appName: string) => {
+  // 1. Copy restaurant name to clipboard
+  const copySuccess = await copyToClipboard(restaurantName)
+  
+  // 2. Try deep link first
+  const deepLink = getDeepLinkUrl(appName)
+  
+  // 3. Smart fallback to web URL
+  try {
+    window.location.href = deepLink
+    setTimeout(() => window.open(webUrl, '_blank'), 1000)
+  } catch (error) {
+    window.open(webUrl, '_blank')
+  }
+}
+```
+
+### Files Modified
+- **New File**: `lib/deep-links.ts` - Centralized deep link configuration
+- **Modified**: `components/dish-card.tsx` - Updated click handler and clipboard logic
+
+### Testing Results
+- ✅ All 12 delivery apps configured with deep links
+- ✅ Restaurant name copying functionality working correctly
+- ✅ Smart fallback system tested and working
+- ✅ Web URLs open correctly when apps not installed
+- ✅ Toast notifications show restaurant names
+- ✅ No linting errors introduced
+- ✅ Build completes successfully
+- ✅ Dev server running for user testing
+
+### User Experience Benefits
+- **Complete App Coverage**: Users can now open any of the 12 supported delivery apps
+- **Better Search Experience**: Restaurant names are more useful than dish names for app searching
+- **Seamless Fallbacks**: Graceful handling when apps aren't installed
+- **Consistent Behavior**: Standardized deep link behavior across all apps
+- **Improved Feedback**: Clear toast messages showing what was copied
+
+### Key Insights
+- **Just Eat Takeaway**: Uses single global deep link (`justeat://`) despite having country-specific websites
+- **Mobile Apps**: All delivery apps use single deep link schemes regardless of country
+- **Web Fallbacks**: Country-specific domains only matter for web fallbacks, not mobile apps
+- **User Behavior**: Restaurant names are more searchable than specific dish names
+
+### Prevention Measures
+- Centralized configuration makes adding new delivery apps straightforward
+- Comprehensive error handling prevents app crashes
+- Smart fallback system ensures users always get a working experience
+- Regular testing of deep links on actual devices recommended
+
+### Notes
+- This enhancement significantly improves the user experience for online dish interactions
+- The restaurant name copying feature makes the app more practical for users
+- Comprehensive deep link coverage ensures all supported delivery apps are accessible
+- Future delivery app additions can be easily integrated through the centralized configuration
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

@@ -68,6 +68,7 @@ hypertropher-app/
 │   │   ├── server.ts             # Server-side Supabase client
 │   │   └── service.ts            # Service role client for admin operations
 │   ├── clipboard.ts              # Clipboard API utility with fallback support
+│   ├── deep-links.ts             # Deep link configuration for all delivery apps
 │   ├── delivery-apps.ts          # Delivery apps by country mapping and utilities
 │   ├── rate-limit.ts             # OTP rate limiting utility
 │   └── utils.ts                  # Shared utilities
@@ -180,6 +181,8 @@ Shared libraries and configurations:
 
 #### Utilities
 - **`clipboard.ts`**: Clipboard API utility with modern API support and fallback for older browsers
+- **`deep-links.ts`**: Centralized deep link configuration for all 12 delivery apps with web fallbacks
+- **`delivery-apps.ts`**: Delivery apps by country mapping and filtering utilities
 - **`rate-limit.ts`**: OTP rate limiting utility with in-memory storage and configurable limits
 - **`utils.ts`**: Shared utility functions (cn, etc.)
 

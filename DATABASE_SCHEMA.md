@@ -20,6 +20,9 @@ This document outlines the database schema for the Hypertropher application, bui
     - [`get_user_profile_by_id(user_id_input UUID)`](#get_user_profile_by_iduser_id_input-uuid)
   - [Custom Types](#custom-types)
     - [`availability_type` ENUM](#availability_type-enum)
+    - [`protein_rating_type` ENUM](#protein_rating_type-enum)
+    - [`taste_rating_type` ENUM](#taste_rating_type-enum)
+    - [`satisfaction_rating_type` ENUM](#satisfaction_rating_type-enum)
   - [Administrative Operations](#administrative-operations)
     - [Environment Configuration for Service Operations](#environment-configuration-for-service-operations)
 

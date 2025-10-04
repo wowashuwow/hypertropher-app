@@ -194,6 +194,15 @@
   - Update DishCard helper functions for new emoji display logic
   - Maintain database schema integrity with proper ENUM constraints
 
+- [x] Implement enhanced deep linking system with restaurant name copying
+  - Create comprehensive deep links configuration for all 12 delivery apps
+  - Add deep links for Grubhub, Postmates, Just Eat Takeaway, Deliveroo, Grab, Foodpanda, iFood, PedidosYa
+  - Update clipboard copy functionality from dish name to restaurant name
+  - Implement smart fallback system (deep link → web URL → error handling)
+  - Create centralized deep link management in lib/deep-links.ts
+  - Update DishCard component with enhanced click handler and user feedback
+  - Maintain existing functionality while adding comprehensive app coverage
+
 ### Stage 7: Polish & Deployment
 **Duration:** 2-3 days
 **Dependencies:** Stage 6 completion

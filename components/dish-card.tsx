@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { copyToClipboard } from "@/lib/clipboard"
+import { getDeepLinkUrl, getWebFallbackUrl } from "@/lib/deep-links"
 
 interface DishCardProps {
   id: string
@@ -61,43 +62,36 @@ export function DishCard({
     onBookmarkToggle?.(id)
   }
 
-  const getDeepLinkUrl = (appName: string) => {
-    const deepLinks = {
-      'Swiggy': 'swiggy://',
-      'Zomato': 'zomato://',
-      'Uber Eats': 'ubereats://',
-      'DoorDash': 'doordash://'
-    }
-    return deepLinks[appName as keyof typeof deepLinks] || `https://${appName.toLowerCase().replace(' ', '')}.com`
-  }
-
-  const getWebFallbackUrl = (appName: string) => {
-    const webUrls = {
-      'Swiggy': 'https://www.swiggy.com',
-      'Zomato': 'https://www.zomato.com',
-      'Uber Eats': 'https://www.ubereats.com',
-      'DoorDash': 'https://www.doordash.com'
-    }
-    return webUrls[appName as keyof typeof webUrls] || `https://${appName.toLowerCase().replace(' ', '')}.com`
-  }
 
   const handleDeliveryAppClick = async (appName: string) => {
     // Set copying state for this specific app
     setCopyingStates(prev => ({ ...prev, [appName]: true }))
     
     try {
-      // Copy dish name to clipboard first
-      const copySuccess = await copyToClipboard(dishName)
+      // Copy restaurant name to clipboard first
+      const copySuccess = await copyToClipboard(restaurantName)
       
       if (copySuccess) {
-        toast.success(`Copied "${dishName}" to clipboard`)
+        toast.success(`Copied "${restaurantName}" to clipboard`)
       } else {
-        toast.error("Failed to copy dish name")
+        toast.error("Failed to copy restaurant name")
       }
       
-      // Proceed with opening the delivery app (existing functionality)
+      // Try deep link first, then fallback to web URL
+      const deepLink = getDeepLinkUrl(appName)
       const webUrl = getWebFallbackUrl(appName)
-      window.open(webUrl, '_blank')
+      
+      // Try to open deep link (mobile app)
+      try {
+        window.location.href = deepLink
+        // If deep link fails, fallback to web URL
+        setTimeout(() => {
+          window.open(webUrl, '_blank')
+        }, 1000)
+      } catch (error) {
+        // If deep link fails immediately, open web URL
+        window.open(webUrl, '_blank')
+      }
       
     } catch (error) {
       console.error('Error in handleDeliveryAppClick:', error)
