@@ -2955,6 +2955,463 @@ Reordered the account settings page to improve user experience by prioritizing t
 
 ---
 
+## [BUG-016] - City Search Input Focus and Auto-Open Issues
+
+### Bug Details
+**Date:** 2024-12-19  
+**Severity:** Medium  
+**Status:** ✅ Resolved  
+**Component:** `components/ui/city-search-input.tsx`
+
+### Description
+Two bugs were identified in the city search functionality after implementing global city selection with Google Maps integration:
+
+1. **Auto-opening dropdown**: When navigating to account settings, the city search dropdown was automatically opening without user interaction
+2. **Input focus loss**: After typing each letter in the city search, the input was losing focus and requiring the user to click again to continue typing
+
+### Steps to Reproduce
+1. Navigate to account settings page from any other page
+2. Observe that city search dropdown opens automatically (Bug 1)
+3. Try typing in the city search input (e.g., "New Y")
+4. Observe that input loses focus after each character typed (Bug 2)
+
+### Expected Behavior
+1. Account settings navigation should show city input focused but dropdown closed
+2. Typing in city search should maintain focus and show suggestions without interruption
+3. City selection should work smoothly without focus issues
+
+### Actual Behavior
+1. City search dropdown opened automatically on page load
+2. Input lost focus after each keystroke, requiring repeated clicking
+3. Poor user experience with interrupted typing flow
+
+### Environment
+- **Frontend**: Next.js 14 with TypeScript
+- **Component**: CitySearchInput with Google Maps Places API
+- **Pages Affected**: Account settings, Complete profile
+- **Browser**: All modern browsers
+
+### Root Cause Analysis
+1. **Auto-opening dropdown**: 
+   - The `onFocus` handler was opening the dropdown whenever there were existing suggestions
+   - No check for user interaction before opening
+   - Component mounted with initial value, triggering search and suggestions
+
+2. **Input focus loss**:
+   - The `useEffect` had `searchCities` in its dependency array
+   - This caused component re-renders on every keystroke
+   - Re-renders caused input to lose focus during state updates
+
+### Resolution Steps
+1. **Added user interaction tracking**:
+   ```typescript
+   const [hasUserInteracted, setHasUserInteracted] = useState(false)
+   ```
+
+2. **Modified focus handler**:
+   ```typescript
+   onFocus={() => {
+     if (suggestions.length > 0 && hasUserInteracted) {
+       setIsOpen(true)
+     }
+   }}
+   ```
+
+3. **Updated input change handler**:
+   ```typescript
+   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     setQuery(e.target.value)
+     setHasUserInteracted(true) // Mark as user interaction
+     if (e.target.value !== value) {
+       onChange(e.target.value)
+     }
+   }
+   ```
+
+4. **Optimized useEffect dependencies**:
+   ```typescript
+   // Removed searchCities from dependencies to prevent re-renders
+   useEffect(() => {
+     // ... search logic
+   }, [query, hasUserInteracted]) // Removed searchCities
+   ```
+
+5. **Updated dropdown opening logic**:
+   ```typescript
+   setIsOpen(results.length > 0 && hasUserInteracted)
+   ```
+
+### Technical Implementation Details
+- **State Management**: Added `hasUserInteracted` boolean state
+- **Event Handling**: Modified focus and input change handlers
+- **Performance**: Removed unnecessary dependencies from useEffect
+- **User Experience**: Prevented auto-opening while preserving functionality
+
+### Testing Results
+- ✅ **Account settings navigation**: City input is focused but dropdown stays closed
+- ✅ **City search typing**: Input maintains focus while typing "New Y"
+- ✅ **City selection**: Dropdown opens and closes correctly when user interacts
+- ✅ **Complete profile page**: Same behavior as account settings
+- ✅ **Build verification**: No compilation errors or linting issues
+
+### Prevention Measures
+- Always track user interaction state for auto-opening components
+- Minimize useEffect dependencies to prevent unnecessary re-renders
+- Test focus behavior thoroughly in form components
+- Consider user interaction patterns when implementing dropdowns
+
+### Related Files
+- `components/ui/city-search-input.tsx` - Main component with fixes
+- `app/account/page.tsx` - Account settings page using component
+- `app/complete-profile/page.tsx` - Profile completion page using component
+
+### Notes
+- This fix improves user experience significantly
+- The solution is scalable and can be applied to similar components
+- Focus management is crucial for form usability
+- User interaction tracking prevents unwanted auto-behaviors
+
+---
+
+## [BUG-017] - Invalid City Selection Bug (Partial Input Being Saved)
+
+### Bug Details
+**Date:** 2024-12-19  
+**Severity:** High  
+**Status:** ✅ Resolved  
+**Component:** `components/ui/city-search-input.tsx`
+
+### Description
+The city search component was allowing invalid partial input (like "MU") to be saved as the user's city instead of requiring a valid selection from Google Places API suggestions. This resulted in invalid city values being stored in the database and displayed throughout the application.
+
+### Steps to Reproduce
+1. Navigate to account settings page
+2. In the city search input, type "MU" (partial input)
+3. Navigate away from the page (e.g., go to homepage)
+4. Observe that "MU" is now displayed as the selected city
+5. Return to account settings - input shows "MU" instead of a valid city
+
+### Expected Behavior
+1. User types "MU" → Input shows "MU" with suggestions, but parent state remains unchanged
+2. User must select a valid city from suggestions (e.g., "Mumbai, India")
+3. Only valid, selected cities should be saved to the database
+4. Partial input should never be persisted as the user's city
+
+### Actual Behavior
+1. User types "MU" → Parent state immediately updates to "MU" ❌
+2. User navigates away → Invalid city "MU" is saved to database ❌
+3. Application displays "MU" as the user's city throughout the app ❌
+
+### Environment
+- **Frontend**: Next.js 14 with TypeScript
+- **Component**: CitySearchInput with Google Places Places API
+- **Pages Affected**: Account settings, Complete profile, Homepage
+- **Database**: Supabase with user city storage
+- **Browser**: All modern browsers
+
+### Root Cause Analysis
+The issue was in the `handleInputChange` function in `city-search-input.tsx`:
+
+```typescript
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setQuery(e.target.value)
+  setHasUserInteracted(true)
+  if (e.target.value !== value) {
+    onChange(e.target.value) // ❌ PROBLEM: Updates parent on every keystroke
+  }
+}
+```
+
+**Root Cause**: The component was calling `onChange(e.target.value)` on every keystroke, immediately updating the parent component's state with whatever the user was typing, regardless of whether it was a valid city selection.
+
+### Resolution Steps
+1. **Modified `handleInputChange` function**:
+   ```typescript
+   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     setQuery(e.target.value)
+     setHasUserInteracted(true)
+     
+     // Only update parent state if input is completely cleared
+     if (e.target.value === '') {
+       onChange('') // Allow clearing the city
+     }
+     // Don't update parent state on every keystroke - only on valid selection
+   }
+   ```
+
+2. **Added state synchronization useEffect**:
+   ```typescript
+   // Sync internal query state with external value prop
+   useEffect(() => {
+     if (value !== query) {
+       setQuery(value)
+     }
+   }, [value]) // Only depend on value to prevent infinite loops
+   ```
+
+3. **Preserved existing functionality**:
+   - `handleCitySelect` still calls `onChange(city.city_country)` for valid selections
+   - Autocomplete suggestions still work normally
+   - City clearing functionality preserved
+
+### Technical Implementation Details
+- **State Management**: Separated internal typing state (`query`) from external confirmed state (`value`)
+- **Event Handling**: Only update parent state on valid selection or explicit clearing
+- **Synchronization**: Added useEffect to sync internal state with external prop changes
+- **User Experience**: Maintained all existing autocomplete and selection functionality
+
+### Testing Results
+- ✅ **Typing "MU"**: Input shows "MU", but parent state unchanged
+- ✅ **Selecting "Mumbai, India"**: Parent state updates to valid city
+- ✅ **Navigating away**: Only valid cities are saved
+- ✅ **Clearing input**: City is properly cleared
+- ✅ **Autocomplete**: Suggestions still work normally
+- ✅ **Page refresh**: Shows last valid city selection
+- ✅ **Build verification**: No compilation errors
+
+### Prevention Measures
+- Always separate internal typing state from external confirmed state in search components
+- Only update parent state on explicit user actions (selection, clearing)
+- Test partial input scenarios thoroughly
+- Validate that autocomplete functionality remains intact after state management changes
+
+### Related Files
+- `components/ui/city-search-input.tsx` - Main component with fix
+- `app/account/page.tsx` - Account settings page using component
+- `app/complete-profile/page.tsx` - Profile completion page using component
+- `app/page.tsx` - Homepage displaying user's city
+
+### Notes
+- This fix prevents invalid city data from being stored in the database
+- The solution maintains all existing functionality while fixing the core bug
+- State management separation is crucial for search components
+- User experience remains smooth with proper autocomplete functionality
+
+---
+
+## [BUG-018] - City Input Clear Error When Using Backspace
+
+### Bug Details
+**Date:** 2024-12-19  
+**Severity:** Medium  
+**Status:** ✅ Resolved  
+**Component:** `components/ui/city-search-input.tsx`
+
+### Description
+When the user completely deletes the city name using backspace in the city search input, an error message "Failed to update city: At least one field (name or city) is required." appears, and the city selection gets deselected. This prevents users from clearing the input to enter a new city name.
+
+### Steps to Reproduce
+1. Navigate to account settings page
+2. In the city search input, completely delete the current city name using backspace
+3. Observe the error message appearing
+4. Notice that the city selection gets deselected
+5. Try to enter a new city name
+
+### Expected Behavior
+1. User deletes city name with backspace → Input clears visually
+2. No error message should appear
+3. Previous valid city should remain selected until new one is chosen
+4. User can type new city name and select from suggestions
+5. No backend update should occur until valid selection is made
+
+### Actual Behavior
+1. User deletes city name with backspace → Error message appears ❌
+2. Backend update attempt fails with validation error ❌
+3. City selection gets deselected ❌
+4. Poor user experience when trying to change cities ❌
+
+### Environment
+- **Frontend**: Next.js 14 with TypeScript
+- **Component**: CitySearchInput with Google Maps Places API
+- **Backend**: Supabase with city validation
+- **Pages Affected**: Account settings, Complete profile
+- **Browser**: All modern browsers
+
+### Root Cause Analysis
+The issue was in the `handleInputChange` function in `city-search-input.tsx`:
+
+```typescript
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setQuery(e.target.value)
+  setHasUserInteracted(true)
+  
+  // Only update parent state if input is completely cleared
+  if (e.target.value === '') {
+    onChange('') // ❌ PROBLEM: Triggers backend update with empty string
+  }
+}
+```
+
+**Root Cause**: When the input was completely cleared (empty string), the component was calling `onChange('')`, which immediately triggered a backend update attempt with an empty string. The backend validation rejected this empty string, causing the error message.
+
+### Resolution Steps
+**Removed the problematic `onChange('')` call**:
+```typescript
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setQuery(e.target.value)
+  setHasUserInteracted(true)
+  
+  // Don't update parent state on input changes - only on valid selection
+  // Clearing input by backspace should not trigger backend update
+}
+```
+
+### Technical Implementation Details
+- **State Management**: Internal `query` state updates on typing, but parent `value` only updates on valid selection
+- **Event Handling**: Removed immediate parent state update on input clearing
+- **Backend Interaction**: No backend calls triggered by input clearing
+- **User Experience**: Smooth input clearing without errors
+
+### Testing Results
+- ✅ **Clearing input with backspace**: No error message appears
+- ✅ **Typing new city name**: Input works normally with suggestions
+- ✅ **Selecting from suggestions**: City updates correctly
+- ✅ **Previous city preservation**: Valid city remains until new selection
+- ✅ **Build verification**: No compilation errors
+
+### Prevention Measures
+- Never trigger backend updates on input clearing
+- Only update parent state on explicit valid selections
+- Test input clearing scenarios thoroughly
+- Ensure smooth user experience for city changes
+
+### Related Files
+- `components/ui/city-search-input.tsx` - Main component with fix
+- `app/account/page.tsx` - Account settings page using component
+- `app/complete-profile/page.tsx` - Profile completion page using component
+
+### Notes
+- This fix completes the city search input functionality
+- Users can now clear input to enter new cities without errors
+- The solution maintains all existing functionality while fixing the UX issue
+- Input clearing is now a smooth, error-free experience
+
+---
+
+## [BUG-019] - Dropdown Reappearing After City Selection
+
+### Bug Details
+**Date:** 2024-12-19  
+**Severity:** Low  
+**Status:** ✅ Resolved  
+**Component:** `components/ui/city-search-input.tsx`
+
+### Description
+After selecting a city from the dropdown, the dropdown would briefly disappear but then reappear along with the success toast message. This created a jarring user experience where the dropdown should remain closed after a selection.
+
+### Steps to Reproduce
+1. Navigate to account settings page
+2. Click on the city search input
+3. Type a city name (e.g., "Pune")
+4. Select a city from the dropdown suggestions
+5. Observe that dropdown briefly disappears then reappears
+6. Notice success toast appears alongside the reopened dropdown
+
+### Expected Behavior
+1. User selects city from dropdown → Dropdown closes immediately
+2. Success toast appears → Dropdown remains closed
+3. Clean, smooth user experience without dropdown flickering
+
+### Actual Behavior
+1. User selects city from dropdown → Dropdown closes briefly ❌
+2. Success toast appears → Dropdown reappears unexpectedly ❌
+3. Jarring user experience with dropdown flickering ❌
+
+### Environment
+- **Frontend**: Next.js 14 with TypeScript
+- **Component**: CitySearchInput with Google Maps Places API
+- **Pages Affected**: Account settings, Complete profile
+- **Browser**: All modern browsers
+
+### Root Cause Analysis
+The issue occurred due to the interaction between component state management and parent component re-rendering:
+
+1. **City Selection**: `handleCitySelect` called `setIsOpen(false)` to close dropdown
+2. **Parent Re-render**: `onChange` triggered parent state update and success toast
+3. **useEffect Re-run**: The debounced search `useEffect` re-ran after parent re-render
+4. **Dropdown Re-opening**: Since suggestions still existed for the selected city, `setIsOpen(true)` was called again
+
+**Root Cause**: The `useEffect` didn't know that a selection had just occurred, so it re-opened the dropdown when it found existing suggestions.
+
+### Resolution Steps
+1. **Added `selected` state tracking**:
+   ```typescript
+   const [selected, setSelected] = useState(false)
+   ```
+
+2. **Updated `handleCitySelect` function**:
+   ```typescript
+   const handleCitySelect = (city: CityResult) => {
+     setQuery(city.city_country)
+     onChange(city.city_country)
+     setIsOpen(false)
+     setSelected(true) // Mark that a city was just selected
+     setSuggestions([]) // Clear suggestions to prevent re-opening
+     setHasUserInteracted(false) // Reset interaction state
+   }
+   ```
+
+3. **Modified `useEffect` to respect selection state**:
+   ```typescript
+   useEffect(() => {
+     if (!query.trim() || query.length < 2) {
+       setSuggestions([])
+       setIsOpen(false)
+       setSelected(false)
+       return
+     }
+
+     // Don't re-open dropdown if a city was just selected
+     if (selected) {
+       setIsOpen(false)
+       return
+     }
+
+     // ... rest of search logic
+   }, [query, hasUserInteracted, selected])
+   ```
+
+4. **Reset selection state on new input**:
+   ```typescript
+   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     setQuery(e.target.value)
+     setHasUserInteracted(true)
+     setSelected(false) // Reset selected state when user starts typing
+   }
+   ```
+
+### Technical Implementation Details
+- **State Management**: Added `selected` boolean state to track recent selections
+- **Event Handling**: Prevent dropdown re-opening after selections
+- **User Experience**: Smooth dropdown behavior without flickering
+- **State Reset**: Proper state cleanup for new search sessions
+
+### Testing Results
+- ✅ **City selection**: Dropdown closes immediately and stays closed
+- ✅ **Success toast**: Appears without dropdown interference
+- ✅ **New searches**: Dropdown works normally when user starts typing again
+- ✅ **State management**: Proper cleanup and reset of selection state
+- ✅ **Build verification**: No compilation errors
+
+### Prevention Measures
+- Track selection state in search components
+- Prevent automatic re-opening after explicit selections
+- Clear suggestions after selections to prevent stale state
+- Test dropdown behavior thoroughly after selections
+
+### Related Files
+- `components/ui/city-search-input.tsx` - Main component with fix
+- `app/account/page.tsx` - Account settings page using component
+- `app/complete-profile/page.tsx` - Profile completion page using component
+
+### Notes
+- This fix completes the city search input functionality
+- Dropdown behavior is now smooth and predictable
+- The solution maintains all existing functionality while fixing the UX issue
+- State management is now robust for all user interaction scenarios
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

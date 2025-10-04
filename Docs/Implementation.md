@@ -154,6 +154,15 @@
   - Show default placeholder when no profile picture is set
   - Update user schema and Supabase storage integration
 
+- [ ] Implement global city selection with Google Maps integration
+  - Replace hardcoded city list with Google Maps Places API city search
+  - Allow users to select any city worldwide during signup and in account settings
+  - Store city in "City, Country" format to prevent ambiguity
+  - Update existing data from "Pune" to "Pune, India" format
+  - Create reusable CitySearchInput component with autocomplete
+  - Maintain existing API compatibility and dish filtering logic
+  - Add debounced search with loading states and error handling
+
 - [ ] Implement region-based delivery app filtering
   - Show only DoorDash and UberEats for US cities
   - Show only Swiggy and Zomato for India cities

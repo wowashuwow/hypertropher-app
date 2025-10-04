@@ -4,115 +4,12 @@ import { useState, useEffect } from "react"
 import { MainLayout } from "@/components/main-layout"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CitySearchInput } from "@/components/ui/city-search-input"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { useSession } from "@/lib/auth/session-provider"
 import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 import { toast } from "sonner"
 
-const cities = [
-  "Mumbai",
-  "Delhi",
-  "Bangalore",
-  "Pune",
-  "Chennai",
-  "Hyderabad",
-  "Kolkata",
-  "Ahmedabad",
-  "Jaipur",
-  "Lucknow",
-  "Surat",
-  "Kanpur",
-  "Nagpur",
-  "Indore",
-  "Thane",
-  "Bhopal",
-  "Visakhapatnam",
-  "Pimpri-Chinchwad",
-  "Patna",
-  "Vadodara",
-  "Ghaziabad",
-  "Ludhiana",
-  "Agra",
-  "Nashik",
-  "Faridabad",
-  "Meerut",
-  "Rajkot",
-  "Kalyan-Dombivli",
-  "Vasai-Virar",
-  "Varanasi",
-  "Srinagar",
-  "Aurangabad",
-  "Dhanbad",
-  "Amritsar",
-  "Navi Mumbai",
-  "Allahabad",
-  "Ranchi",
-  "Howrah",
-  "Coimbatore",
-  "Jabalpur",
-  "Gwalior",
-  "Vijayawada",
-  "Jodhpur",
-  "Madurai",
-  "Raipur",
-  "Kota",
-  "Guwahati",
-  "Chandigarh",
-  "Solapur",
-  "Hubli-Dharwad",
-  "Tiruchirappalli",
-  "Bareilly",
-  "Mysore",
-  "Tiruppur",
-  "Gurgaon",
-  "Aligarh",
-  "Jalandhar",
-  "Bhubaneswar",
-  "Salem",
-  "Warangal",
-  "Guntur",
-  "Bhiwandi",
-  "Saharanpur",
-  "Gorakhpur",
-  "Bikaner",
-  "Amravati",
-  "Noida",
-  "Jamshedpur",
-  "Bhilai Nagar",
-  "Cuttack",
-  "Firozabad",
-  "Kochi",
-  "Nellore",
-  "Bhavnagar",
-  "Dehradun",
-  "Durgapur",
-  "Asansol",
-  "Rourkela",
-  "Nanded",
-  "Kolhapur",
-  "Ajmer",
-  "Akola",
-  "Gulbarga",
-  "Jamnagar",
-  "Ujjain",
-  "Loni",
-  "Siliguri",
-  "Jhansi",
-  "Ulhasnagar",
-  "Jammu",
-  "Sangli-Miraj & Kupwad",
-  "Mangalore",
-  "Erode",
-  "Belgaum",
-  "Ambattur",
-  "Tirunelveli",
-  "Malegaon",
-  "Gaya",
-  "Jalgaon",
-  "Udaipur",
-  "Maheshtala",
-]
 
 interface InviteCode {
   code: string
@@ -243,22 +140,13 @@ export default function AccountPage() {
                   <p className="text-muted-foreground">Loading city...</p>
                 </div>
               ) : (
-                <Select 
-                  value={selectedCity} 
-                  onValueChange={handleCityChange}
+                <CitySearchInput
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  placeholder="Search for your city..."
                   disabled={updatingCity}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  className="w-full"
+                />
               )}
             </div>
 

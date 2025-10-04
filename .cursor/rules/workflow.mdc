@@ -70,9 +70,9 @@ Mark tasks complete only when:
 - **ALWAYS** document errors and solutions
 - **ALWAYS** follow the established workflow process
 - **ALWAYS** test functionality before presenting to user
+- - **NEVER** claim functionality is working without user confirmation
+- - **NEVER** mark bugs as "Resolved" without user verification
 - **NEVER** commit changes without user approval
-- **NEVER** mark bugs as "Resolved" without user verification
-- **NEVER** claim functionality is working without user confirmation
 - **NEVER** proceed to git commit before user manually verifies implementation
 
 ## Testing & Approval Workflow

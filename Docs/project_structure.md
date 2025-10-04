@@ -48,6 +48,7 @@ hypertropher-app/
 │   │   ├── popover.tsx           # Popover components
 │   │   ├── profile-picture-upload.tsx # Profile picture upload component
 │   │   ├── restaurant-search-input.tsx # Google Maps restaurant search component
+│   │   ├── city-search-input.tsx # Google Maps city search component
 │   │   └── select.tsx            # Dropdown selection components
 │   ├── bottom-navigation.tsx     # Mobile navigation
 │   ├── dish-card.tsx             # Dish display component

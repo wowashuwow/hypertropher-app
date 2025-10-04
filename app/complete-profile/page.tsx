@@ -6,13 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CitySearchInput } from "@/components/ui/city-search-input"
 import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 
-// NOTE: This is a simplified list. We can expand it later.
-const cities = [
-  "Mumbai", "Delhi", "Bangalore", "Pune", "Chennai", "Hyderabad", "Kolkata"
-];
 
 export default function CompleteProfilePage() {
   const [name, setName] = useState("");
@@ -96,18 +92,12 @@ export default function CompleteProfilePage() {
 
             <div className="space-y-2">
               <Label htmlFor="city-select">Your Primary City</Label>
-               <Select value={city} onValueChange={setCity} required>
-                  <SelectTrigger id="city-select">
-                    <SelectValue placeholder="Select your city" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+               <CitySearchInput
+                  value={city}
+                  onChange={setCity}
+                  placeholder="Search for your city..."
+                  className="w-full"
+                />
             </div>
 
             <div className="space-y-2">

@@ -19,6 +19,19 @@ export interface RestaurantResult {
   user_ratings_total?: number;
 }
 
+export interface CityResult {
+  place_id: string;
+  name: string;
+  formatted_address: string;
+  city_country: string; // Format: "City Name, Country"
+  geometry: {
+    location: {
+      lat: number;
+      lng: number;
+    };
+  };
+}
+
 export const useGooglePlaces = ({ userCity, userLocation }: UseGooglePlacesOptions) => {
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
   const [placesService, setPlacesService] = useState<google.maps.places.PlacesService | null>(null);
@@ -157,6 +170,59 @@ export const useGooglePlaces = ({ userCity, userLocation }: UseGooglePlacesOptio
     });
   }, [autocompleteService, userLocation, userCity]);
 
+  // Search cities using AutocompleteService
+  const searchCities = useCallback(async (query: string): Promise<CityResult[]> => {
+    console.log('🔍 Searching cities for:', query);
+    
+    if (!autocompleteService || !query.trim() || query.length < 2) {
+      console.log('❌ Autocomplete service not available or query too short');
+      return [];
+    }
+
+    return new Promise((resolve) => {
+      const request: google.maps.places.AutocompletionRequest = {
+        input: query,
+        types: ['(cities)'], // Restrict to cities only
+      };
+
+      console.log('📤 Sending city search request:', request);
+
+      autocompleteService.getPlacePredictions(request, (predictions, status) => {
+        console.log('📥 City search response:', { status, predictionsCount: predictions?.length || 0 });
+        
+        if (status === window.google?.maps?.places?.PlacesServiceStatus?.OK && predictions) {
+          console.log('✅ City search successful, got', predictions.length, 'predictions');
+          
+          const cities: CityResult[] = predictions.map(prediction => {
+            // Extract city and country from description
+            const parts = prediction.description.split(', ');
+            const cityName = parts[0];
+            const country = parts[parts.length - 1]; // Last part is usually country
+            const cityCountry = `${cityName}, ${country}`;
+            
+            return {
+              place_id: prediction.place_id,
+              name: cityName,
+              formatted_address: prediction.description,
+              city_country: cityCountry,
+              geometry: {
+                location: {
+                  lat: 0, // Will be filled by getPlaceDetails if needed
+                  lng: 0
+                }
+              }
+            };
+          });
+          
+          resolve(cities);
+        } else {
+          console.error('❌ City search failed:', status);
+          resolve([]);
+        }
+      });
+    });
+  }, [autocompleteService]);
+
   return {
     googleMapsLoaded,
     placesService,
@@ -165,5 +231,6 @@ export const useGooglePlaces = ({ userCity, userLocation }: UseGooglePlacesOptio
     error,
     searchRestaurants,
     getAutocompletePredictions,
+    searchCities,
   };
 };
