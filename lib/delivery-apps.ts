@@ -82,6 +82,34 @@ export function extractCountryFromCity(city: string): string | null {
 }
 
 /**
+ * Delivery app logo mapping
+ * Maps app names to their SVG logo paths
+ */
+export const DELIVERY_APP_LOGOS: Record<string, string> = {
+  "Swiggy": "/logos/swiggy.svg",
+  "Zomato": "/logos/zomato.svg",
+  "Uber Eats": "/logos/ubereats.svg",
+  "DoorDash": "/logos/doordash.svg",
+  "Grubhub": "/logos/grubhub.svg",
+  "Postmates": "/logos/postmates.svg",
+  "Just Eat Takeaway.com": "/logos/just-eat.svg",
+  "Deliveroo": "/logos/deliveroo.svg",
+  "Grab": "/logos/grab.svg",
+  "Foodpanda": "/logos/foodpanda.svg",
+  "iFood": "/logos/ifood.svg",
+  "PedidosYa": "/logos/pedidosya.svg",
+}
+
+/**
+ * Gets the logo path for a delivery app
+ * @param appName - Name of the delivery app
+ * @returns Path to the SVG logo or placeholder if not found
+ */
+export function getDeliveryAppLogo(appName: string): string {
+  return DELIVERY_APP_LOGOS[appName] || "/logos/placeholder.svg"
+}
+
+/**
  * Gets available delivery apps for a given city
  * @param city - City string in "City, Country" format
  * @returns Object with available apps, country, and hasApps flag

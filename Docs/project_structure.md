@@ -49,6 +49,7 @@ hypertropher-app/
 │   │   ├── profile-picture-upload.tsx # Profile picture upload component
 │   │   ├── restaurant-search-input.tsx # Google Maps restaurant search component
 │   │   ├── city-search-input.tsx # Google Maps city search component
+│   │   ├── delivery-app-pills.tsx # Delivery app selection pills component
 │   │   └── select.tsx            # Dropdown selection components
 │   ├── bottom-navigation.tsx     # Mobile navigation
 │   ├── dish-card.tsx             # Dish display component
@@ -158,6 +159,7 @@ Shadcn UI components for consistent design:
 - **`label.tsx`**: Form labels
 - **`multi-select.tsx`**: Multi-selection dropdown component
 - **`popover.tsx`**: Popover components
+- **`delivery-app-pills.tsx`**: Delivery app selection pills with SVG logos
 - **`select.tsx`**: Dropdown selection components
 
 ### `/lib` - Utilities and Configuration
@@ -190,7 +192,7 @@ Static files served directly:
 - **User Images**: Placeholder user avatars
 
 #### Logos (`/public/logos`)
-- **Delivery App Logos**: SVG logos for Swiggy, Zomato, DoorDash, Uber Eats
+- **Delivery App Logos**: SVG logos for Swiggy, Zomato, DoorDash, Uber Eats, Grubhub, Postmates, Just Eat, Deliveroo, Grab, Foodpanda, iFood, PedidosYa, and placeholder
 - **App Logos**: Application branding assets
 
 #### Icons

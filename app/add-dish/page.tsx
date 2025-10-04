@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 // import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MultiSelect } from "@/components/ui/multi-select"
+import { DeliveryAppPills } from "@/components/ui/delivery-app-pills"
 import { RestaurantSearchInput } from "@/components/ui/restaurant-search-input"
 import { useGeolocation } from "@/lib/hooks/use-geolocation"
 import { RestaurantResult } from "@/lib/hooks/use-google-places"
@@ -291,21 +291,12 @@ export default function AddDishPage() {
                 <>
                   <div className="space-y-2">
                     <Label>Delivery Apps *</Label>
-                    {hasApps ? (
-                      <MultiSelect
-                        options={availableApps.map(app => ({
-                          label: app,
-                          value: app
-                        }))}
-                        selected={deliveryApps}
-                        onChange={setDeliveryApps}
-                        placeholder="Select delivery apps..."
-                      />
-                    ) : (
-                      <div className="text-sm text-muted-foreground p-3 border rounded-lg bg-muted">
-                        No delivery apps available for {country || 'this location'}
-                      </div>
-                    )}
+                    <DeliveryAppPills
+                      availableApps={hasApps ? availableApps : []}
+                      selectedApps={deliveryApps}
+                      onSelectionChange={setDeliveryApps}
+                      disabled={!hasApps}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="onlineRestaurant">Restaurant Name</Label>

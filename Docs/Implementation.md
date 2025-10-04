@@ -174,6 +174,16 @@
   - Update both add dish and edit dish forms with dynamic filtering
   - Handle cases where no delivery apps are available for a location
 
+- [x] Implement delivery app pills UI with SVG logos
+  - Replace MultiSelect component with DeliveryAppPills component
+  - Create wrapping flex layout matching protein source pills pattern
+  - Add SVG logos for all delivery apps (Swiggy, Zomato, Uber Eats, DoorDash, Grubhub, Postmates, Just Eat, Deliveroo, Grab, Foodpanda, iFood, PedidosYa)
+  - Implement multi-select functionality with visual feedback
+  - Add logo mapping system in lib/delivery-apps.ts
+  - Update both add-dish and edit-dish pages with new component
+  - Maintain existing form validation and state management
+  - Handle empty states gracefully with appropriate messaging
+
 ### Stage 7: Polish & Deployment
 **Duration:** 2-3 days
 **Dependencies:** Stage 6 completion

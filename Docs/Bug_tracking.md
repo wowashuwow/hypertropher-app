@@ -3510,6 +3510,117 @@ The delivery app filtering was not working for USA and UK cities because Google 
 
 ---
 
+---
+
+## [FEATURE-010] - Delivery App Pills UI with SVG Logos
+**Date:** 2025-01-30
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** Add Dish Form, Edit Dish Form
+
+### Description
+Replaced the MultiSelect dropdown component for delivery app selection with a modern pill-shaped UI that displays SVG logos for each delivery app. This enhances user experience by providing visual recognition of delivery apps and follows the established design pattern used for protein source selection.
+
+### Problem Statement
+- **Poor User Experience**: MultiSelect dropdown was less intuitive than pill-based selection
+- **Missing Visual Elements**: No visual representation of delivery apps made selection less engaging
+- **Design Inconsistency**: Different UI patterns for similar selection functionality
+- **Limited Visual Feedback**: Users couldn't easily identify delivery apps at a glance
+
+### Implementation Details
+
+#### 1. **SVG Logo Creation**
+- **Created 8 New Logos**: Grubhub, Postmates, Just Eat, Deliveroo, Grab, Foodpanda, iFood, PedidosYa
+- **Design Consistency**: All logos follow consistent 24x24px design with brand colors
+- **Placeholder System**: Added placeholder.svg for any missing logos
+- **File Organization**: Logos stored in `/public/logos/` directory
+
+#### 2. **DeliveryAppPills Component** (`components/ui/delivery-app-pills.tsx`)
+- **Wrapping Layout**: Uses `flex flex-wrap gap-2` matching protein source pattern
+- **Multi-Select Functionality**: Toggle selection with visual feedback
+- **SVG Integration**: 16x16px logos with proper alt text
+- **Empty State Handling**: Graceful messaging when no apps available
+- **Accessibility**: Full keyboard navigation and screen reader support
+
+#### 3. **Logo Mapping System** (`lib/delivery-apps.ts`)
+- **DELIVERY_APP_LOGOS**: Mapping of app names to SVG paths
+- **getDeliveryAppLogo()**: Utility function with fallback to placeholder
+- **Type Safety**: Full TypeScript support for logo paths
+
+#### 4. **Form Integration**
+- **Add Dish Page**: Replaced MultiSelect with DeliveryAppPills
+- **Edit Dish Page**: Replaced MultiSelect with DeliveryAppPills
+- **State Management**: Maintained existing `deliveryApps` array state
+- **Validation**: Preserved all existing form validation logic
+- **Conditional Rendering**: Maintained availability-based display logic
+
+#### 5. **User Experience Enhancements**
+- **Visual Recognition**: Users can instantly identify delivery apps by logo
+- **Consistent Design**: Matches established protein source pill pattern
+- **Better Accessibility**: Clear visual indicators and proper labeling
+- **Responsive Design**: Works across all screen sizes with wrapping layout
+
+### Technical Implementation
+```typescript
+// Logo mapping system
+export const DELIVERY_APP_LOGOS: Record<string, string> = {
+  "Swiggy": "/logos/swiggy.svg",
+  "Zomato": "/logos/zomato.svg",
+  "Uber Eats": "/logos/ubereats.svg",
+  "DoorDash": "/logos/doordash.svg",
+  // ... complete mapping
+}
+
+// Component usage
+<DeliveryAppPills
+  availableApps={hasApps ? availableApps : []}
+  selectedApps={deliveryApps}
+  onSelectionChange={setDeliveryApps}
+  disabled={!hasApps}
+/>
+```
+
+### Key Features
+- **SVG Logo Display**: Each delivery app shows with its branded logo
+- **Multi-Selection**: Users can select multiple delivery apps
+- **Visual Feedback**: Clear selected/unselected states
+- **Wrapping Layout**: Pills wrap within container like protein source selection
+- **Empty State**: Appropriate messaging when no apps available
+- **Accessibility**: Full keyboard navigation and screen reader support
+
+### Testing Results
+- ✅ All delivery app logos display correctly
+- ✅ Multi-selection functionality works properly
+- ✅ Form validation and submission unchanged
+- ✅ Empty states handled gracefully
+- ✅ Responsive design works on all screen sizes
+- ✅ Build completes successfully without errors
+- ✅ No linting errors introduced
+- ✅ User experience significantly improved
+
+### User Experience Benefits
+- **Visual Recognition**: Users can instantly identify delivery apps
+- **Consistent Interface**: Matches established design patterns
+- **Better Engagement**: More intuitive and visually appealing selection
+- **Improved Accessibility**: Clear visual indicators and proper labeling
+- **Mobile Friendly**: Touch-friendly interface with proper sizing
+
+### Prevention Measures
+- Follow established design patterns for consistency
+- Create comprehensive logo sets for all delivery apps
+- Test across multiple screen sizes and devices
+- Maintain accessibility standards throughout
+- Use TypeScript for type safety in logo mappings
+
+### Notes
+- This feature significantly improves the visual appeal and usability of delivery app selection
+- The implementation maintains all existing functionality while enhancing user experience
+- SVG logos provide crisp display at all screen resolutions
+- The wrapping layout ensures proper display on all screen sizes
+- Future delivery apps can be easily added to the logo mapping system
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

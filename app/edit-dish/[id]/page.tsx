@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MultiSelect } from "@/components/ui/multi-select"
+import { DeliveryAppPills } from "@/components/ui/delivery-app-pills"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
 import { ArrowLeft, Save, X } from "lucide-react"
@@ -275,21 +275,12 @@ export default function EditDishPage() {
                 {availability === "Online" && (
                   <div className="space-y-2">
                     <Label>Delivery Apps *</Label>
-                    {hasApps ? (
-                      <MultiSelect
-                        options={availableApps.map(app => ({
-                          label: app,
-                          value: app
-                        }))}
-                        selected={deliveryApps}
-                        onChange={setDeliveryApps}
-                        placeholder="Select delivery apps..."
-                      />
-                    ) : (
-                      <div className="text-sm text-muted-foreground p-3 border rounded-lg bg-muted">
-                        No delivery apps available for {country || 'this location'}
-                      </div>
-                    )}
+                    <DeliveryAppPills
+                      availableApps={hasApps ? availableApps : []}
+                      selectedApps={deliveryApps}
+                      onSelectionChange={setDeliveryApps}
+                      disabled={!hasApps}
+                    />
                   </div>
                 )}
 
