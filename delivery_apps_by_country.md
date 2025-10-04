@@ -1,9 +1,9 @@
 | Country           | Major Food Delivery Apps                                                                                                      |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | India             | Swiggy, Zomato                                                                                                               |
-| United States     | Uber Eats, DoorDash, Grubhub, Postmates                                                                                      |
+| USA               | Uber Eats, DoorDash, Grubhub, Postmates                                                                                      |
 | Canada            | Uber Eats, DoorDash, Just Eat Takeaway.com                                                                                   |
-| United Kingdom    | Uber Eats, Just Eat Takeaway.com, Deliveroo, Grubhub (limited)                                                               |
+| UK                | Uber Eats, Just Eat Takeaway.com, Deliveroo, Grubhub (limited)                                                               |
 | Australia         | Uber Eats, Just Eat Takeaway.com, Deliveroo                                                                                  |
 | New Zealand       | Just Eat Takeaway.com, Deliveroo                                                                                             |
 | Ireland           | Just Eat Takeaway.com, Deliveroo                                                                                             |
