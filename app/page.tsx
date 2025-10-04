@@ -16,9 +16,9 @@ interface Dish {
   restaurant_name: string
   city: string
   price: string
-  protein: "💪 Overloaded" | "👍 Great"
-  taste: "🤤 Amazing" | "👍 Great"
-  satisfaction: "🤩 Would Eat Everyday" | "👍 Great"
+  protein: "Overloaded" | "Pretty Good"
+  taste: "Mouthgasm" | "Pretty Good"
+  satisfaction: "Would Eat Everyday" | "Pretty Good"
   comment?: string
   addedBy: string
   addedByProfilePicture?: string | null
@@ -88,9 +88,9 @@ export default function HomePage() {
           restaurant_name: dish.restaurant_name,
           city: dish.city,
           price: `₹${dish.price}`,
-          protein: dish.protein_content as "💪 Overloaded" | "👍 Great",
-          taste: dish.taste as "🤤 Amazing" | "👍 Great",
-          satisfaction: dish.satisfaction as "🤩 Would Eat Everyday" | "👍 Great",
+          protein: dish.protein_content,
+          taste: dish.taste,
+          satisfaction: dish.satisfaction,
           comment: dish.comment,
           addedBy: dish.users?.name || "Unknown",
           addedByProfilePicture: dish.users?.profile_picture_url || null,

@@ -20,9 +20,9 @@ interface Dish {
   restaurant_name: string
   city: string
   price: number
-  protein_content: "💪 Overloaded" | "👍 Great"
-  taste: "🤤 Amazing" | "👍 Great"
-  satisfaction: "🤩 Would Eat Everyday" | "👍 Great"
+  protein_content: "Overloaded" | "Pretty Good"
+  taste: "Mouthgasm" | "Pretty Good"
+  satisfaction: "Would Eat Everyday" | "Pretty Good"
   comment?: string
   availability: "In-Store" | "Online"
   protein_source: string
@@ -46,9 +46,9 @@ export default function EditDishPage() {
   const [restaurantName, setRestaurantName] = useState("")
   const [price, setPrice] = useState("")
   const [proteinSource, setProteinSource] = useState("")
-  const [protein, setProtein] = useState<"💪 Overloaded" | "👍 Great">("👍 Great")
-  const [taste, setTaste] = useState<"🤤 Amazing" | "👍 Great">("👍 Great")
-  const [satisfaction, setSatisfaction] = useState<"🤩 Would Eat Everyday" | "👍 Great">("👍 Great")
+  const [protein, setProtein] = useState<"Overloaded" | "Pretty Good">("Pretty Good")
+  const [taste, setTaste] = useState<"Mouthgasm" | "Pretty Good">("Pretty Good")
+  const [satisfaction, setSatisfaction] = useState<"Would Eat Everyday" | "Pretty Good">("Pretty Good")
   const [comment, setComment] = useState("")
   const [availability, setAvailability] = useState<"In-Store" | "Online">("In-Store")
   const [deliveryApps, setDeliveryApps] = useState<string[]>([])
@@ -342,9 +342,9 @@ export default function EditDishPage() {
                   <div className="space-y-2">
                     <Label>Taste</Label>
                     <ButtonGroup
-                      options={["🤤 Amazing", "👍 Great"]}
-                      value={taste}
-                      onChange={(value) => setTaste(value as typeof taste)}
+                      options={["🤤🤤🤤 Mouthgasm", "👍 Pretty Good"]}
+                      value={taste === "Mouthgasm" ? "🤤🤤🤤 Mouthgasm" : "👍 Pretty Good"}
+                      onChange={(value) => setTaste(value.replace(/^[^\s]+\s/, '') as typeof taste)}
                       name="taste"
                     />
                   </div>
@@ -352,9 +352,9 @@ export default function EditDishPage() {
                   <div className="space-y-2">
                     <Label>Protein Content</Label>
                     <ButtonGroup
-                      options={["💪 Overloaded", "👍 Great"]}
-                      value={protein}
-                      onChange={(value) => setProtein(value as typeof protein)}
+                      options={["💪💪💪 Overloaded", "👍 Pretty Good"]}
+                      value={protein === "Overloaded" ? "💪💪💪 Overloaded" : "👍 Pretty Good"}
+                      onChange={(value) => setProtein(value.replace(/^[^\s]+\s/, '') as typeof protein)}
                       name="protein"
                     />
                   </div>
@@ -376,9 +376,9 @@ export default function EditDishPage() {
                   <div className="space-y-2">
                     <Label>Overall Satisfaction</Label>
                     <ButtonGroup
-                      options={["🤩 Would Eat Everyday", "👍 Great"]}
-                      value={satisfaction}
-                      onChange={(value) => setSatisfaction(value as typeof satisfaction)}
+                      options={["🤩🤩🤩 Would Eat Everyday", "👍 Pretty Good"]}
+                      value={satisfaction === "Would Eat Everyday" ? "🤩🤩🤩 Would Eat Everyday" : "👍 Pretty Good"}
+                      onChange={(value) => setSatisfaction(value.replace(/^[^\s]+\s/, '') as typeof satisfaction)}
                       name="satisfaction"
                     />
                   </div>

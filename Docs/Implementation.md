@@ -154,7 +154,7 @@
   - Show default placeholder when no profile picture is set
   - Update user schema and Supabase storage integration
 
-- [ ] Implement global city selection with Google Maps integration
+- [x] Implement global city selection with Google Maps integration
   - Replace hardcoded city list with Google Maps Places API city search
   - Allow users to select any city worldwide during signup and in account settings
   - Store city in "City, Country" format to prevent ambiguity
@@ -183,6 +183,16 @@
   - Update both add-dish and edit-dish pages with new component
   - Maintain existing form validation and state management
   - Handle empty states gracefully with appropriate messaging
+
+- [x] Implement enhanced rating system with improved text and emoji display
+  - Update rating text values: "Great" → "Pretty Good", "Amazing" → "Mouthgasm"
+  - Implement new emoji display logic: "Pretty Good" → 👍, "Overloaded" → 💪💪💪, "Mouthgasm" → 🤤🤤🤤, "Would Eat Everyday" → 🤩🤩🤩
+  - Update database ENUM types to reflect new rating values
+  - Migrate existing data from old rating values to new ones
+  - Update all TypeScript interfaces across the application
+  - Modify form components to display emoji-prefixed options while storing clean text
+  - Update DishCard helper functions for new emoji display logic
+  - Maintain database schema integrity with proper ENUM constraints
 
 ### Stage 7: Polish & Deployment
 **Duration:** 2-3 days

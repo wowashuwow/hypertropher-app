@@ -13,9 +13,9 @@ interface Dish {
   restaurant_name: string
   city: string
   price: string
-  protein: "💪 Overloaded" | "👍 Great"
-  taste: "🤤 Amazing" | "👍 Great"
-  satisfaction: "🤩 Would Eat Everyday" | "👍 Great"
+  protein: "Overloaded" | "Pretty Good"
+  taste: "Mouthgasm" | "Pretty Good"
+  satisfaction: "Would Eat Everyday" | "Pretty Good"
   comment?: string
   addedBy: string
   availability: "In-Store" | "Online"

@@ -14,9 +14,9 @@ interface DishCardProps {
   city: string
   imageUrl?: string
   price: string
-  protein: "💪 Overloaded" | "👍 Great"
-  taste: "🤤 Amazing" | "👍 Great"
-  satisfaction?: "🤩 Would Eat Everyday" | "👍 Great"
+  protein: "Overloaded" | "Pretty Good"
+  taste: "Mouthgasm" | "Pretty Good"
+  satisfaction?: "Would Eat Everyday" | "Pretty Good"
   comment?: string
   addedBy: string
   addedByProfilePicture?: string | null
@@ -39,7 +39,7 @@ export function DishCard({
   price,
   protein,
   taste,
-  satisfaction = "👍 Great",
+  satisfaction = "Pretty Good",
   comment,
   addedBy,
   addedByProfilePicture,
@@ -115,16 +115,15 @@ export function DishCard({
   }
 
   const getProteinEmojis = (protein: string) => {
-    return protein === "Overloaded" ? "💪" : "👍"
+    return protein === "Overloaded" ? "💪💪💪" : "👍"
   }
 
   const getTasteEmojis = (taste: string) => {
-    return taste === "Amazing" ? "🤤" : "👍"
+    return taste === "Mouthgasm" ? "🤤🤤🤤" : "👍"
   }
 
   const getSatisfactionEmojis = (satisfaction: string) => {
-    const emojiMap = { "Would Eat Everyday": "🤩", Great: "👍" }
-    return emojiMap[satisfaction as keyof typeof emojiMap] || "👍"
+    return satisfaction === "Would Eat Everyday" ? "🤩🤩🤩" : "👍"
   }
 
 

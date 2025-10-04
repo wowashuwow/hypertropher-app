@@ -58,9 +58,9 @@ The core table containing all user-contributed dish information.
 | `image_url` | `TEXT` | | The URL of the dish photo stored in Supabase Storage. |
 | `price` | `NUMERIC` | Not Null | The price of the dish. |
 | `protein_source`| `TEXT` | Not Null | The primary protein source (e.g., "Chicken", "Paneer"). |
-| `taste` | `TEXT` | | User's rating for taste (e.g., "Amazing", "Great"). |
-| `protein_content`| `TEXT` | | User's rating for protein content (e.g., "Overloaded", "Great"). |
-| `satisfaction` | `TEXT` | | User's overall satisfaction rating (e.g., "Would Eat Everyday"). |
+| `taste` | `TEXT` | | User's rating for taste (e.g., "Mouthgasm", "Pretty Good"). |
+| `protein_content`| `TEXT` | | User's rating for protein content (e.g., "Overloaded", "Pretty Good"). |
+| `satisfaction` | `TEXT` | | User's overall satisfaction rating (e.g., "Would Eat Everyday", "Pretty Good"). |
 | `comment` | `TEXT` | Nullable | Optional user comments about the dish. |
 | `restaurant_address`| `TEXT` | Nullable | Full address of the restaurant (for in-store). |
 | `latitude` | `NUMERIC` | Nullable | Latitude for mapping. |
@@ -171,6 +171,33 @@ Defines the possible values for dish availability.
 - `'In-Store'` - Dish is available at physical restaurant locations
 
 **Usage:** Used by the `dishes.availability` column to ensure data consistency.
+
+### `protein_rating_type` ENUM
+Defines the possible values for protein content ratings.
+
+**Values:**
+- `'Overloaded'` - High protein content rating
+- `'Pretty Good'` - Standard protein content rating
+
+**Usage:** Used by the `dishes.protein_content` column to ensure data consistency.
+
+### `taste_rating_type` ENUM
+Defines the possible values for taste ratings.
+
+**Values:**
+- `'Mouthgasm'` - Exceptional taste rating
+- `'Pretty Good'` - Standard taste rating
+
+**Usage:** Used by the `dishes.taste` column to ensure data consistency.
+
+### `satisfaction_rating_type` ENUM
+Defines the possible values for overall satisfaction ratings.
+
+**Values:**
+- `'Would Eat Everyday'` - Highest satisfaction rating
+- `'Pretty Good'` - Standard satisfaction rating
+
+**Usage:** Used by the `dishes.satisfaction` column to ensure data consistency.
 
 ---
 

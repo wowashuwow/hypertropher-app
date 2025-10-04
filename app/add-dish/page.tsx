@@ -29,11 +29,11 @@ export default function AddDishPage() {
     "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other" | ""
   >("")
   const [photo, setPhoto] = useState<File | null>(null)
-  const [taste, setTaste] = useState<"🤤 Amazing" | "👍 Great" | "">("")
-  const [protein, setProtein] = useState<"💪 Overloaded" | "👍 Great" | "">("")
+  const [taste, setTaste] = useState<"Mouthgasm" | "Pretty Good" | "">("")
+  const [protein, setProtein] = useState<"Overloaded" | "Pretty Good" | "">("")
   const [price, setPrice] = useState<string>("")
   const [comment, setComment] = useState("")
-  const [satisfaction, setSatisfaction] = useState<"🤩 Would Eat Everyday" | "👍 Great" | "">("")
+  const [satisfaction, setSatisfaction] = useState<"Would Eat Everyday" | "Pretty Good" | "">("")
   const [isLoading, setIsLoading] = useState(false)
 
   // Geolocation hooks
@@ -142,9 +142,9 @@ export default function AddDishPage() {
       image_url: imageUrl,
       price: parseFloat(price),
       protein_source: proteinSource,
-      taste: taste.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
-      protein_content: protein.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
-      satisfaction: satisfaction.replace(/[^a-zA-Z\s]/g, '').trim(), // Cleans the string
+      taste: taste.replace(/^[^\s]+\s/, ''), // Remove emoji prefix, keep clean text
+      protein_content: protein.replace(/^[^\s]+\s/, ''), // Remove emoji prefix, keep clean text
+      satisfaction: satisfaction.replace(/^[^\s]+\s/, ''), // Remove emoji prefix, keep clean text
       comment,
       delivery_apps: sourceType === "Online" ? deliveryApps : [],
       restaurant_address: selectedRestaurant?.formatted_address || null,
@@ -365,9 +365,9 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Taste</Label>
                   <ButtonGroup
-                    options={["🤤 Amazing", "👍 Great"]}
-                    value={taste}
-                    onChange={(value) => setTaste(value as typeof taste)}
+                    options={["🤤🤤🤤 Mouthgasm", "👍 Pretty Good"]}
+                    value={taste === "Mouthgasm" ? "🤤🤤🤤 Mouthgasm" : taste === "Pretty Good" ? "👍 Pretty Good" : ""}
+                    onChange={(value) => setTaste(value.replace(/^[^\s]+\s/, '') as typeof taste)}
                     name="taste"
                   />
                 </div>
@@ -375,9 +375,9 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Protein Content</Label>
                   <ButtonGroup
-                    options={["💪 Overloaded", "👍 Great"]}
-                    value={protein}
-                    onChange={(value) => setProtein(value as typeof protein)}
+                    options={["💪💪💪 Overloaded", "👍 Pretty Good"]}
+                    value={protein === "Overloaded" ? "💪💪💪 Overloaded" : protein === "Pretty Good" ? "👍 Pretty Good" : ""}
+                    onChange={(value) => setProtein(value.replace(/^[^\s]+\s/, '') as typeof protein)}
                     name="protein"
                   />
                 </div>
@@ -397,9 +397,9 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Overall Satisfaction</Label>
                   <ButtonGroup
-                    options={["🤩 Would Eat Everyday", "👍 Great"]}
-                    value={satisfaction}
-                    onChange={(value) => setSatisfaction(value as typeof satisfaction)}
+                    options={["🤩🤩🤩 Would Eat Everyday", "👍 Pretty Good"]}
+                    value={satisfaction === "Would Eat Everyday" ? "🤩🤩🤩 Would Eat Everyday" : satisfaction === "Pretty Good" ? "👍 Pretty Good" : ""}
+                    onChange={(value) => setSatisfaction(value.replace(/^[^\s]+\s/, '') as typeof satisfaction)}
                     name="satisfaction"
                   />
                 </div>
