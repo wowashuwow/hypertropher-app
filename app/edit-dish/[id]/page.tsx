@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
 import { ArrowLeft, Save, X } from "lucide-react"
 
 interface Dish {
@@ -51,6 +52,10 @@ export default function EditDishPage() {
   const [comment, setComment] = useState("")
   const [availability, setAvailability] = useState<"In-Store" | "Online">("In-Store")
   const [deliveryApps, setDeliveryApps] = useState<string[]>([])
+  const [userCity, setUserCity] = useState("")
+
+  // Delivery apps filtering based on user's city
+  const { availableApps, country, hasApps } = useDeliveryAppsForCity(userCity || "")
 
   // Fetch dish data
   useEffect(() => {
@@ -98,6 +103,23 @@ export default function EditDishPage() {
       fetchDish()
     }
   }, [dishId, user])
+
+  // Fetch user's city for delivery app filtering
+  useEffect(() => {
+    const fetchUserCity = async () => {
+      try {
+        const response = await fetch('/api/users')
+        if (response.ok) {
+          const data = await response.json()
+          setUserCity(data.city || "")
+        }
+      } catch (error) {
+        console.error('Error fetching user city:', error)
+      }
+    }
+
+    fetchUserCity()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -253,17 +275,21 @@ export default function EditDishPage() {
                 {availability === "Online" && (
                   <div className="space-y-2">
                     <Label>Delivery Apps *</Label>
-                    <MultiSelect
-                      options={[
-                        { label: "Swiggy", value: "Swiggy" },
-                        { label: "Zomato", value: "Zomato" },
-                        { label: "Uber Eats", value: "Uber Eats" },
-                        { label: "DoorDash", value: "DoorDash" },
-                      ]}
-                      selected={deliveryApps}
-                      onChange={setDeliveryApps}
-                      placeholder="Select delivery apps..."
-                    />
+                    {hasApps ? (
+                      <MultiSelect
+                        options={availableApps.map(app => ({
+                          label: app,
+                          value: app
+                        }))}
+                        selected={deliveryApps}
+                        onChange={setDeliveryApps}
+                        placeholder="Select delivery apps..."
+                      />
+                    ) : (
+                      <div className="text-sm text-muted-foreground p-3 border rounded-lg bg-muted">
+                        No delivery apps available for {country || 'this location'}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -401,7 +427,7 @@ export default function EditDishPage() {
                   <Button
                     type="submit"
                     className="flex-1"
-                    disabled={saving || !dishName || !restaurantName || !price || !proteinSource || (availability === "Online" && deliveryApps.length === 0)}
+                    disabled={saving || !dishName || !restaurantName || !price || !proteinSource || (availability === "Online" && deliveryApps.length === 0) || (availability === "Online" && !hasApps)}
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {saving ? "Saving..." : "Save Changes"}

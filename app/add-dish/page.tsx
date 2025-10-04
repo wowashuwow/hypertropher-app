@@ -14,6 +14,7 @@ import { MultiSelect } from "@/components/ui/multi-select"
 import { RestaurantSearchInput } from "@/components/ui/restaurant-search-input"
 import { useGeolocation } from "@/lib/hooks/use-geolocation"
 import { RestaurantResult } from "@/lib/hooks/use-google-places"
+import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
 import { createClient } from "@/lib/supabase/client"
 
 export default function AddDishPage() {
@@ -45,6 +46,9 @@ export default function AddDishPage() {
     requestLocationPermission,
     checkGeolocationSupport,
   } = useGeolocation()
+
+  // Delivery apps filtering based on user's city
+  const { availableApps, country, hasApps } = useDeliveryAppsForCity(userCity || "")
 
   // Fetch user's profile data to get their selected city
   useEffect(() => {
@@ -91,6 +95,11 @@ export default function AddDishPage() {
     }
     if (sourceType === "Online" && deliveryApps.length === 0) {
       alert("At least one delivery app is required for online dishes.");
+      return;
+    }
+
+    if (sourceType === "Online" && !hasApps) {
+      alert("No delivery apps are available for your location");
       return;
     }
     if (sourceType === "In-Restaurant" && !restaurant) {
@@ -282,17 +291,21 @@ export default function AddDishPage() {
                 <>
                   <div className="space-y-2">
                     <Label>Delivery Apps *</Label>
-                    <MultiSelect
-                      options={[
-                        { label: "Swiggy", value: "Swiggy" },
-                        { label: "Zomato", value: "Zomato" },
-                        { label: "Uber Eats", value: "Uber Eats" },
-                        { label: "DoorDash", value: "DoorDash" },
-                      ]}
-                      selected={deliveryApps}
-                      onChange={setDeliveryApps}
-                      placeholder="Select delivery apps..."
-                    />
+                    {hasApps ? (
+                      <MultiSelect
+                        options={availableApps.map(app => ({
+                          label: app,
+                          value: app
+                        }))}
+                        selected={deliveryApps}
+                        onChange={setDeliveryApps}
+                        placeholder="Select delivery apps..."
+                      />
+                    ) : (
+                      <div className="text-sm text-muted-foreground p-3 border rounded-lg bg-muted">
+                        No delivery apps available for {country || 'this location'}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="onlineRestaurant">Restaurant Name</Label>
@@ -412,7 +425,7 @@ export default function AddDishPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource || !price || (sourceType === "Online" && deliveryApps.length === 0)}>
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource || !price || (sourceType === "Online" && deliveryApps.length === 0) || (sourceType === "Online" && !hasApps)}>
                 {isLoading ? "Submitting..." : "Submit Dish"}
               </Button>
             </form>

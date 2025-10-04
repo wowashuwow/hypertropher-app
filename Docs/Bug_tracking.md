@@ -3412,6 +3412,104 @@ The issue occurred due to the interaction between component state management and
 
 ---
 
+## [BUG-020] - Country Name Mismatch Between Google Maps and Delivery Apps Mapping
+
+### Bug Details
+**Date:** 2024-12-19  
+**Severity:** High  
+**Status:** ✅ Resolved  
+**Component:** `lib/delivery-apps.ts`
+
+### Description
+The delivery app filtering was not working for USA and UK cities because Google Maps API returns abbreviated country names ("USA", "UK") while our delivery apps mapping used full country names ("United States", "United Kingdom"). This caused cities like "New York, USA" and "London, UK" to show no delivery apps available, even though they should show relevant apps.
+
+### Steps to Reproduce
+1. Navigate to add dish form
+2. Select city from USA (e.g., "New York, USA")
+3. Choose "Online" availability
+4. Observe that no delivery apps are shown in the dropdown
+5. Repeat with UK city (e.g., "London, UK")
+
+### Expected Behavior
+1. USA cities should show US delivery apps: ["Uber Eats", "DoorDash", "Grubhub", "Postmates"]
+2. UK cities should show UK delivery apps: ["Uber Eats", "Just Eat Takeaway.com", "Deliveroo", "Grubhub"]
+3. Other countries should continue working as before
+
+### Actual Behavior
+1. USA cities showed no delivery apps available ❌
+2. UK cities showed no delivery apps available ❌
+3. Users couldn't add online dishes from these major markets ❌
+
+### Environment
+- **Frontend**: Next.js 14 with TypeScript
+- **Component**: Delivery app filtering logic
+- **API**: Google Maps Places API for city data
+- **Pages Affected**: Add dish form, Edit dish form
+- **Browser**: All modern browsers
+
+### Root Cause Analysis
+**Google Maps API Country Names vs Our Mapping:**
+- **Google Maps Returns**: "New York, USA", "London, UK"
+- **Our Mapping Used**: "United States", "United Kingdom"
+- **Country Extraction**: "USA" and "UK" were not found in our mapping
+- **Result**: No delivery apps shown for these countries
+
+**Root Cause**: Mismatch between Google Maps API country naming convention and our delivery apps mapping.
+
+### Resolution Steps
+**Updated delivery apps mapping to match Google Maps country names:**
+
+1. **Changed "United States" to "USA"**:
+   ```typescript
+   // Before:
+   "United States": ["Uber Eats", "DoorDash", "Grubhub", "Postmates"]
+   
+   // After:
+   "USA": ["Uber Eats", "DoorDash", "Grubhub", "Postmates"]
+   ```
+
+2. **Changed "United Kingdom" to "UK"**:
+   ```typescript
+   // Before:
+   "United Kingdom": ["Uber Eats", "Just Eat Takeaway.com", "Deliveroo", "Grubhub"]
+   
+   // After:
+   "UK": ["Uber Eats", "Just Eat Takeaway.com", "Deliveroo", "Grubhub"]
+   ```
+
+### Technical Implementation Details
+- **Simple Fix**: Updated country keys in `DELIVERY_APPS_BY_COUNTRY` mapping
+- **No Code Changes**: Only data mapping changes, no logic modifications
+- **Backward Compatible**: All existing functionality preserved
+- **Performance**: No impact on performance
+
+### Testing Results
+- ✅ **"New York, USA"**: Now shows US delivery apps correctly
+- ✅ **"London, UK"**: Now shows UK delivery apps correctly
+- ✅ **"Mumbai, India"**: Still works correctly
+- ✅ **"Tokyo, Japan"**: Still works correctly
+- ✅ **Unknown countries**: Still return no apps appropriately
+- ✅ **Build verification**: No compilation errors
+
+### Prevention Measures
+- Test delivery app filtering with major cities from each country
+- Verify Google Maps API returns match our country mapping
+- Consider adding tests for country name extraction
+- Monitor user feedback for delivery app availability issues
+
+### Related Files
+- `lib/delivery-apps.ts` - Main delivery apps mapping with country names
+- `app/add-dish/page.tsx` - Add dish form using delivery app filtering
+- `app/edit-dish/[id]/page.tsx` - Edit dish form using delivery app filtering
+
+### Notes
+- This fix resolves the most common delivery app filtering issues
+- Simple approach chosen over complex alias mapping system
+- Future country name mismatches can be fixed with similar simple updates
+- No impact on existing functionality or performance
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

@@ -59,6 +59,7 @@ hypertropher-app/
 │   │   ├── route-protection.tsx  # Route protection component
 │   │   └── session-provider.tsx  # Session context provider
 │   ├── hooks/                    # Custom React hooks
+│   │   ├── use-delivery-apps.ts  # Delivery app filtering hook
 │   │   ├── use-geolocation.ts    # Location permission and user location
 │   │   └── use-google-places.ts  # Google Places API service integration
 │   ├── supabase/                 # Supabase client configurations
@@ -66,6 +67,7 @@ hypertropher-app/
 │   │   ├── server.ts             # Server-side Supabase client
 │   │   └── service.ts            # Service role client for admin operations
 │   ├── clipboard.ts              # Clipboard API utility with fallback support
+│   ├── delivery-apps.ts          # Delivery apps by country mapping and utilities
 │   ├── rate-limit.ts             # OTP rate limiting utility
 │   └── utils.ts                  # Shared utilities
 ├── public/                       # Static assets
@@ -94,6 +96,7 @@ hypertropher-app/
 ├── .cursor/                      # Cursor IDE rules
 ├── components.json               # Shadcn UI configuration
 ├── DATABASE_SCHEMA.md            # Database design documentation
+├── delivery_apps_by_country.md   # Delivery apps available by country
 ├── next-env.d.ts                 # Next.js TypeScript definitions
 ├── next.config.mjs               # Next.js configuration
 ├── package.json                  # Dependencies and scripts

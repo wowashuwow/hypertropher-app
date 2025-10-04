@@ -163,11 +163,16 @@
   - Maintain existing API compatibility and dish filtering logic
   - Add debounced search with loading states and error handling
 
-- [ ] Implement region-based delivery app filtering
+- [x] Implement region-based delivery app filtering
   - Show only DoorDash and UberEats for US cities
   - Show only Swiggy and Zomato for India cities
   - Update add dish form delivery app options based on selected city
   - Maintain existing multi-select functionality
+  - Create delivery apps by country mapping from delivery_apps_by_country.md
+  - Implement country extraction utility from "City, Country" format
+  - Create useDeliveryAppsForCity hook for filtering logic
+  - Update both add dish and edit dish forms with dynamic filtering
+  - Handle cases where no delivery apps are available for a location
 
 ### Stage 7: Polish & Deployment
 **Duration:** 2-3 days
