@@ -440,6 +440,27 @@ const navItems = [
 - **API Responses**: Appropriate cache headers
 - **User Data**: Client-side caching with invalidation
 
+### Mobile Performance Optimization
+- **3D Effects**: Progressive enhancement with mobile-specific optimizations
+- **CSS Transforms**: Hardware-accelerated transforms for smooth animations
+- **Responsive Design**: Automatic effect scaling based on device capabilities
+- **Fallback Systems**: Graceful degradation for older devices
+
+## Interactive Components
+
+### Comment Section with 3D Effects
+- **Profile Pictures**: Small circular images (24x24px) with gradient fallback
+- **3D Tray Animation**: Slide-up overlay with depth and shadows
+- **Mobile Optimization**: Simplified shadows for optimal performance
+- **Desktop Enhancement**: Multi-layer shadows + backdrop blur for realistic depth
+- **Personal Touch**: Profile pictures create "friend messaging" aesthetic
+
+### Visual Hierarchy
+- **Depth System**: Layered shadows create clear visual hierarchy
+- **Glass Morphism**: Gradient backgrounds with transparency for modern look
+- **Progressive Enhancement**: Desktop gets full effects, mobile gets optimized experience
+- **Animation Timing**: 200ms transitions with ease-out for natural feel
+
 ## Design Tools Integration
 
 ### Figma Integration

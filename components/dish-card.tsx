@@ -302,10 +302,13 @@ export function DishCard({
         )}
       </div>
       
-      {/* Comment Overlay Tray - Slides up from bottom */}
+      {/* Comment Overlay Tray - Slides up from bottom with 3D effects */}
       {comment && comment.trim().length > 0 && (
         <div className={cn(
-          "absolute bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg transition-transform duration-200 ease-out z-10",
+          "absolute bottom-0 left-0 right-0 bg-gradient-to-b from-background/95 to-background/98 border-t border-border transition-all duration-200 ease-out z-10",
+          // Apply custom 3D effects class
+          "comment-tray-3d",
+          // Animation states
           isExpanded 
             ? "translate-y-0" 
             : "translate-y-full"
@@ -321,10 +324,37 @@ export function DishCard({
             </button>
           </div>
           <div className="px-4 pb-4">
-            <div className="bg-card rounded-lg p-3 shadow-sm">
-              <p className="text-sm text-foreground leading-relaxed">
-                {comment}
-              </p>
+            <div className="bg-card rounded-lg p-3 shadow-sm relative">
+              {/* Profile picture positioned absolutely at top-left */}
+              <div className="absolute -top-2 -left-2">
+                {addedByProfilePicture ? (
+                  <img 
+                    src={addedByProfilePicture} 
+                    alt={`${addedBy}'s profile`}
+                    className="w-6 h-6 rounded-full object-cover border-2 border-background shadow-sm"
+                    onError={(e) => {
+                      // Fallback to initials if image fails to load
+                      e.currentTarget.style.display = 'none'
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                      if (fallback) fallback.style.display = 'flex'
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-background shadow-sm ${
+                    addedByProfilePicture ? 'hidden' : ''
+                  }`}
+                >
+                  <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
+                </div>
+              </div>
+              
+              {/* Comment text with left padding to accommodate profile picture */}
+              <div className="pl-4">
+                <p className="text-sm text-foreground leading-relaxed">
+                  {comment}
+                </p>
+              </div>
             </div>
           </div>
         </div>

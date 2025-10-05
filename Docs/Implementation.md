@@ -232,6 +232,12 @@
   - ✅ Comment tray slides up from bottom edge of card and covers content behind it
   - ✅ Proper arrow directions: upward arrow when closed, downward arrow when open
   - ✅ Fast, consistent animations (200ms) for both opening and closing
+  - ✅ Added profile pictures to comment bubbles for personal touch (using existing RPC data)
+  - ✅ Implemented mobile-optimized 3D visual effects with progressive enhancement
+  - ✅ Desktop: Enhanced shadows + backdrop blur for realistic depth
+  - ✅ Mobile: Simplified shadows for optimal performance
+  - ✅ Gradient background with transparency for modern glass-like effect
+  - ✅ Profile picture fallback system with gradient initials
 - [ ] **UI/UX Modernization Phase 3**: Add basic page transition animations
   - Implement smooth page transitions between Discover → Add Dish → My Dishes
   - Add subtle animations for improved user experience

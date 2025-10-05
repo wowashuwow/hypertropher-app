@@ -182,7 +182,32 @@
     scrollbar-width: none; /* Firefox */
   }
 
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+         .scrollbar-hide::-webkit-scrollbar {
+           display: none; /* Chrome, Safari, Opera */
+         }
+
+         /* 3D Comment Tray Effects */
+         .comment-tray-3d {
+           /* Enhanced shadow system for desktop */
+           box-shadow: 
+             0 4px 6px -1px rgba(0, 0, 0, 0.1),
+             0 10px 15px -3px rgba(0, 0, 0, 0.1),
+             0 20px 25px -5px rgba(0, 0, 0, 0.04),
+             0 0 0 1px rgba(0, 0, 0, 0.05);
+         }
+
+         /* Mobile-optimized shadows */
+         @media (max-width: 767px) {
+           .comment-tray-3d {
+             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+           }
+         }
+
+         /* Desktop 3D effects */
+         @media (min-width: 768px) {
+           .comment-tray-3d {
+             backdrop-filter: blur(2px);
+             -webkit-backdrop-filter: blur(2px);
+           }
   }
 }

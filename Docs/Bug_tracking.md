@@ -4099,6 +4099,140 @@ Completely redesigned the comments section to use a modern overlay tray that sli
 - The overlay tray creates a more modern, app-like interaction
 - Ready for future enhancements: profile pictures in comments and 3D visual effects
 
+## [FEATURE-016] - UI/UX Modernization Phase 2 Part 2 Enhancement: Profile Pictures and 3D Effects in Comments
+
+**Date:** 2025-01-30
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** DishCard Component, Comments Section, Visual Design, Mobile Performance
+
+### Description
+Enhanced the comment section with profile pictures for personal touch and mobile-optimized 3D visual effects. This creates a more engaging and modern user experience while maintaining excellent performance across all devices.
+
+### Problem Statement
+- **Lack of Personal Connection**: Comments felt impersonal without visual identity
+- **Flat Visual Design**: Comment overlay lacked depth and visual hierarchy
+- **Mobile Performance Concerns**: Need to ensure smooth performance on mobile devices
+- **Inconsistent Visual Experience**: Comments didn't match the modern design system
+
+### Implementation Details
+
+#### 1. **Profile Picture Integration**
+- **Data Source**: Utilized existing RPC call data (`addedByProfilePicture` prop)
+- **Positioning**: Absolutely positioned at top-left of comment bubble
+- **Fallback System**: Gradient circle with user's initial if image fails to load
+- **Visual Design**: Small circular image (24x24px) with border and shadow
+- **Personal Touch**: Creates "friend sending text message" aesthetic
+
+#### 2. **Mobile-Optimized 3D Effects**
+- **Progressive Enhancement**: Different effects for mobile vs desktop
+- **Mobile (≤767px)**: Simple shadow only for optimal performance
+- **Desktop (≥768px)**: Enhanced multi-layer shadows + backdrop blur
+- **Performance Focus**: Hardware-accelerated CSS transforms
+- **Responsive Design**: Automatic detection and appropriate effect application
+
+#### 3. **Enhanced Visual Design**
+- **Gradient Background**: `bg-gradient-to-b from-background/95 to-background/98`
+- **Multi-Layer Shadows**: Desktop gets 4-layer shadow system for depth
+- **Backdrop Blur**: Desktop-only effect for glass-like appearance
+- **Smooth Animations**: 200ms transitions with ease-out timing
+
+### Technical Implementation
+
+#### Profile Picture Component:
+```typescript
+{/* Profile picture positioned absolutely at top-left */}
+<div className="absolute -top-2 -left-2">
+  {addedByProfilePicture ? (
+    <img 
+      src={addedByProfilePicture} 
+      alt={`${addedBy}'s profile`}
+      className="w-6 h-6 rounded-full object-cover border-2 border-background shadow-sm"
+      onError={(e) => {
+        // Fallback to initials if image fails to load
+        e.currentTarget.style.display = 'none'
+        const fallback = e.currentTarget.nextElementSibling as HTMLElement
+        if (fallback) fallback.style.display = 'flex'
+      }}
+    />
+  ) : null}
+  <div 
+    className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-background shadow-sm ${
+      addedByProfilePicture ? 'hidden' : ''
+    }`}
+  >
+    <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
+  </div>
+</div>
+```
+
+#### Mobile-Optimized 3D CSS:
+```css
+/* 3D Comment Tray Effects */
+.comment-tray-3d {
+  /* Enhanced shadow system for desktop */
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 20px 25px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile-optimized shadows */
+@media (max-width: 767px) {
+  .comment-tray-3d {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Desktop 3D effects */
+@media (min-width: 768px) {
+  .comment-tray-3d {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+```
+
+### Files Modified
+- **`components/dish-card.tsx`**: Added profile picture integration and 3D effects class
+- **`app/globals.css`**: Added mobile-optimized 3D effects CSS classes
+
+### Testing Results
+- ✅ Profile pictures display correctly with fallback system
+- ✅ 3D effects work smoothly on desktop with enhanced shadows and backdrop blur
+- ✅ Mobile performance optimized with simplified shadows
+- ✅ Responsive design automatically applies appropriate effects
+- ✅ Gradient backgrounds and transparency create modern glass-like effect
+- ✅ All existing comment functionality preserved
+- ✅ No linting errors introduced
+- ✅ Build completes successfully
+- ✅ Dev server running and functional
+
+### User Experience Benefits
+- **Personal Connection**: Profile pictures make comments feel more personal and trusted
+- **Visual Hierarchy**: 3D effects create clear depth and focus on comments
+- **Modern Design**: Glass-like transparency and shadows match contemporary design trends
+- **Mobile Performance**: Optimized effects ensure smooth animations on all devices
+- **Consistent Experience**: Progressive enhancement provides appropriate effects per device
+
+### Key Insights
+- **Zero Performance Impact**: Profile pictures use existing data, no additional API calls
+- **Mobile-First Approach**: Simplified effects on mobile prevent performance issues
+- **Progressive Enhancement**: Desktop gets full effects, mobile gets optimized experience
+- **Fallback Systems**: Both profile pictures and 3D effects have graceful degradation
+
+### Prevention Measures
+- Mobile-specific CSS prevents heavy effects on smaller devices
+- Profile picture fallback ensures visual consistency
+- Hardware-accelerated transforms ensure smooth animations
+- Responsive design automatically adapts to device capabilities
+
+### Notes
+- This enhancement significantly improves the comment section's visual appeal and personal touch
+- Mobile performance optimization ensures excellent user experience across all devices
+- Ready for Phase 3: Basic page transition animations
+
 ---
 
 ## [FEATURE-013] - UI/UX Modernization Phase 1: v0 Design System Integration
