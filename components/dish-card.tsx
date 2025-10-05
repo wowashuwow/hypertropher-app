@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bookmark, Link, MapPin, ChevronDown, Edit, Trash2 } from "lucide-react"
+import { Bookmark, Link, MapPin, ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -286,25 +286,46 @@ export function DishCard({
           </div>
         )}
         
-        {/* Minimal expand button for comments */}
+        {/* Modern expand button for comments */}
         {comment && comment.trim().length > 0 && (
           <button
             onClick={toggleExpanded}
-            className="w-full flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-200 border border-transparent hover:border-border"
           >
             <span>{isExpanded ? "Hide" : "Show"} comment</span>
-            <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", isExpanded && "rotate-180")} />
+            {isExpanded ? (
+              <ChevronDown className="w-4 h-4 transition-transform duration-200" />
+            ) : (
+              <ChevronUp className="w-4 h-4 transition-transform duration-200" />
+            )}
           </button>
         )}
       </div>
       
-      {/* Expandable Comment Section */}
-      {comment && comment.trim().length > 0 && isExpanded && (
-        <div className="border-t border-border bg-muted/20 px-4 py-3">
-          <div className="bg-background rounded-lg p-3 shadow-sm">
-            <p className="text-sm text-foreground leading-relaxed">
-              {comment}
-            </p>
+      {/* Comment Overlay Tray - Slides up from bottom */}
+      {comment && comment.trim().length > 0 && (
+        <div className={cn(
+          "absolute bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg transition-transform duration-200 ease-out z-10",
+          isExpanded 
+            ? "translate-y-0" 
+            : "translate-y-full"
+        )}>
+          {/* Close button inside overlay */}
+          <div className="px-4 pt-4">
+            <button
+              onClick={toggleExpanded}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-200 border border-transparent hover:border-border"
+            >
+              <span>Close comment</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="px-4 pb-4">
+            <div className="bg-card rounded-lg p-3 shadow-sm">
+              <p className="text-sm text-foreground leading-relaxed">
+                {comment}
+              </p>
+            </div>
           </div>
         </div>
       )}

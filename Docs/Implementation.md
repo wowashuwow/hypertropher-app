@@ -223,11 +223,15 @@
   - ✅ Maintained all existing functionality (deep linking, clipboard, button states)
   - ✅ Enhanced button layout with proper icon alignment and text truncation
   - ✅ All 12 delivery apps now show their respective SVG logos (Swiggy, Zomato, Uber Eats, etc.)
-- [ ] **UI/UX Modernization Phase 2 - Part 2**: Modernize comments section
-  - Modernize comments section button design to match design system
-  - Implement slide-up animation for comments (instead of slide-down)
-  - Create modern, sleek comment expansion interaction
-  - Maintain existing comment functionality while improving visual experience
+- [x] **UI/UX Modernization Phase 2 - Part 2**: Modernize comments section
+  - ✅ Modernized comments section button design to match design system
+  - ✅ Implemented slide-up animation for comments as overlay tray (instead of inline expansion)
+  - ✅ Created modern, sleek comment overlay interaction with proper arrow directions
+  - ✅ Added consistent "Close comment" button styling matching "Show comment" button
+  - ✅ Maintained all existing comment functionality while improving visual experience
+  - ✅ Comment tray slides up from bottom edge of card and covers content behind it
+  - ✅ Proper arrow directions: upward arrow when closed, downward arrow when open
+  - ✅ Fast, consistent animations (200ms) for both opening and closing
 - [ ] **UI/UX Modernization Phase 3**: Add basic page transition animations
   - Implement smooth page transitions between Discover → Add Dish → My Dishes
   - Add subtle animations for improved user experience

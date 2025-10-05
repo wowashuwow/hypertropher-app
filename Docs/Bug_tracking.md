@@ -3980,6 +3980,127 @@ Enhanced delivery app buttons in dish cards by adding app-specific SVG icons for
 
 ---
 
+## [FEATURE-015] - UI/UX Modernization Phase 2 Part 2: Comment Overlay Tray with 3D-Style Animation
+
+**Date:** 2025-01-30
+**Status:** ✅ Resolved
+**Priority:** Medium
+**Component:** DishCard Component, Comments Section, Animation System
+
+### Description
+Completely redesigned the comments section to use a modern overlay tray that slides up from the bottom of the dish card, creating a more engaging and intuitive user experience. The implementation includes proper arrow directions, consistent button styling, and smooth animations.
+
+### Problem Statement
+- **Poor UX Design**: Comments expanded inline, pushing content down and disrupting the card layout
+- **Inconsistent Styling**: Comment buttons lacked visual consistency with the design system
+- **Wrong Arrow Directions**: Arrow directions didn't match the intended interaction behavior
+- **Missing Close Button**: No clear way to close the comment overlay
+- **Slow Animations**: Inconsistent and slow animation speeds
+
+### Implementation Details
+
+#### 1. **Overlay Tray System**
+- **Position**: Comment tray now appears as an absolute overlay on top of the dish card
+- **Animation**: Slides up from bottom edge using `translate-y-full` to `translate-y-0`
+- **Z-Index**: Uses `z-10` to appear above card content
+- **Coverage**: Tray covers content behind it, creating proper overlay behavior
+
+#### 2. **Correct Arrow Directions**
+- **When Closed**: "Show comment" button displays upward arrow (ChevronUp) indicating upward slide
+- **When Open**: "Hide comment" button displays downward arrow (ChevronDown) indicating downward slide
+- **Logic**: Conditional rendering based on `isExpanded` state
+
+#### 3. **Consistent Button Styling**
+- **Show Comment Button**: Modern styling with hover effects and proper spacing
+- **Close Comment Button**: Identical styling to maintain visual consistency
+- **Text Labels**: Clear "Show comment" and "Close comment" labels with appropriate arrows
+- **Hover Effects**: Consistent hover states across both buttons
+
+#### 4. **Fast, Consistent Animations**
+- **Duration**: 200ms for both opening and closing animations
+- **Easing**: `ease-out` for natural motion feel
+- **Transform**: `translate-y` for smooth slide up/down motion
+- **Performance**: Hardware-accelerated CSS transitions
+
+### Technical Implementation
+
+#### Overlay Tray Structure:
+```typescript
+{/* Comment Overlay Tray - Slides up from bottom */}
+{comment && comment.trim().length > 0 && (
+  <div className={cn(
+    "absolute bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg transition-transform duration-200 ease-out z-10",
+    isExpanded 
+      ? "translate-y-0"     // Visible - slides up
+      : "translate-y-full"  // Hidden - slides down
+  )}>
+    {/* Close button with consistent styling */}
+    <div className="px-4 pt-4">
+      <button className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-200 border border-transparent hover:border-border">
+        <span>Close comment</span>
+        <ChevronDown className="w-4 h-4" />
+      </button>
+    </div>
+    {/* Comment content */}
+    <div className="px-4 pb-4">
+      <div className="bg-card rounded-lg p-3 shadow-sm">
+        <p className="text-sm text-foreground leading-relaxed">{comment}</p>
+      </div>
+    </div>
+  </div>
+)}
+```
+
+#### Arrow Direction Logic:
+```typescript
+// Show/Hide button with correct arrows
+{isExpanded ? (
+  <ChevronDown className="w-4 h-4 transition-transform duration-200" />
+) : (
+  <ChevronUp className="w-4 h-4 transition-transform duration-200" />
+)}
+```
+
+### Files Modified
+- **`components/dish-card.tsx`**: Complete redesign of comments section with overlay tray system
+
+### Testing Results
+- ✅ Comment tray slides up from bottom edge correctly
+- ✅ Tray covers content behind it as intended
+- ✅ Arrow directions match interaction behavior
+- ✅ Both buttons have consistent styling and hover effects
+- ✅ Fast, smooth animations (200ms) for opening and closing
+- ✅ Close button works correctly with proper text and arrow
+- ✅ No linting errors introduced
+- ✅ Build completes successfully
+- ✅ Dev server running and functional
+
+### User Experience Benefits
+- **Intuitive Interaction**: Arrow directions clearly indicate tray movement
+- **Professional Appearance**: Consistent button styling matches design system
+- **Smooth Animations**: Fast, natural-feeling slide animations
+- **Clear Actions**: Both "Show" and "Close" buttons are visually distinct and functional
+- **Overlay Behavior**: Tray properly covers content, creating true overlay experience
+
+### Key Insights
+- **Overlay vs Inline**: Overlay approach provides better UX than inline expansion
+- **Visual Consistency**: Matching button styles creates cohesive user experience
+- **Animation Timing**: 200ms provides optimal balance between speed and smoothness
+- **Arrow Semantics**: Directional arrows should match the actual animation direction
+
+### Prevention Measures
+- Consistent animation duration prevents jarring speed differences
+- Conditional arrow rendering ensures correct visual cues
+- Matching button styles maintain design system consistency
+- Proper z-index layering prevents visual conflicts
+
+### Notes
+- This implementation significantly improves the comments section user experience
+- The overlay tray creates a more modern, app-like interaction
+- Ready for future enhancements: profile pictures in comments and 3D visual effects
+
+---
+
 ## [FEATURE-013] - UI/UX Modernization Phase 1: v0 Design System Integration
 
 **Date:** 2025-01-30
