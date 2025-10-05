@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { copyToClipboard } from "@/lib/clipboard"
 import { getDeepLinkUrl, getWebFallbackUrl } from "@/lib/deep-links"
+import { getDeliveryAppLogo } from "@/lib/delivery-apps"
 
 interface DishCardProps {
   id: string
@@ -218,33 +219,46 @@ export function DishCard({
                 onClick={() => handleDeliveryAppClick(app)}
                 disabled={copyingStates[app]}
                 className={cn(
-                  "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm",
+                  "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm flex items-center justify-center gap-2",
                   copyingStates[app] && "opacity-75 cursor-not-allowed"
                 )}
               >
-                <Link className="mr-2 h-4 w-4" />
-                {copyingStates[app] ? "Copying..." : `Open ${app}`}
+                <img 
+                  src={getDeliveryAppLogo(app)} 
+                  alt={`${app} logo`}
+                  className="h-4 w-4 flex-shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.src = "/logos/placeholder.svg"
+                  }}
+                />
+                <span className="truncate">
+                  {copyingStates[app] ? "Copying..." : `Open ${app}`}
+                </span>
               </Button>
             ))}
           </div>
         ) : availability === "Online" ? (
           <Button 
             className={cn(
-              "w-full bg-green-600 hover:bg-green-700 text-white border-0"
+              "w-full bg-green-600 hover:bg-green-700 text-white border-0 flex items-center justify-center gap-2"
             )}
             disabled
           >
-            <Link className="mr-2 h-4 w-4" />
-            Online
+            <img 
+              src="/logos/placeholder.svg" 
+              alt="Online delivery"
+              className="h-4 w-4 flex-shrink-0"
+            />
+            <span>Online</span>
           </Button>
         ) : (
           <Button 
             className={cn(
-              "w-full bg-blue-600 hover:bg-blue-700 text-white border-0"
+              "w-full bg-blue-600 hover:bg-blue-700 text-white border-0 flex items-center justify-center gap-2"
             )}
           >
-            <MapPin className="mr-2 h-4 w-4" />
-            Navigate
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span>Navigate</span>
           </Button>
         )}
         
