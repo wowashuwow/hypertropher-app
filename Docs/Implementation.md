@@ -209,6 +209,23 @@
 
 #### Sub-steps:
 - [x] Implement OTP rate limiting to prevent abuse and control costs
+- [x] **UI/UX Modernization Phase 1**: Integrate v0 design system and modernize dish cards
+  - Apply v0 globals.css theme and design patterns throughout the app
+  - Modernize dish card styling to match sleek v0 design (keep all existing functionality)
+  - Maintain current font (Rethink Sans) but update sizing according to v0 design
+  - Keep all existing ratings, price display, and functionality unchanged
+  - Focus only on visual improvements and modern styling
+- [ ] **UI/UX Modernization Phase 2**: Fix delivery app buttons and improve comments section
+  - Verify delivery app buttons are using Shadcn UI components properly
+  - Modernize comments section button design to match design system
+  - Implement slide-up animation for comments (instead of slide-down)
+  - Create modern, sleek comment expansion interaction
+  - Maintain existing comment functionality while improving visual experience
+- [ ] **UI/UX Modernization Phase 3**: Add basic page transition animations
+  - Implement smooth page transitions between Discover → Add Dish → My Dishes
+  - Add subtle animations for improved user experience
+  - Keep animations minimal and performance-focused
+  - Ensure transitions work consistently across all pages
 - [ ] Deploy to Vercel with environment configuration
 - [ ] Add invite code verification feedback
 - [ ] Implement secure invite code passing

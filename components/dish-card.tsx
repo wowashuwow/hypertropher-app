@@ -122,22 +122,22 @@ export function DishCard({
 
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md relative flex flex-col h-full">
+    <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 relative flex flex-col h-full">
       {/* Image Section */}
       <div className="aspect-[4/5] relative">
         <img src={imageUrl || "/placeholder.svg"} alt={dishName} className="w-full h-full object-cover" />
         <button
           onClick={handleBookmarkClick}
-          className="absolute top-4 right-4 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
+          className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md"
         >
-          <Bookmark className={cn("w-5 h-5", bookmarked ? "fill-primary text-primary" : "text-gray-600")} />
+          <Bookmark className={cn("w-4 h-4", bookmarked ? "fill-primary text-primary" : "text-gray-600")} />
         </button>
       </div>
 
       {/* Content Section - Flexible */}
       <div className="p-4 flex flex-col flex-grow">
-        <div className="flex items-start justify-between mb-1 gap-2">
-          <h2 className="text-xl font-semibold text-card-foreground">{dishName}</h2>
+        <div className="flex items-start justify-between mb-0.5 gap-2">
+          <h2 className="text-lg font-semibold text-card-foreground leading-tight">{dishName}</h2>
           <div className="flex flex-wrap gap-1 self-start">
             {availability === "Online" && deliveryApps.length > 0 ? (
               deliveryApps.map((app) => (
@@ -160,36 +160,35 @@ export function DishCard({
             )}
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mb-3">
-          {restaurantName} - {city}
+        <p className="text-xs text-muted-foreground mb-3">
+          {restaurantName} · {city}
         </p>
 
-        <div className="space-y-1 mb-3 flex-grow">
-          <div className="text-sm">
-            <span className="text-muted-foreground">Price: </span>
-            <span>{price}</span>
+        <div className="space-y-1.5 mb-3 flex-grow">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Cost</span>
+            <span className="font-medium">{price}</span>
           </div>
-          <div className="text-sm">
-            <span className="text-muted-foreground">Protein: </span>
-            <span>{getProteinEmojis(protein)}</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Protein</span>
+            <span className="font-medium">{getProteinEmojis(protein)}</span>
           </div>
-          <div className="text-sm">
-            <span className="text-muted-foreground">Taste: </span>
-            <span>{getTasteEmojis(taste)}</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Taste</span>
+            <span className="font-medium">{getTasteEmojis(taste)}</span>
           </div>
-          <div className="text-sm">
-            <span className="text-muted-foreground">Satisfaction: </span>
-            <span>{getSatisfactionEmojis(satisfaction)}</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Satisfaction</span>
+            <span className="font-medium">{getSatisfactionEmojis(satisfaction)}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">Added by {addedBy}</p>
+        <div className="flex items-center gap-2 pt-3 border-t border-border">
           {addedByProfilePicture ? (
             <img
               src={addedByProfilePicture}
               alt={`${addedBy}'s profile`}
-              className="w-6 h-6 rounded-full object-cover"
+              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
               onError={(e) => {
                 // Fallback to initials if image fails to load
                 e.currentTarget.style.display = 'none'
@@ -199,12 +198,13 @@ export function DishCard({
             />
           ) : null}
           <div 
-            className={`w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center ${
+            className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 ${
               addedByProfilePicture ? 'hidden' : ''
             }`}
           >
             <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
           </div>
+          <p className="text-xs text-muted-foreground truncate">Added by {addedBy}</p>
         </div>
       </div>
 

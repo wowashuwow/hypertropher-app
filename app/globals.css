@@ -4,75 +4,91 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color scheme for Protein Finder app */
-  --background: oklch(0.9789 0.0082 121.6272); /* Off-white background */
-  --foreground: oklch(0 0 0); /* Dark charcoal text */
-  --card: oklch(1.0000 0 0); /* White cards */
-  --card-foreground: oklch(0 0 0);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0 0 0);
-  --primary: oklch(0.5106 0.2301 276.9656); /* Strong motivating blue */
-  --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.7038 0.1230 182.5025);
-  --secondary-foreground: oklch(1.0000 0 0);
-  --muted: oklch(0.9551 0 0);
-  --muted-foreground: oklch(0.3211 0 0); /* Light gray for subtle text */
-  --accent: oklch(0.7686 0.1647 70.0804);
-  --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0 0 0); /* Light border for cards */
-  --input: oklch(0.5555 0 0);
-  --ring: oklch(0.7853 0.1041 274.7134);
-  --chart-1: oklch(0.5106 0.2301 276.9656);
-  --chart-2: oklch(0.7038 0.1230 182.5025);
-  --chart-3: oklch(0.7686 0.1647 70.0804);
-  --chart-4: oklch(0.6559 0.2118 354.3084);
-  --chart-5: oklch(0.7227 0.1920 149.5793);
-  --radius: 1rem;
-  --sidebar: oklch(0.9789 0.0082 121.6272);
-  --sidebar-foreground: oklch(0 0 0);
-  --sidebar-primary: oklch(0.5106 0.2301 276.9656);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.7686 0.1647 70.0804);
-  --sidebar-accent-foreground: oklch(0 0 0);
-  --sidebar-border: oklch(0 0 0);
-  --sidebar-ring: oklch(0.7853 0.1041 274.7134);
+  /* Light mode - clean, energetic fitness aesthetic */
+  --background: #ffffff; /* Pure white for clean, modern look */
+  --foreground: #0a0a0a; /* Deep black text for maximum contrast */
+  --card: #f8f8f8; /* Subtle off-white for cards */
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  /* Changed from green #009955 to powerful red #cc0000 */
+  --primary: #cc0000; /* Bold red for powerful, energetic look */
+  --primary-foreground: #ffffff;
+  /* Changed from pink #cc0044 to deep orange #ff4400 */
+  --secondary: #ff4400; /* Deep orange to complement red */
+  --secondary-foreground: #ffffff;
+  --muted: #f0f0f0;
+  --muted-foreground: #666666; /* Dark gray for secondary text */
+  /* Changed from cyan #0088bb to amber #ff8800 */
+  --accent: #ff8800; /* Warm amber accent */
+  --accent-foreground: #ffffff;
+  /* Changed destructive to match new red theme */
+  --destructive: #cc0000;
+  --destructive-foreground: #ffffff;
+  --border: #e0e0e0; /* Light gray borders */
+  --input: #f0f0f0;
+  /* Changed ring color to red */
+  --ring: #cc0000;
+  /* Updated chart colors to red/orange palette */
+  --chart-1: #cc0000;
+  --chart-2: #ff4400;
+  --chart-3: #ff8800;
+  --chart-4: #ffaa00;
+  --chart-5: #ff6600;
+  --radius: 12px;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a0a0a;
+  /* Updated sidebar colors to red theme */
+  --sidebar-primary: #cc0000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ff8800;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e0e0e0;
+  --sidebar-ring: #cc0000;
 }
 
 .dark {
-  --background: oklch(0 0 0);
-  --foreground: oklch(1.0000 0 0);
-  --card: oklch(0.2455 0.0217 257.2823);
-  --card-foreground: oklch(1.0000 0 0);
-  --popover: oklch(0.2455 0.0217 257.2823);
-  --popover-foreground: oklch(1.0000 0 0);
-  --primary: oklch(0.6801 0.1583 276.9349);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.7845 0.1325 181.9120);
-  --secondary-foreground: oklch(0 0 0);
-  --muted: oklch(0.3211 0 0);
-  --muted-foreground: oklch(0.8452 0 0);
-  --accent: oklch(0.8790 0.1534 91.6054);
-  --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(0.7106 0.1661 22.2162);
-  --destructive-foreground: oklch(0 0 0);
-  --border: oklch(0.4459 0 0);
-  --input: oklch(1.0000 0 0);
-  --ring: oklch(0.6801 0.1583 276.9349);
-  --chart-1: oklch(0.6801 0.1583 276.9349);
-  --chart-2: oklch(0.7845 0.1325 181.9120);
-  --chart-3: oklch(0.8790 0.1534 91.6054);
-  --chart-4: oklch(0.7253 0.1752 349.7607);
-  --chart-5: oklch(0.8003 0.1821 151.7110);
-  --sidebar: oklch(0 0 0);
-  --sidebar-foreground: oklch(1.0000 0 0);
-  --sidebar-primary: oklch(0.6801 0.1583 276.9349);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.8790 0.1534 91.6054);
-  --sidebar-accent-foreground: oklch(0 0 0);
-  --sidebar-border: oklch(1.0000 0 0);
-  --sidebar-ring: oklch(0.6801 0.1583 276.9349);
+  /* Dark mode - aggressive neon aesthetic */
+  --background: #0a0a0a; /* Deep black background for drama */
+  --foreground: #ffffff; /* Pure white text for maximum contrast */
+  --card: #141414; /* Dark card background */
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  /* Changed from neon green #00ff88 to electric red #ff3333 */
+  --primary: #ff3333; /* Electric red - power and intensity */
+  --primary-foreground: #000000;
+  /* Changed from hot pink #ff0055 to bright orange #ff6600 */
+  --secondary: #ff6600; /* Bright orange - energy and heat */
+  --secondary-foreground: #ffffff;
+  --muted: #1f1f1f;
+  --muted-foreground: #a0a0a0; /* Medium gray for secondary text */
+  /* Changed from cyan #00d4ff to golden yellow #ffbb00 */
+  --accent: #ffbb00; /* Golden yellow - warmth and power */
+  --accent-foreground: #000000;
+  /* Changed destructive to match red theme */
+  --destructive: #ff3333;
+  --destructive-foreground: #ffffff;
+  --border: #2a2a2a; /* Subtle dark borders */
+  --input: #2a2a2a;
+  /* Changed ring to red */
+  --ring: #ff3333;
+  /* Updated chart colors to red/orange/yellow palette */
+  --chart-1: #ff3333;
+  --chart-2: #ff6600;
+  --chart-3: #ffbb00;
+  --chart-4: #ff9900;
+  --chart-5: #ff4444;
+  --radius: 12px;
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #ffffff;
+  /* Updated sidebar colors to red theme */
+  --sidebar-primary: #ff3333;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #ffbb00;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #2a2a2a;
+  --sidebar-ring: #ff3333;
 }
 
 @theme inline {
@@ -122,6 +138,51 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    /* Adding smooth font rendering for crisp text */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Bold typography hierarchy for fitness app */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  button,
+  a {
+    @apply transition-all duration-200;
+  }
+
+  button:hover,
+  a:hover {
+    @apply brightness-110;
+  }
+
+  /* Adding scrollbar-hide utility to hide scrollbars while maintaining scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 }

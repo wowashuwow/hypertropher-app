@@ -27,19 +27,19 @@ Hypertropher follows a modern, mobile-first design approach with a focus on acce
 
 ## Color Palette
 
-### Primary Colors
+### Primary Colors (Updated - v0 Design System)
 ```css
-/* Primary Brand Colors */
---primary: 222.2 84% 4.9%;           /* Dark blue-gray */
---primary-foreground: 210 40% 98%;   /* Light text on primary */
+/* Primary Brand Colors - Energetic Red/Orange Theme */
+--primary: #cc0000;                  /* Bold red for powerful, energetic look */
+--primary-foreground: #ffffff;       /* White text on primary */
 
 /* Secondary Colors */
---secondary: 210 40% 96%;            /* Light gray */
---secondary-foreground: 222.2 84% 4.9%; /* Dark text on secondary */
+--secondary: #ff4400;                /* Deep orange to complement red */
+--secondary-foreground: #ffffff;     /* White text on secondary */
 
 /* Accent Colors */
---accent: 210 40% 96%;               /* Light accent */
---accent-foreground: 222.2 84% 4.9%; /* Dark text on accent */
+--accent: #ff8800;                   /* Warm amber accent */
+--accent-foreground: #ffffff;        /* White text on accent */
 ```
 
 ### Semantic Colors
