@@ -4467,6 +4467,191 @@ Implemented Phase 1 of the UI/UX modernization by integrating the v0 design syst
 
 ---
 
+## [BUG-019] - Add Dish Form Submission Issues and Performance Problems
+
+**Date:** 2025-01-30
+**Severity:** High (Core Functionality)
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+The add dish form had multiple critical issues preventing successful submission and causing poor user experience. Users experienced slow form submission, database validation errors, and missing restaurant location data.
+
+### Issues Identified
+1. **Incorrect Emoji Removal Logic**: Using old regex `replace(/^[^\s]+\s/, '')` causing invalid ENUM values
+2. **Google Places API Location Parameter**: Missing location parameter causing API failures
+3. **Missing Restaurant Validation**: No validation for restaurant selection and location data
+4. **Slow Form Submission**: Poor user experience with long wait times
+5. **Missing Performance Timing**: No debugging information for troubleshooting
+6. **Unrealistic Upload Progress**: Progress indication that didn't match actual upload time
+
+### Root Cause
+Multiple issues in form validation, API integration, and user experience design that accumulated to create a poor submission experience.
+
+### Resolution Steps
+1. **Fixed Emoji Removal Logic**: Updated regex to `replace(/^[^\w\s]*\s*/, '')` for proper text cleaning
+2. **Fixed Google Places API**: Added fallback location handling and comprehensive error handling
+3. **Added Comprehensive Validation**: Restaurant selection, rating validation, location data validation
+4. **Added Performance Timing**: Debug logging for form submission and API calls
+5. **Enhanced Navigation**: Replaced window.location with Next.js router for faster navigation
+6. **Implemented Realistic Upload Progress**: File-size based progress estimation with proper timing
+7. **Added User Feedback**: Clear error messages and validation feedback
+
+### Testing Results
+- ✅ Form submission works correctly without database errors
+- ✅ Restaurant location data properly saved for "In-Store" dishes
+- ✅ Upload progress indication realistic and helpful
+- ✅ Performance timing logs help with debugging
+- ✅ Fast navigation after successful submission
+- ✅ Comprehensive validation prevents invalid submissions
+
+### Prevention Measures
+- Always validate form data before submission
+- Implement comprehensive error handling from the start
+- Add performance monitoring for debugging
+- Test form submission thoroughly with various scenarios
+- Provide clear user feedback for all validation errors
+
+---
+
+## [BUG-020] - Upload Progress Indication Unrealistic and Stuck
+
+**Date:** 2025-01-30
+**Severity:** Medium (User Experience)
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+The upload progress indication in the add dish form was unrealistic and would get stuck at 90%, providing poor user feedback during photo uploads.
+
+### Steps to Reproduce
+1. Navigate to add dish form
+2. Select a photo to upload
+3. Submit the form
+4. Observe upload progress jumping quickly to 90% then staying stuck
+5. Notice progress doesn't correlate with actual upload time
+
+### Expected Behavior
+Upload progress should correlate with actual upload time and provide realistic feedback to users.
+
+### Actual Behavior
+Progress jumped quickly from 10% → 90% then stayed stuck, not reflecting actual upload progress.
+
+### Root Cause
+Fixed interval progress updates that didn't account for file size or actual upload time, causing unrealistic progress indication.
+
+### Resolution Steps
+1. **Implemented File-Size Based Estimation**: Calculate expected upload time based on file size
+2. **Added Realistic Progress Curve**: Progress updates based on estimated upload time
+3. **Added File Size Display**: Show file size in progress indication (e.g., "Uploading 2.3MB... 45%")
+4. **Improved Timing Logic**: Minimum upload time and file-size proportional progress steps
+5. **Enhanced User Feedback**: Clear indication of upload scope and progress
+
+### Testing Results
+- ✅ Progress indication correlates with actual upload time
+- ✅ File size display helps users understand upload scope
+- ✅ Progress doesn't get stuck at 90%
+- ✅ Realistic progression for different file sizes
+- ✅ Better user experience during uploads
+
+### Prevention Measures
+- Always correlate progress indication with actual operation time
+- Consider file size and network conditions in progress calculations
+- Provide contextual information (file size, estimated time)
+- Test progress indication with various file sizes
+- Ensure progress reaches 100% only when operation completes
+
+---
+
+## [BUG-021] - Edit Dish Form Restaurant Search Integration Issues
+
+**Date:** 2025-01-30
+**Severity:** High (Core Functionality)
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+The edit dish form had multiple critical issues preventing proper restaurant search functionality for "In-Store" dishes. Users couldn't edit restaurant names, and the form lacked proper validation and error handling that was already implemented in the add dish form.
+
+### Issues Identified
+1. **Incorrect Emoji Removal Logic**: Using old regex `replace(/^[^\s]+\s/, '')` instead of fixed `replace(/^[^\w\s]*\s*/, '')`
+2. **RestaurantSearchInput Integration**: Problematic onChange handler preventing text editing
+3. **Missing Form Validation**: No validation for restaurant selection or rating values
+4. **Missing Performance Timing**: No debug logging or performance monitoring
+5. **Missing Error Handling**: No comprehensive error handling for restaurant selection
+
+### Root Cause
+The edit dish form was missing all the fixes that had been implemented in the add dish form, causing the same database ENUM validation errors and poor user experience.
+
+### Resolution Steps
+1. **Fixed Emoji Removal Logic**: Updated all ButtonGroup onChange handlers to use correct regex
+2. **Fixed RestaurantSearchInput**: Removed problematic onChange, added proper state management
+3. **Added Comprehensive Validation**: Restaurant selection, rating validation, form submission checks
+4. **Added Performance Timing**: Debug logging for form submission and API calls
+5. **Enhanced Error Handling**: User feedback and validation error messages
+6. **Updated Submit Button**: Added restaurant validation to disabled state
+
+### Testing Results
+- ✅ Restaurant name editing works correctly
+- ✅ Google Maps search functionality restored
+- ✅ Form validation prevents invalid submissions
+- ✅ Performance timing logs help with debugging
+- ✅ All existing functionality preserved
+- ✅ No linting errors introduced
+
+### Prevention Measures
+- Always apply the same fixes to both add and edit forms
+- Test form validation thoroughly before marking complete
+- Implement comprehensive error handling from the start
+- Add debug logging for troubleshooting
+
+---
+
+## [BUG-022] - Restaurant Name Input Text Editing Disabled
+
+**Date:** 2025-01-30
+**Severity:** High (User Experience)
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+Users couldn't edit restaurant names in the edit dish form's RestaurantSearchInput component. Backspace and typing didn't work, preventing users from modifying restaurant selections.
+
+### Steps to Reproduce
+1. Navigate to edit dish form
+2. Try to edit restaurant name in the search input
+3. Observe that backspace and typing don't work
+4. Notice input field is unresponsive to text editing
+
+### Expected Behavior
+Users should be able to edit restaurant names freely while still having access to Google Maps search suggestions.
+
+### Actual Behavior
+Input field was completely unresponsive to text editing, preventing any modifications.
+
+### Root Cause
+The RestaurantSearchInput component's onChange handler was set to `onChange={() => {}}`, which completely disabled text editing functionality.
+
+### Resolution Steps
+1. **Restored Proper onChange Handler**: Added logic to update restaurant state while clearing selectedRestaurant when user manually edits
+2. **State Synchronization**: Ensured restaurant state updates on typing but selectedRestaurant clears on manual editing
+3. **Preserved Google Maps Functionality**: Maintained search suggestions and restaurant selection from dropdown
+
+### Testing Results
+- ✅ Text editing works correctly (backspace, typing)
+- ✅ Google Maps search suggestions still appear
+- ✅ Restaurant selection from dropdown works
+- ✅ Manual editing clears selectedRestaurant appropriately
+- ✅ Form validation works correctly
+
+### Prevention Measures
+- Never disable onChange handlers in search components
+- Test text editing functionality thoroughly
+- Ensure state synchronization between typing and selection
+- Maintain both manual editing and dropdown selection capabilities
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

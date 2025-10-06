@@ -78,6 +78,11 @@ export default function EditDishPage() {
     console.log('🏗️ EditDish: Restaurant selected:', restaurant)
     setSelectedRestaurant(restaurant)
     setRestaurant(restaurant.name)
+    console.log('🏗️ EditDish: Restaurant state updated:', {
+      name: restaurant.name,
+      address: restaurant.formatted_address,
+      coordinates: restaurant.geometry.location
+    })
   }
 
   // Handle availability changes - clear selectedRestaurant when switching types
@@ -162,9 +167,39 @@ export default function EditDishPage() {
     e.preventDefault()
     if (!dish) return
 
+    const submissionStartTime = Date.now();
+    console.log('🏗️ EditDish: Starting form submission...');
+
     try {
       setSaving(true)
       setError(null)
+
+      // Validate restaurant selection for In-Store dishes
+      if (availability === "In-Store" && !selectedRestaurant) {
+        alert("Please search for and select a restaurant from the dropdown.");
+        return;
+      }
+
+      if (availability === "In-Store" && selectedRestaurant && 
+          (!selectedRestaurant.formatted_address || 
+           selectedRestaurant.geometry.location.lat === 0)) {
+        alert("Invalid restaurant selection. Please select a valid restaurant.");
+        return;
+      }
+
+      // Validate rating values
+      const validRatings = ["Pretty Good", "Overloaded", "Mouthgasm", "Would Eat Everyday"];
+      const cleanTaste = taste.replace(/^[^\w\s]*\s*/, '');
+      const cleanProtein = protein.replace(/^[^\w\s]*\s*/, '');
+      const cleanSatisfaction = satisfaction.replace(/^[^\w\s]*\s*/, '');
+
+      if (!validRatings.includes(cleanTaste) || !validRatings.includes(cleanProtein) || !validRatings.includes(cleanSatisfaction)) {
+        alert("Invalid rating values. Please select valid ratings.");
+        return;
+      }
+
+      console.log('🏗️ EditDish: Validation passed, preparing dish data...');
+      console.log('🏗️ EditDish: Clean ratings:', { cleanTaste, cleanProtein, cleanSatisfaction });
 
       const dishData = {
         id: dish.id,
@@ -175,9 +210,9 @@ export default function EditDishPage() {
         city: dish.city, // Keep the original city value
         price: parseFloat(price),
         protein_source: proteinSource,
-        protein_content: protein,
-        taste,
-        satisfaction,
+        protein_content: cleanProtein,
+        taste: cleanTaste,
+        satisfaction: cleanSatisfaction,
         comment: comment.trim() || null,
         availability,
         delivery_apps: availability === "Online" ? deliveryApps : [],
@@ -189,6 +224,9 @@ export default function EditDishPage() {
 
       console.log('🏗️ EditDish: Submitting dish data:', dishData)
       console.log('🏗️ EditDish: selectedRestaurant:', selectedRestaurant)
+
+      console.log('🚀 EditDish: Starting API call to update dish...');
+      const apiStartTime = Date.now();
 
       const response = await fetch('/api/dishes', {
         method: 'PUT',
@@ -202,6 +240,10 @@ export default function EditDishPage() {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to update dish')
       }
+
+      const apiTime = Date.now() - apiStartTime;
+      console.log(`🚀 EditDish: API call completed in ${apiTime}ms`);
+      console.log('✅ EditDish: Total submission time:', Date.now() - submissionStartTime, 'ms');
 
       // Redirect back to My Dishes page
       router.push('/my-dishes')
@@ -334,7 +376,14 @@ export default function EditDishPage() {
                 {availability === "In-Store" ? (
                   <RestaurantSearchInput
                     value={restaurant}
-                    onChange={(value) => setRestaurant(value)}
+                    onChange={(value) => {
+                      // Update restaurant name for display, but clear selectedRestaurant if user is typing
+                      setRestaurant(value);
+                      // Clear selectedRestaurant if user is manually editing the text
+                      if (selectedRestaurant && selectedRestaurant.name !== value) {
+                        setSelectedRestaurant(null);
+                      }
+                    }}
                     onSelect={handleRestaurantSelect}
                     userCity={userCity}
                     userLocation={userLocation}
@@ -400,7 +449,7 @@ export default function EditDishPage() {
                     <ButtonGroup
                       options={["🤤🤤🤤 Mouthgasm", "👍 Pretty Good"]}
                       value={taste === "Mouthgasm" ? "🤤🤤🤤 Mouthgasm" : "👍 Pretty Good"}
-                      onChange={(value) => setTaste(value.replace(/^[^\s]+\s/, '') as typeof taste)}
+                      onChange={(value) => setTaste(value.replace(/^[^\w\s]*\s*/, '') as typeof taste)}
                       name="taste"
                     />
                   </div>
@@ -410,7 +459,7 @@ export default function EditDishPage() {
                     <ButtonGroup
                       options={["💪💪💪 Overloaded", "👍 Pretty Good"]}
                       value={protein === "Overloaded" ? "💪💪💪 Overloaded" : "👍 Pretty Good"}
-                      onChange={(value) => setProtein(value.replace(/^[^\s]+\s/, '') as typeof protein)}
+                      onChange={(value) => setProtein(value.replace(/^[^\w\s]*\s*/, '') as typeof protein)}
                       name="protein"
                     />
                   </div>
@@ -434,7 +483,7 @@ export default function EditDishPage() {
                     <ButtonGroup
                       options={["🤩🤩🤩 Would Eat Everyday", "👍 Pretty Good"]}
                       value={satisfaction === "Would Eat Everyday" ? "🤩🤩🤩 Would Eat Everyday" : "👍 Pretty Good"}
-                      onChange={(value) => setSatisfaction(value.replace(/^[^\s]+\s/, '') as typeof satisfaction)}
+                      onChange={(value) => setSatisfaction(value.replace(/^[^\w\s]*\s*/, '') as typeof satisfaction)}
                       name="satisfaction"
                     />
                   </div>
@@ -475,7 +524,7 @@ export default function EditDishPage() {
                     type="submit"
                     className="flex-1"
                     disabled={saving || !dishName || 
-                      (availability === "In-Store" ? !restaurant : !onlineRestaurant) || 
+                      (availability === "In-Store" ? !selectedRestaurant : !onlineRestaurant) || 
                       !price || !proteinSource || 
                       (availability === "Online" && deliveryApps.length === 0) || 
                       (availability === "Online" && !hasApps)}
