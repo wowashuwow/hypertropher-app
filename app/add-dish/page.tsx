@@ -240,6 +240,7 @@ export default function AddDishPage() {
       restaurant_address: selectedRestaurant?.formatted_address || null,
       latitude: selectedRestaurant?.geometry.location.lat || null,
       longitude: selectedRestaurant?.geometry.location.lng || null,
+      place_id: selectedRestaurant?.place_id || null,
     };
 
     console.log('🏗️ AddDish: Final dish data to be submitted:', dishData);

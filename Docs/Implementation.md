@@ -258,6 +258,15 @@
   - ✅ Updated submit button disabled state to include restaurant validation
   - ✅ Fixed restaurant name text editing functionality (backspace and typing)
   - ✅ Ensured feature parity between add dish and edit dish forms
+- [x] **Navigate Button Implementation**: Functional restaurant navigation for In-Store dishes
+  - ✅ Added place_id column to dishes table for Google Maps restaurant navigation
+  - ✅ Updated add/edit dish forms to capture and store place_id from Google Places API
+  - ✅ Implemented handleNavigate function in DishCard with Google Maps restaurant page URLs
+  - ✅ Fixed data transformation in homepage and my-dishes pages to include place_id
+  - ✅ Fixed wishlist API to include place_id in select query and data transformation
+  - ✅ Updated all Dish interfaces and DishCard component to handle place_id
+  - ✅ Added comprehensive error handling for missing place_id data
+  - ✅ Navigate button now opens Google Maps restaurant pages with reviews, photos, and business information
 - [ ] **UI/UX Modernization Phase 3**: Add basic page transition animations
   - Implement smooth page transitions between Discover → Add Dish → My Dishes
   - Add subtle animations for improved user experience

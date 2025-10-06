@@ -4652,6 +4652,159 @@ The RestaurantSearchInput component's onChange handler was set to `onChange={() 
 
 ---
 
+## [BUG-023] - Navigate Button Non-Functional for In-Store Dishes
+
+**Date:** 2025-01-30
+**Severity:** High (Core Functionality)
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+The "Navigate" button on dish cards for "In-Store" dishes was non-functional. Users could not navigate to restaurant locations in Google Maps, limiting the utility of the app for finding physical restaurant locations.
+
+### Steps to Reproduce
+1. Navigate to homepage or any page with dish cards
+2. Find a dish with "In-Store" availability
+3. Click the "Navigate" button
+4. Observe that nothing happens
+
+### Expected Behavior
+- Navigate button should open Google Maps restaurant page with reviews, photos, and location details
+- Users should be able to get directions to the restaurant
+- Restaurant page should show complete business information
+
+### Actual Behavior
+- Navigate button had no onClick handler
+- Clicking the button did nothing
+- Users couldn't access restaurant location information
+
+### Environment
+- **Application**: Hypertropher Web App
+- **Version**: Development
+- **Browser**: All browsers
+- **OS**: All operating systems
+- **Files Affected**: 
+  - `components/dish-card.tsx`
+  - `app/page.tsx`
+  - `app/my-dishes/page.tsx`
+  - `app/my-wishlist/page.tsx`
+  - `app/add-dish/page.tsx`
+  - `app/edit-dish/[id]/page.tsx`
+  - Database schema
+
+### Root Cause Analysis
+1. **Missing place_id Storage**: Google Places API was capturing `place_id` but not storing it in the database
+2. **Missing Navigation Logic**: DishCard component had no navigation handler for the Navigate button
+3. **Missing Data Flow**: Frontend pages weren't passing `place_id` to DishCard component
+4. **Incomplete Implementation**: Navigate button was rendered but had no functionality
+
+### Resolution Steps
+
+#### 1. **Database Schema Update**
+- Added `place_id` column to `dishes` table: `ALTER TABLE dishes ADD COLUMN place_id TEXT;`
+- Updated `DATABASE_SCHEMA.md` to document the new field
+
+#### 2. **Form Submission Updates**
+- **Add Dish Form**: Added `place_id: selectedRestaurant?.place_id || null` to dishData
+- **Edit Dish Form**: Added `place_id: availability === "In-Store" ? (selectedRestaurant?.place_id || null) : null` to dishData
+- **API Route**: Already handled dynamic fields, no changes needed
+
+#### 3. **Frontend Interface Updates**
+- **Dish Interface**: Added `place_id?: string | null` to Dish interface in all pages (homepage, my-dishes, my-wishlist)
+- **DishCardProps**: Added `placeId?: string | null` prop to DishCard component
+
+#### 4. **Navigation Implementation**
+- **handleNavigate Function**: Created function that constructs Google Maps restaurant page URL
+- **URL Format**: `https://www.google.com/maps/place/?q=place_id:${placeId}`
+- **Error Handling**: Graceful handling for missing place_id with user feedback
+- **User Feedback**: Toast notifications for successful navigation and error states
+
+#### 5. **Component Integration**
+- **Navigate Button**: Added `onClick={handleNavigate}` to existing Navigate button
+- **All Pages**: Updated homepage, my-dishes, and my-wishlist to pass `placeId={dish.place_id}` to DishCard
+
+### Technical Implementation Details
+
+#### Google Maps Restaurant Page URL:
+```typescript
+const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${placeId}`;
+```
+
+#### Navigation Handler:
+```typescript
+const handleNavigate = () => {
+  if (placeId) {
+    const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${placeId}`
+    window.open(restaurantPageUrl, '_blank')
+    toast.success(`Opening ${restaurantName} in Google Maps`)
+  } else {
+    toast.error("Location data not available for this restaurant")
+  }
+}
+```
+
+#### Database Schema:
+```sql
+ALTER TABLE dishes ADD COLUMN place_id TEXT;
+```
+
+### Testing Results
+- ✅ Navigate button now opens Google Maps restaurant page
+- ✅ Restaurant page shows reviews, photos, hours, and business information
+- ✅ Users can get directions and view complete restaurant details
+- ✅ Error handling works for dishes without place_id
+- ✅ All existing functionality preserved
+- ✅ Build completes successfully without errors
+- ✅ No linting errors introduced
+
+### Additional Issues Found and Fixed
+After initial implementation, user testing revealed that the Navigate button still showed "Location data not available" error. Investigation revealed additional issues:
+
+#### **Issue 1: Frontend Data Transformation Missing place_id**
+- **Homepage (`app/page.tsx`)**: Data transformation was not including `place_id` field
+- **My Dishes (`app/my-dishes/page.tsx`)**: Data transformation was not including `place_id` field
+- **Fix**: Added `place_id: dish.place_id,` to both data transformation mappings
+
+#### **Issue 2: Wishlist API Missing place_id**
+- **Wishlist API (`app/api/wishlist/route.ts`)**: Select query was not including `place_id` field
+- **Wishlist API Data Transformation**: Transformation was not including `place_id` field
+- **Fix**: 
+  - Added `place_id,` to the select query in dishes!inner section
+  - Added `place_id: item.dishes.place_id,` to the data transformation
+
+### Final Resolution Summary
+The Navigate button functionality required fixes at multiple levels:
+1. **Database**: Added `place_id` column (manual step)
+2. **Forms**: Updated to capture and submit `place_id` from Google Places API
+3. **API**: Ensured all APIs return `place_id` in responses
+4. **Frontend**: Fixed data transformations to include `place_id` in all pages
+5. **Component**: Implemented navigation logic with Google Maps restaurant page URLs
+
+### User Verification
+- ✅ User confirmed Navigate button now works correctly
+- ✅ Opens Google Maps restaurant page with complete business information
+- ✅ No more "Location data not available" error messages
+
+### User Experience Benefits
+- **Complete Restaurant Information**: Users see full Google Maps business page with reviews, photos, hours
+- **Better Navigation**: Direct access to directions and restaurant details
+- **Enhanced Utility**: App now provides complete value for finding physical restaurant locations
+- **Professional Experience**: Seamless integration with Google Maps ecosystem
+
+### Prevention Measures
+- Always implement complete data flow from API capture to UI functionality
+- Test all interactive elements to ensure they have proper event handlers
+- Document new database fields in schema documentation
+- Implement comprehensive error handling for missing data scenarios
+
+### Notes
+- This fix significantly enhances the app's utility for finding physical restaurant locations
+- The implementation leverages existing Google Places API data for maximum efficiency
+- Restaurant page URLs provide much more value than generic coordinate-based navigation
+- All changes maintain backward compatibility with existing dishes
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

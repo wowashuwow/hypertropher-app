@@ -25,6 +25,7 @@ interface DishCardProps {
   availability: "Online" | "In-Store"
   proteinSource?: string
   deliveryApps?: string[]
+  placeId?: string | null
   isBookmarked?: boolean
   onBookmarkToggle?: (id: string) => void
   showActions?: boolean
@@ -48,6 +49,7 @@ export function DishCard({
   availability,
   proteinSource,
   deliveryApps = [],
+  placeId,
   isBookmarked = false,
   onBookmarkToggle,
   showActions = false,
@@ -61,6 +63,17 @@ export function DishCard({
   const handleBookmarkClick = () => {
     setBookmarked(!bookmarked)
     onBookmarkToggle?.(id)
+  }
+
+  const handleNavigate = () => {
+    if (placeId) {
+      // Open restaurant page with reviews, photos, etc.
+      const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${placeId}`
+      window.open(restaurantPageUrl, '_blank')
+      toast.success(`Opening ${restaurantName} in Google Maps`)
+    } else {
+      toast.error("Location data not available for this restaurant")
+    }
   }
 
 
@@ -256,6 +269,7 @@ export function DishCard({
             className={cn(
               "w-full bg-blue-600 hover:bg-blue-700 text-white border-0 flex items-center justify-center gap-2"
             )}
+            onClick={handleNavigate}
           >
             <MapPin className="h-4 w-4 flex-shrink-0" />
             <span>Navigate</span>

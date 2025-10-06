@@ -68,6 +68,7 @@ The core table containing all user-contributed dish information.
 | `restaurant_address`| `TEXT` | Nullable | Full address of the restaurant (for in-store). |
 | `latitude` | `NUMERIC` | Nullable | Latitude for mapping. |
 | `longitude` | `NUMERIC` | Nullable | Longitude for mapping. |
+| `place_id` | `TEXT` | Nullable | Google Maps Place ID for restaurant navigation (for in-store). |
 | `delivery_app_url`| `TEXT` | Nullable | The URL to the dish on the delivery app (for online). |
 | `delivery_apps` | `JSONB` | Default: `'[]'::jsonb` | Array of delivery app names (e.g., ["Swiggy", "Zomato"]) for online dishes. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the dish was added. |

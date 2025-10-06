@@ -220,6 +220,7 @@ export default function EditDishPage() {
         restaurant_address: availability === "In-Store" ? (selectedRestaurant?.formatted_address || null) : null,
         latitude: availability === "In-Store" ? (selectedRestaurant?.geometry.location.lat || null) : null,
         longitude: availability === "In-Store" ? (selectedRestaurant?.geometry.location.lng || null) : null,
+        place_id: availability === "In-Store" ? (selectedRestaurant?.place_id || null) : null,
       }
 
       console.log('🏗️ EditDish: Submitting dish data:', dishData)

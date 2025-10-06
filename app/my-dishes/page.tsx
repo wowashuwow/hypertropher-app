@@ -25,6 +25,7 @@ interface Dish {
   image_url: string
   protein_source: string
   delivery_apps?: string[]
+  place_id?: string | null
   users: { name: string; profile_picture_url?: string | null }
 }
 
@@ -91,6 +92,7 @@ export default function MyDishesPage() {
           image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
           protein_source: dish.protein_source,
           delivery_apps: dish.delivery_apps || [],
+          place_id: dish.place_id,
           users: dish.users
         }))
         
@@ -195,6 +197,7 @@ export default function MyDishesPage() {
                   imageUrl={dish.image_url}
                   proteinSource={dish.protein_source}
                   deliveryApps={dish.delivery_apps}
+                  placeId={dish.place_id}
                   isBookmarked={bookmarkedDishes.has(dish.id)}
                   onBookmarkToggle={handleBookmarkToggle}
                   showActions={true}

@@ -50,6 +50,7 @@ export async function GET() {
           satisfaction,
           comment,
           delivery_apps,
+          place_id,
           created_at,
           users!dishes_user_id_fkey (
             name
@@ -80,6 +81,7 @@ export async function GET() {
       image_url: item.dishes.image_url || "/delicious-high-protein-meal.jpg",
       protein_source: item.dishes.protein_source,
       delivery_apps: item.dishes.delivery_apps || [],
+      place_id: item.dishes.place_id,
       users: item.dishes.users,
       wishlisted_at: item.created_at
     }));

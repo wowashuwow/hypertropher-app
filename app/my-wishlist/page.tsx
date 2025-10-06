@@ -22,6 +22,7 @@ interface Dish {
   image_url: string
   protein_source: string
   delivery_apps?: string[]
+  place_id?: string | null
   users: { name: string; profile_picture_url?: string | null }
 }
 
@@ -140,6 +141,7 @@ export default function MyListPage() {
                   imageUrl={dish.image_url}
                   proteinSource={dish.protein_source}
                   deliveryApps={dish.delivery_apps}
+                  placeId={dish.place_id}
                   isBookmarked={true} 
                   onBookmarkToggle={handleBookmarkToggle} 
                 />
