@@ -91,17 +91,28 @@ export const useGooglePlaces = ({ userCity, userLocation }: UseGooglePlacesOptio
         query: query,
       };
 
-      // Add location bias if user has granted location permission
+      // Always provide location for Google Places API
       if (userLocation) {
         request.location = new window.google.maps.LatLng(userLocation.lat, userLocation.lng);
         request.radius = 5000; // 5km
+        console.log('🍽️ Using user location for restaurant search:', userLocation);
       } else if (userCity) {
-        // Fallback to city-based search without location bias
-        request.query = `${query} ${userCity}`;
+        // Use a default location for the city (this is a fallback)
+        // For now, use a default location that should work for most searches
+        request.location = new window.google.maps.LatLng(19.0760, 72.8777); // Mumbai coordinates as fallback
         request.radius = 50000; // 50km for city-wide search
+        request.query = `${query} ${userCity}`;
+        console.log('🍽️ Using fallback location for restaurant search with city:', userCity);
+      } else {
+        // Last resort - use a global default location
+        request.location = new window.google.maps.LatLng(19.0760, 72.8777); // Mumbai coordinates
+        request.radius = 50000;
+        console.log('🍽️ Using global fallback location for restaurant search');
       }
 
       placesService.textSearch(request, (results, status) => {
+        console.log('🍽️ Google Places API response:', { status, resultsCount: results?.length || 0 });
+        
         if (status === window.google?.maps?.places?.PlacesServiceStatus?.OK && results) {
           const formattedResults: RestaurantResult[] = results.map((place) => ({
             place_id: place.place_id!,
@@ -118,7 +129,14 @@ export const useGooglePlaces = ({ userCity, userLocation }: UseGooglePlacesOptio
           }));
           resolve(formattedResults);
         } else {
-          console.error('Places search failed:', status);
+          console.error('🍽️ Places search failed:', { 
+            status, 
+            errorMessage: status === 'ZERO_RESULTS' ? 'No restaurants found' : 
+                         status === 'OVER_QUERY_LIMIT' ? 'API quota exceeded' :
+                         status === 'REQUEST_DENIED' ? 'API request denied' :
+                         status === 'INVALID_REQUEST' ? 'Invalid request parameters' :
+                         `Unknown error: ${status}`
+          });
           resolve([]);
         }
       });

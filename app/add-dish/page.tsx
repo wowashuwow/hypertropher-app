@@ -16,8 +16,10 @@ import { useGeolocation } from "@/lib/hooks/use-geolocation"
 import { RestaurantResult } from "@/lib/hooks/use-google-places"
 import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
 import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
 
 export default function AddDishPage() {
+  const router = useRouter()
   const [sourceType, setSourceType] = useState<"In-Restaurant" | "Online">("In-Restaurant")
   const [deliveryApps, setDeliveryApps] = useState<string[]>([])
   const [onlineRestaurant, setOnlineRestaurant] = useState("")
@@ -133,7 +135,57 @@ export default function AddDishPage() {
       imageUrl = urlData.publicUrl;
     }
 
-    // 2. Prepare Dish Data for API
+    // 2. Validate rating values and prepare clean data
+    const cleanTaste = taste.replace(/^[^\w\s]*\s*/, '');
+    const cleanProtein = protein.replace(/^[^\w\s]*\s*/, '');
+    const cleanSatisfaction = satisfaction.replace(/^[^\w\s]*\s*/, '');
+
+    // Validate that we have valid ENUM values
+    const validRatings = {
+      protein: ['Overloaded', 'Pretty Good'],
+      taste: ['Mouthgasm', 'Pretty Good'],
+      satisfaction: ['Would Eat Everyday', 'Pretty Good']
+    };
+
+    if (!validRatings.taste.includes(cleanTaste)) {
+      throw new Error(`Invalid taste rating: "${cleanTaste}". Valid values are: ${validRatings.taste.join(', ')}`);
+    }
+    if (!validRatings.protein.includes(cleanProtein)) {
+      throw new Error(`Invalid protein rating: "${cleanProtein}". Valid values are: ${validRatings.protein.join(', ')}`);
+    }
+    if (!validRatings.satisfaction.includes(cleanSatisfaction)) {
+      throw new Error(`Invalid satisfaction rating: "${cleanSatisfaction}". Valid values are: ${validRatings.satisfaction.join(', ')}`);
+    }
+
+    // Validate restaurant selection for In-Restaurant dishes
+    if (sourceType === "In-Restaurant") {
+      if (!selectedRestaurant) {
+        throw new Error("Please select a restaurant from the dropdown suggestions. Just typing the name is not enough - you need to click on a suggestion from the list.");
+      }
+      if (!selectedRestaurant.formatted_address) {
+        throw new Error("Selected restaurant is missing address information. Please try selecting a different restaurant.");
+      }
+      // Check if we have valid coordinates (not placeholder 0,0)
+      if (selectedRestaurant.geometry?.location?.lat === 0 && selectedRestaurant.geometry?.location?.lng === 0) {
+        console.warn('⚠️ Restaurant has placeholder coordinates (0,0) - this might indicate a Google Places API issue');
+      }
+    }
+
+    console.log('🏗️ AddDish: Original rating values:', { taste, protein, satisfaction });
+    console.log('🏗️ AddDish: Cleaned rating values:', { cleanTaste, cleanProtein, cleanSatisfaction });
+    console.log('🏗️ AddDish: Restaurant selection state:', { 
+      sourceType, 
+      restaurant, 
+      selectedRestaurant,
+      restaurantAddress: selectedRestaurant?.formatted_address,
+      latitude: selectedRestaurant?.geometry?.location?.lat,
+      longitude: selectedRestaurant?.geometry?.location?.lng,
+      userLocation,
+      userCity,
+      locationPermissionGranted
+    });
+
+    // 3. Prepare Dish Data for API
     const dishData = {
       dish_name: dishName,
       restaurant_name: sourceType === "Online" ? onlineRestaurant : (selectedRestaurant?.name || restaurant),
@@ -142,9 +194,9 @@ export default function AddDishPage() {
       image_url: imageUrl,
       price: parseFloat(price),
       protein_source: proteinSource,
-      taste: taste.replace(/^[^\s]+\s/, ''), // Remove emoji prefix, keep clean text
-      protein_content: protein.replace(/^[^\s]+\s/, ''), // Remove emoji prefix, keep clean text
-      satisfaction: satisfaction.replace(/^[^\s]+\s/, ''), // Remove emoji prefix, keep clean text
+      taste: cleanTaste, // Use validated clean value
+      protein_content: cleanProtein, // Use validated clean value
+      satisfaction: cleanSatisfaction, // Use validated clean value
       comment,
       delivery_apps: sourceType === "Online" ? deliveryApps : [],
       restaurant_address: selectedRestaurant?.formatted_address || null,
@@ -152,7 +204,9 @@ export default function AddDishPage() {
       longitude: selectedRestaurant?.geometry.location.lng || null,
     };
 
-    // 3. Submit Dish Data to our API
+    console.log('🏗️ AddDish: Final dish data to be submitted:', dishData);
+
+    // 4. Submit Dish Data to our API
     try {
       const response = await fetch('/api/dishes', {
         method: 'POST',
@@ -166,8 +220,8 @@ export default function AddDishPage() {
       }
 
       alert("Dish submitted successfully!");
-      // Optionally, redirect or reset form here
-      window.location.href = '/'; // Redirect to homepage on success
+      // Redirect to homepage using Next.js router for faster navigation
+      router.push('/');
 
     } catch (error) {
       console.error("Submission Error:", error);
@@ -367,7 +421,7 @@ export default function AddDishPage() {
                   <ButtonGroup
                     options={["🤤🤤🤤 Mouthgasm", "👍 Pretty Good"]}
                     value={taste === "Mouthgasm" ? "🤤🤤🤤 Mouthgasm" : taste === "Pretty Good" ? "👍 Pretty Good" : ""}
-                    onChange={(value) => setTaste(value.replace(/^[^\s]+\s/, '') as typeof taste)}
+                    onChange={(value) => setTaste(value.replace(/^[^\w\s]*\s*/, '') as typeof taste)}
                     name="taste"
                   />
                 </div>
@@ -377,7 +431,7 @@ export default function AddDishPage() {
                   <ButtonGroup
                     options={["💪💪💪 Overloaded", "👍 Pretty Good"]}
                     value={protein === "Overloaded" ? "💪💪💪 Overloaded" : protein === "Pretty Good" ? "👍 Pretty Good" : ""}
-                    onChange={(value) => setProtein(value.replace(/^[^\s]+\s/, '') as typeof protein)}
+                    onChange={(value) => setProtein(value.replace(/^[^\w\s]*\s*/, '') as typeof protein)}
                     name="protein"
                   />
                 </div>
@@ -399,7 +453,7 @@ export default function AddDishPage() {
                   <ButtonGroup
                     options={["🤩🤩🤩 Would Eat Everyday", "👍 Pretty Good"]}
                     value={satisfaction === "Would Eat Everyday" ? "🤩🤩🤩 Would Eat Everyday" : satisfaction === "Pretty Good" ? "👍 Pretty Good" : ""}
-                    onChange={(value) => setSatisfaction(value.replace(/^[^\s]+\s/, '') as typeof satisfaction)}
+                    onChange={(value) => setSatisfaction(value.replace(/^[^\w\s]*\s*/, '') as typeof satisfaction)}
                     name="satisfaction"
                   />
                 </div>

@@ -11,7 +11,10 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DeliveryAppPills } from "@/components/ui/delivery-app-pills"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { RestaurantSearchInput } from "@/components/ui/restaurant-search-input"
 import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
+import { useGeolocation } from "@/lib/hooks/use-geolocation"
+import { RestaurantResult } from "@/lib/hooks/use-google-places"
 import { ArrowLeft, Save, X } from "lucide-react"
 
 interface Dish {
@@ -43,7 +46,9 @@ export default function EditDishPage() {
 
   // Form state
   const [dishName, setDishName] = useState("")
-  const [restaurantName, setRestaurantName] = useState("")
+  const [restaurant, setRestaurant] = useState("")           // For In-Store dishes
+  const [onlineRestaurant, setOnlineRestaurant] = useState("") // For Online dishes
+  const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantResult | null>(null)
   const [price, setPrice] = useState("")
   const [proteinSource, setProteinSource] = useState("")
   const [protein, setProtein] = useState<"Overloaded" | "Pretty Good">("Pretty Good")
@@ -54,8 +59,33 @@ export default function EditDishPage() {
   const [deliveryApps, setDeliveryApps] = useState<string[]>([])
   const [userCity, setUserCity] = useState("")
 
+  // Geolocation hook
+  const {
+    userLocation,
+    locationPermissionGranted,
+    locationPermissionRequested,
+    locationError,
+    loading: locationLoading,
+    requestLocationPermission,
+    checkGeolocationSupport,
+  } = useGeolocation()
+
   // Delivery apps filtering based on user's city
   const { availableApps, country, hasApps } = useDeliveryAppsForCity(userCity || "")
+
+  // Restaurant selection handler
+  const handleRestaurantSelect = (restaurant: RestaurantResult) => {
+    console.log('🏗️ EditDish: Restaurant selected:', restaurant)
+    setSelectedRestaurant(restaurant)
+    setRestaurant(restaurant.name)
+  }
+
+  // Handle availability changes - clear selectedRestaurant when switching types
+  useEffect(() => {
+    if (availability === "Online") {
+      setSelectedRestaurant(null)
+    }
+  }, [availability])
 
   // Fetch dish data
   useEffect(() => {
@@ -82,7 +112,14 @@ export default function EditDishPage() {
 
         setDish(dish)
         setDishName(dish.dish_name)
-        setRestaurantName(dish.restaurant_name)
+        
+        // Conditional restaurant loading based on availability
+        if (dish.availability === "In-Store") {
+          setRestaurant(dish.restaurant_name)
+        } else {
+          setOnlineRestaurant(dish.restaurant_name)
+        }
+        
         setPrice(dish.price.toString())
         setProteinSource(dish.protein_source)
         setProtein(dish.protein_content)
@@ -132,7 +169,9 @@ export default function EditDishPage() {
       const dishData = {
         id: dish.id,
         dish_name: dishName,
-        restaurant_name: restaurantName,
+        restaurant_name: availability === "In-Store" 
+          ? (selectedRestaurant?.name || restaurant)
+          : onlineRestaurant,
         city: dish.city, // Keep the original city value
         price: parseFloat(price),
         protein_source: proteinSource,
@@ -142,7 +181,14 @@ export default function EditDishPage() {
         comment: comment.trim() || null,
         availability,
         delivery_apps: availability === "Online" ? deliveryApps : [],
+        // Add location fields only for In-Store dishes:
+        restaurant_address: availability === "In-Store" ? (selectedRestaurant?.formatted_address || null) : null,
+        latitude: availability === "In-Store" ? (selectedRestaurant?.geometry.location.lat || null) : null,
+        longitude: availability === "In-Store" ? (selectedRestaurant?.geometry.location.lng || null) : null,
       }
+
+      console.log('🏗️ EditDish: Submitting dish data:', dishData)
+      console.log('🏗️ EditDish: selectedRestaurant:', selectedRestaurant)
 
       const response = await fetch('/api/dishes', {
         method: 'PUT',
@@ -284,18 +330,28 @@ export default function EditDishPage() {
                   </div>
                 )}
 
-                {/* Restaurant Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="restaurantName">Restaurant Name *</Label>
-                  <Input
-                    id="restaurantName"
-                    type="text"
-                    placeholder="Enter restaurant name"
-                    value={restaurantName}
-                    onChange={(e) => setRestaurantName(e.target.value)}
-                    required
+                {/* Restaurant Name - Conditional based on availability */}
+                {availability === "In-Store" ? (
+                  <RestaurantSearchInput
+                    value={restaurant}
+                    onChange={(value) => setRestaurant(value)}
+                    onSelect={handleRestaurantSelect}
+                    userCity={userCity}
+                    userLocation={userLocation}
                   />
-                </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="onlineRestaurant">Restaurant Name</Label>
+                    <Input
+                      id="onlineRestaurant"
+                      type="text"
+                      placeholder="Enter Restaurant Name"
+                      value={onlineRestaurant}
+                      onChange={(e) => setOnlineRestaurant(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
 
                 {/* Dish Name */}
                 <div className="space-y-2">
@@ -418,7 +474,11 @@ export default function EditDishPage() {
                   <Button
                     type="submit"
                     className="flex-1"
-                    disabled={saving || !dishName || !restaurantName || !price || !proteinSource || (availability === "Online" && deliveryApps.length === 0) || (availability === "Online" && !hasApps)}
+                    disabled={saving || !dishName || 
+                      (availability === "In-Store" ? !restaurant : !onlineRestaurant) || 
+                      !price || !proteinSource || 
+                      (availability === "Online" && deliveryApps.length === 0) || 
+                      (availability === "Online" && !hasApps)}
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {saving ? "Saving..." : "Save Changes"}
