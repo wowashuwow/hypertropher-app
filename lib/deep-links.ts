@@ -24,7 +24,8 @@ export const DELIVERY_APP_DEEP_LINKS: Record<string, string> = {
   'Grab': 'grab://',
   'Foodpanda': 'foodpanda://',
   'iFood': 'ifood://',
-  'PedidosYa': 'pedidosya://'
+  'PedidosYa': 'pedidosya://',
+  'Rappi': 'rappi://'
 }
 
 /**
@@ -43,7 +44,8 @@ export const DELIVERY_APP_WEB_URLS: Record<string, string> = {
   'Grab': 'https://www.grab.com',
   'Foodpanda': 'https://www.foodpanda.com',
   'iFood': 'https://www.ifood.com.br',
-  'PedidosYa': 'https://www.pedidosya.com'
+  'PedidosYa': 'https://www.pedidosya.com',
+  'Rappi': 'https://www.rappi.com'
 }
 
 /**

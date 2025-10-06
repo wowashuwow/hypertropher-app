@@ -43,16 +43,17 @@ export const DELIVERY_APPS_BY_COUNTRY: CountryDeliveryApps = {
   "Qatar": ["Foodpanda"],
   "United Arab Emirates": ["Foodpanda", "Deliveroo"],
   "Pakistan": ["Foodpanda"],
-  "Brazil": ["iFood", "Uber Eats"],
-  "Mexico": ["iFood", "Uber Eats"],
-  "Chile": ["Foodpanda", "PedidosYa"],
-  "Colombia": ["Foodpanda", "iFood", "PedidosYa"],
-  "Peru": ["Foodpanda", "PedidosYa"],
-  "Uruguay": ["Foodpanda", "PedidosYa"],
-  "Argentina": ["Foodpanda", "PedidosYa"],
-  "Ecuador": ["PedidosYa"],
+  "Brazil": ["Rappi", "iFood", "Uber Eats"],
+  "Mexico": ["Rappi", "iFood", "Uber Eats"],
+  "Chile": ["Rappi", "Foodpanda", "PedidosYa"],
+  "Colombia": ["Rappi", "Foodpanda", "iFood", "PedidosYa"],
+  "Peru": ["Rappi", "Foodpanda", "PedidosYa"],
+  "Uruguay": ["Rappi", "Foodpanda", "PedidosYa"],
+  "Argentina": ["Rappi", "Foodpanda", "PedidosYa"],
+  "Ecuador": ["Rappi", "PedidosYa"],
   "Paraguay": ["PedidosYa"],
   "Bolivia": ["PedidosYa"],
+  "Costa Rica": ["Rappi"],
   "South Korea": ["Uber Eats"],
   "Japan": ["Uber Eats"]
 }
@@ -98,6 +99,7 @@ export const DELIVERY_APP_LOGOS: Record<string, string> = {
   "Foodpanda": "/logos/foodpanda.svg",
   "iFood": "/logos/ifood.svg",
   "PedidosYa": "/logos/pedidosya.svg",
+  "Rappi": "/logos/rappi.svg",
 }
 
 /**

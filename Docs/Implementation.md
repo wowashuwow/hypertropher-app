@@ -177,7 +177,7 @@
 - [x] Implement delivery app pills UI with SVG logos
   - Replace MultiSelect component with DeliveryAppPills component
   - Create wrapping flex layout matching protein source pills pattern
-  - Add SVG logos for all delivery apps (Swiggy, Zomato, Uber Eats, DoorDash, Grubhub, Postmates, Just Eat, Deliveroo, Grab, Foodpanda, iFood, PedidosYa)
+  - Add SVG logos for all delivery apps (Swiggy, Zomato, Uber Eats, DoorDash, Grubhub, Postmates, Just Eat, Deliveroo, Grab, Foodpanda, iFood, PedidosYa, Rappi)
   - Implement multi-select functionality with visual feedback
   - Add logo mapping system in lib/delivery-apps.ts
   - Update both add-dish and edit-dish pages with new component
@@ -195,8 +195,8 @@
   - Maintain database schema integrity with proper ENUM constraints
 
 - [x] Implement enhanced deep linking system with restaurant name copying
-  - Create comprehensive deep links configuration for all 12 delivery apps
-  - Add deep links for Grubhub, Postmates, Just Eat Takeaway, Deliveroo, Grab, Foodpanda, iFood, PedidosYa
+  - Create comprehensive deep links configuration for all 13 delivery apps
+  - Add deep links for Grubhub, Postmates, Just Eat Takeaway, Deliveroo, Grab, Foodpanda, iFood, PedidosYa, Rappi
   - Update clipboard copy functionality from dish name to restaurant name
   - Implement smart fallback system (deep link → web URL → error handling)
   - Create centralized deep link management in lib/deep-links.ts
