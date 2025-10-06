@@ -347,6 +347,146 @@ The core functionality is working and secure. Google Maps Places API integration
   - This will help convey the real value of the app by showing users dishes in their specific city
   - Brainstorm implementation approach (dropdown, location detection, etc.)
 
+## Future Performance Optimization Tasks
+
+### Stage 7: Form Submission Performance Optimization
+
+#### **Task 7.1: Advanced Photo Upload Optimization**
+**Objective**: Implement comprehensive photo upload performance improvements
+**Priority**: High
+**Estimated Time**: 2-3 days
+
+**Subtasks**:
+- [ ] **Image Compression Before Upload**
+  - Implement client-side image compression using Canvas API
+  - Add quality settings (80%, 90%, 95%) for different use cases
+  - Resize large images to optimal dimensions (max 1920x1080)
+  - Reduce file size by 60-80% while maintaining quality
+  - Add file size validation and warnings for oversized images
+
+- [ ] **Upload Retry Logic and Error Handling**
+  - Implement exponential backoff retry mechanism
+  - Add timeout handling for slow uploads (30s timeout)
+  - Provide user-friendly error messages for different failure scenarios
+  - Add ability to retry failed uploads without losing form data
+  - Implement chunked upload for large files (if needed)
+
+- [ ] **Upload Progress Enhancement**
+  - Replace simulated progress with real upload progress tracking
+  - Implement WebSocket or Server-Sent Events for real-time progress
+  - Add file size and upload speed indicators
+  - Show estimated time remaining
+  - Add cancel upload functionality
+
+#### **Task 7.2: Parallel Processing Implementation**
+**Objective**: Optimize form submission by processing operations in parallel
+**Priority**: Medium
+**Estimated Time**: 3-4 days
+
+**Subtasks**:
+- [ ] **Background Photo Upload**
+  - Start photo upload immediately after selection
+  - Allow form submission while upload is in progress
+  - Update dish record with image URL after upload completion
+  - Implement upload queue for multiple photos
+  - Add fallback handling if upload fails after dish creation
+
+- [ ] **Optimistic UI Updates**
+  - Show dish creation immediately with temporary image placeholder
+  - Update UI with real image when upload completes
+  - Implement rollback mechanism if upload fails
+  - Add visual indicators for pending uploads
+
+- [ ] **Form State Persistence**
+  - Save form data to localStorage during submission
+  - Restore form state if submission fails
+  - Implement draft saving functionality
+  - Add auto-save feature for long forms
+
+#### **Task 7.3: Database Performance Optimization**
+**Objective**: Optimize database operations for faster dish creation
+**Priority**: Medium
+**Estimated Time**: 2 days
+
+**Subtasks**:
+- [ ] **Database Index Optimization**
+  - Review and optimize indexes on dishes table
+  - Add composite indexes for common query patterns
+  - Optimize RLS policies for faster execution
+  - Add database query performance monitoring
+
+- [ ] **API Response Optimization**
+  - Implement response caching for static data
+  - Add compression for API responses
+  - Optimize JSON serialization
+  - Implement database connection pooling
+
+- [ ] **Batch Operations**
+  - Implement batch insert for multiple dishes
+  - Add bulk update operations
+  - Optimize user profile fetching with batch queries
+
+#### **Task 7.4: Network and Caching Optimization**
+**Objective**: Improve network performance and reduce API calls
+**Priority**: Low
+**Estimated Time**: 1-2 days
+
+**Subtasks**:
+- [ ] **CDN Implementation**
+  - Move static assets to CDN
+  - Implement image CDN for uploaded photos
+  - Add geographic distribution for faster uploads
+  - Implement edge caching for API responses
+
+- [ ] **Client-Side Caching**
+  - Implement React Query for API caching
+  - Add localStorage caching for user preferences
+  - Cache delivery app configurations
+  - Implement offline-first functionality
+
+- [ ] **API Optimization**
+  - Implement GraphQL for efficient data fetching
+  - Add API request batching
+  - Implement request deduplication
+  - Add API rate limiting and throttling
+
+#### **Task 7.5: User Experience Enhancements**
+**Objective**: Improve perceived performance and user experience
+**Priority**: Low
+**Estimated Time**: 1-2 days
+
+**Subtasks**:
+- [ ] **Loading States and Skeletons**
+  - Add skeleton loading for dish cards
+  - Implement progressive image loading
+  - Add loading states for all async operations
+  - Implement smooth transitions and animations
+
+- [ ] **Performance Monitoring**
+  - Add real-time performance metrics
+  - Implement user experience monitoring
+  - Add error tracking and analytics
+  - Create performance dashboards
+
+- [ ] **Progressive Web App Features**
+  - Add service worker for offline functionality
+  - Implement push notifications
+  - Add app-like navigation experience
+  - Implement background sync
+
+### **Performance Benchmarks and Targets**
+- **Photo Upload**: < 3 seconds for 5MB image
+- **Form Submission**: < 1 second for dish creation (excluding photo)
+- **Total Submission Time**: < 5 seconds end-to-end
+- **API Response Time**: < 500ms for all operations
+- **Page Load Time**: < 2 seconds for all pages
+
+### **Implementation Priority Order**
+1. **Immediate (Quick Wins)**: Image compression, upload retry logic
+2. **Short-term (1-2 weeks)**: Parallel processing, database optimization
+3. **Medium-term (1-2 months)**: CDN implementation, advanced caching
+4. **Long-term (3+ months)**: PWA features, advanced monitoring
+
 ## Resource Links
 - [Next.js 14 Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
@@ -354,3 +494,6 @@ The core functionality is working and secure. Google Maps Places API integration
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [Google Maps Places API](https://developers.google.com/maps/documentation/places/web-service)
 - [Vercel Deployment Guide](https://vercel.com/docs)
+- [Image Compression Best Practices](https://web.dev/fast/)
+- [React Query Documentation](https://tanstack.com/query/latest)
+- [PWA Implementation Guide](https://web.dev/progressive-web-apps/)

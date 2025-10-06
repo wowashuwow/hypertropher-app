@@ -37,6 +37,9 @@ export default function AddDishPage() {
   const [comment, setComment] = useState("")
   const [satisfaction, setSatisfaction] = useState<"Would Eat Everyday" | "Pretty Good" | "">("")
   const [isLoading, setIsLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'completed' | 'error'>('idle')
+  const [uploadFileSize, setUploadFileSize] = useState<string>('')
 
   // Geolocation hooks
   const {
@@ -109,19 +112,50 @@ export default function AddDishPage() {
       return;
     }
     setIsLoading(true);
+    setUploadStatus('idle');
+    setUploadProgress(0);
+    setUploadFileSize('');
 
     const supabase = createClient();
     let imageUrl = "";
+    const submissionStartTime = Date.now();
 
     // 1. Handle Photo Upload to Supabase Storage
     if (photo) {
+      console.log('📸 Starting photo upload...');
+      const uploadStartTime = Date.now();
+      setUploadStatus('uploading');
+      setUploadProgress(0);
+      
+      // Display file size to user
+      const fileSizeMB = photo.size / (1024 * 1024);
+      setUploadFileSize(fileSizeMB < 1 ? `${Math.round(fileSizeMB * 1024)}KB` : `${fileSizeMB.toFixed(1)}MB`);
+      
       const fileName = `${Date.now()}-${photo.name}`;
+      
+      // Simulate progress updates based on file size and estimated upload time
+      // Estimate upload time: 1MB = ~2 seconds on average connection
+      const estimatedUploadTime = Math.max(fileSizeMB * 2000, 3000); // At least 3 seconds
+      const progressSteps = Math.min(Math.floor(estimatedUploadTime / 200), 30); // Update every 200ms, max 30 steps
+      
+      let currentStep = 0;
+      const progressInterval = setInterval(() => {
+        currentStep++;
+        // Use a logarithmic curve that feels more natural
+        const progress = Math.min(85, Math.floor((currentStep / progressSteps) * 85));
+        setUploadProgress(progress);
+      }, 200);
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("dish-photos") // NOTE: We will need to create this bucket in Supabase.
         .upload(fileName, photo);
 
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
       if (uploadError) {
         console.error("Error uploading photo:", uploadError);
+        setUploadStatus('error');
         alert("Failed to upload photo. Please try again.");
         setIsLoading(false);
         return;
@@ -133,6 +167,10 @@ export default function AddDishPage() {
         .getPublicUrl(uploadData.path);
       
       imageUrl = urlData.publicUrl;
+      setUploadStatus('completed');
+      
+      const uploadTime = Date.now() - uploadStartTime;
+      console.log(`📸 Photo upload completed in ${uploadTime}ms`);
     }
 
     // 2. Validate rating values and prepare clean data
@@ -207,6 +245,9 @@ export default function AddDishPage() {
     console.log('🏗️ AddDish: Final dish data to be submitted:', dishData);
 
     // 4. Submit Dish Data to our API
+    console.log('🚀 Starting API call to create dish...');
+    const apiStartTime = Date.now();
+    
     try {
       const response = await fetch('/api/dishes', {
         method: 'POST',
@@ -218,6 +259,10 @@ export default function AddDishPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to submit dish.");
       }
+
+      const apiTime = Date.now() - apiStartTime;
+      console.log(`🚀 API call completed in ${apiTime}ms`);
+      console.log('✅ Total submission time:', Date.now() - submissionStartTime, 'ms');
 
       alert("Dish submitted successfully!");
       // Redirect to homepage using Next.js router for faster navigation
@@ -471,7 +516,23 @@ export default function AddDishPage() {
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource || !price || (sourceType === "Online" && deliveryApps.length === 0) || (sourceType === "Online" && !hasApps)}>
-                {isLoading ? "Submitting..." : "Submit Dish"}
+                {isLoading ? (
+                  uploadStatus === 'uploading' ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Uploading {uploadFileSize}... {uploadProgress}%</span>
+                    </div>
+                  ) : uploadStatus === 'completed' ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Creating dish...
+                    </div>
+                  ) : (
+                    "Submitting..."
+                  )
+                ) : (
+                  "Submit Dish"
+                )}
               </Button>
             </form>
           </CardContent>
