@@ -267,11 +267,44 @@
   - ✅ Updated all Dish interfaces and DishCard component to handle place_id
   - ✅ Added comprehensive error handling for missing place_id data
   - ✅ Navigate button now opens Google Maps restaurant pages with reviews, photos, and business information
-- [ ] **UI/UX Modernization Phase 3**: Add basic page transition animations
-  - Implement smooth page transitions between Discover → Add Dish → My Dishes
-  - Add subtle animations for improved user experience
-  - Keep animations minimal and performance-focused
-  - Ensure transitions work consistently across all pages
+- [x] **UI/UX Modernization Phase 3**: Add basic page transition animations
+  - [x] **Phase 3.1: Fix Page Refresh Issue with CSS-Only Transitions** ✅ COMPLETE
+    - **Problem**: Custom JavaScript transition logic causing page refreshes and header/navigation disappearing
+    - **Root Cause**: React element comparison conflicts with Next.js App Router navigation timing
+    - **Solution**: Remove JavaScript transition logic, implement pure CSS transitions that work with Next.js
+    - **Implementation Steps**:
+      1. ✅ Reverted MainLayout to simple version (removed custom transition state management)
+      2. ✅ Updated CSS for route-based transitions using data attributes and key prop
+      3. ✅ Let Next.js handle navigation naturally while adding CSS slide animations
+      4. ✅ Tested transitions across all main navigation routes (Discover → Add Dish → My Dishes → My Wishlist)
+      5. ✅ Verified no more page refreshes or disappearing header/navigation
+      6. ✅ Enhanced animation timing for better visibility (400ms duration, 40px slide distance)
+    - **Files Modified**: `components/main-layout.tsx`, `app/globals.css`
+    - **Result**: Smooth, visible slide transitions without page refreshes, consistent header/navigation
+  - [ ] **Phase 3.2: Navigation Enhancement** (Deferred)
+    - Add subtle scale animation (1.05x) on active nav items
+    - Implement smooth color transitions for active states
+    - Add press animation (0.95x scale) for mobile taps
+    - Ensure 44px minimum touch targets are maintained
+  - [ ] **Phase 3.3: Content-Specific Animations** (Deferred)
+    - Staggered fade-in for dish cards on page load
+    - Subtle hover effects for desktop users
+    - Smooth transitions between form steps (if any)
+    - Success state animations for form submissions
+
+**Technical Implementation Details for Phase 3.1 (Completed):**
+- **Approach**: CSS-only transitions using Next.js key prop and data attributes (no JavaScript transition logic)
+- **Animation Timing**: 400ms entry (ease-out), 40px slide distance - enhanced for better visibility
+- **Performance**: Mobile-first with 60fps target, works with Next.js App Router optimizations
+- **Accessibility**: Reduced motion support and maintained keyboard navigation
+- **CSS Strategy**: Transform-based animations triggered by route changes, hardware-accelerated
+- **Implementation**: Pure CSS @keyframes with transform: translateX() and opacity transitions
+
+**Implementation Priority & Rationale:**
+1. **Phase 3.1 (Current Issue)**: Fix page refresh problem first - immediate user experience issue causing visual glitches
+2. **Stage 8 Performance Optimization (Future Issue)**: Address unnecessary API calls second - performance improvement but not breaking functionality
+3. **Rationale**: Current issue affects every navigation, while performance issue is more subtle but impacts overall app speed
+
 - [ ] Deploy to Vercel with environment configuration
 - [ ] Add invite code verification feedback
 - [ ] Implement secure invite code passing
@@ -284,6 +317,19 @@
 **Dependencies:** Stage 7 completion
 
 #### Sub-steps:
+- [ ] **Fix Unnecessary Re-loading Issue**: Prevent unnecessary API calls and loading states on page navigation
+  - **Problem**: Every page visit triggers fresh API calls for user data (name, city) even when data hasn't changed
+  - **Root Cause**: Client-side rendered pages re-initialize on navigation, no caching or state persistence
+  - **Evidence**: Terminal logs show repeated `/api/users` calls on every page visit (lines 23-294 in terminal output)
+  - **Solution**: Implement user data caching and state persistence in session provider
+  - **Implementation Steps**:
+    1. Add user data caching logic to SessionProvider with timestamp-based expiration
+    2. Implement React Query or SWR for API response caching
+    3. Add loading state optimization to prevent unnecessary spinners for cached data
+    4. Test navigation between pages to verify reduced API calls
+    5. Verify faster page loads and better user experience
+  - **Files to Modify**: `lib/auth/session-provider.tsx`, potentially add React Query/SWR
+  - **Expected Result**: No unnecessary API calls, faster page loads, better perceived performance
 - [ ] Implement server-side sorting and filtering
 - [ ] Add database indexing for performance
 - [ ] Implement pagination for large datasets

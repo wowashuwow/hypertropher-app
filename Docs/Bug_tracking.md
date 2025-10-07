@@ -4797,6 +4797,106 @@ The Navigate button functionality required fixes at multiple levels:
 - Document new database fields in schema documentation
 - Implement comprehensive error handling for missing data scenarios
 
+## [BUG-024] - Page Refresh During Navigation
+**Date:** 2025-01-30
+**Severity:** High
+**Status:** Resolved
+**Reporter:** User
+
+### Description
+Sometimes when navigating from page to page, the entire page refreshes causing the top title bar and bottom navigation bar to completely disappear. This creates a poor user experience where users cannot see the animation and the app feels broken.
+
+### Steps to Reproduce
+1. Navigate between different pages (Discover → Add Dish → My Dishes → My Wishlist)
+2. Sometimes the page would refresh completely instead of smooth navigation
+3. Header and bottom navigation would disappear temporarily
+4. Animation would not be visible due to page refresh
+
+### Expected Behavior
+- Smooth slide-in animation when navigating between pages
+- Header and bottom navigation should always remain visible
+- No page refreshes during navigation
+- Consistent visual experience across all route changes
+
+### Actual Behavior
+- Page would refresh completely on some navigation attempts
+- Header and bottom navigation would disappear
+- No smooth transition animation visible
+- Inconsistent navigation experience
+
+### Environment
+- **Browser:** All browsers
+- **Device:** Mobile and desktop
+- **App Version:** Current development version
+- **User Role:** Logged in users
+
+### Error Details
+- No console errors, but visual glitches during navigation
+- React component unmounting and remounting issues
+- Next.js App Router navigation conflicts
+
+### Root Cause
+The initial page transition implementation used custom JavaScript transition logic with `useState` and `useEffect` in `MainLayout` component. This created conflicts with Next.js App Router's built-in navigation system, causing:
+1. React element comparison conflicts during route changes
+2. Timing issues between custom transition logic and Next.js navigation
+3. Component unmounting/remounting during transitions
+4. Page refresh behavior instead of smooth client-side navigation
+
+### Solution Implemented
+**Approach**: Replaced JavaScript transition logic with pure CSS transitions that work harmoniously with Next.js App Router.
+
+**Implementation Steps**:
+1. **Reverted MainLayout**: Removed custom transition state management (`isTransitioning`, `currentChildren`)
+2. **Simplified Component**: Used `key={pathname}` and `data-route={pathname}` props on main element
+3. **CSS-Only Transitions**: Implemented pure CSS `@keyframes` animations triggered by route changes
+4. **Enhanced Timing**: Increased animation duration to 400ms and slide distance to 40px for better visibility
+5. **Hardware Acceleration**: Used `transform: translateX()` and `opacity` for optimal performance
+
+### Technical Details
+```css
+/* CSS Animation Implementation */
+.page-transition-enter-active {
+  animation: pageSlideIn 400ms ease-out forwards;
+}
+
+@keyframes pageSlideIn {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+```
+
+### Files Modified
+- `components/main-layout.tsx`: Removed custom JavaScript transition logic
+- `app/globals.css`: Added CSS-only page transition animations
+
+### Testing Results
+- ✅ No more page refreshes during navigation
+- ✅ Header and bottom navigation always remain visible
+- ✅ Smooth slide-in animation visible on all route changes
+- ✅ Consistent navigation experience across all pages
+- ✅ Better animation visibility with 400ms duration and 40px slide distance
+- ✅ Hardware-accelerated animations for optimal performance
+- ✅ Accessibility support with reduced motion preferences
+
+### User Experience Improvements
+- **Smooth Navigation**: All page transitions now use smooth slide animations
+- **Visual Consistency**: Header and navigation always remain visible
+- **Better Performance**: Hardware-accelerated CSS animations
+- **Enhanced Visibility**: Longer animation duration makes transitions more noticeable
+- **Professional Feel**: App now feels like a native mobile application
+
+### Prevention Measures
+- Avoid custom JavaScript logic that conflicts with framework navigation systems
+- Use CSS-only animations when possible for better performance and compatibility
+- Test navigation thoroughly across all routes during development
+- Ensure animations are visible and enhance user experience rather than being too subtle
+
 ### Notes
 - This fix significantly enhances the app's utility for finding physical restaurant locations
 - The implementation leverages existing Google Places API data for maximum efficiency

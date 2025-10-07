@@ -211,3 +211,82 @@
            }
   }
 }
+
+/* Page Transition Animations - Phase 3.1 (CSS-Only Approach) */
+/* Hardware-accelerated transforms for optimal mobile performance */
+/* Works with Next.js key prop to trigger transitions on route changes */
+
+/* Page transition - slide in from right when route changes */
+.page-transition-enter-active {
+  animation: pageSlideIn 400ms ease-out forwards;
+}
+
+/* Page transition keyframes */
+@keyframes pageSlideIn {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Alternative approach using CSS transitions for smoother performance */
+[data-route] {
+  transition: transform 400ms ease-out, opacity 400ms ease-out;
+}
+
+/* Initial state for new routes */
+[data-route]:not([data-route=""]):not([data-route="/"]) {
+  animation: pageSlideIn 400ms ease-out forwards;
+}
+
+/* Loading state enhancement */
+.loading-fade-enter {
+  opacity: 0;
+}
+
+.loading-fade-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-out;
+}
+
+.loading-fade-exit {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+/* Reduced motion support for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter-active,
+  .loading-fade-enter,
+  .loading-fade-enter-active,
+  .loading-fade-exit,
+  [data-route] {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Skeleton loading for dish cards */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton-card {
+  background: linear-gradient(90deg, 
+    hsl(var(--muted)) 25%, 
+    hsl(var(--muted) / 0.5) 50%, 
+    hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}

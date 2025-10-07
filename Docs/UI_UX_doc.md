@@ -455,6 +455,14 @@ const navItems = [
 - **Desktop Enhancement**: Multi-layer shadows + backdrop blur for realistic depth
 - **Personal Touch**: Profile pictures create "friend messaging" aesthetic
 
+### Page Transition Animations
+- **CSS-Only Approach**: Pure CSS animations that work harmoniously with Next.js App Router
+- **Slide-In Effect**: Pages slide in from right (40px) with opacity fade-in
+- **Animation Timing**: 400ms duration with ease-out timing for smooth, visible transitions
+- **Hardware Acceleration**: Uses `transform: translateX()` and `opacity` for optimal performance
+- **Accessibility Support**: Respects `prefers-reduced-motion` for users with motion sensitivity
+- **Mobile-First**: Optimized for mobile performance with 60fps target
+
 ### Visual Hierarchy
 - **Depth System**: Layered shadows create clear visual hierarchy
 - **Glass Morphism**: Gradient backgrounds with transparency for modern look
