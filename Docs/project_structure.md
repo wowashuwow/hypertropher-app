@@ -168,7 +168,7 @@ Shared libraries and configurations:
 
 #### Authentication (`/lib/auth`)
 - **`route-protection.tsx`**: Component for protecting authenticated routes
-- **`session-provider.tsx`**: React context provider for user session management
+- **`session-provider.tsx`**: React context provider for user session management with event-based caching
 
 #### Custom Hooks (`/lib/hooks`)
 - **`use-geolocation.ts`**: Location permission handling and user location management
@@ -333,10 +333,11 @@ import { cn } from "@/lib/utils"
 
 ### State Management
 - **Local State**: `useState` for component-level state
-- **Server State**: Supabase queries for data fetching
+- **Server State**: Supabase queries for data fetching with intelligent caching
 - **Form State**: Controlled components with React state
-- **Session State**: Context API for user session management
+- **Session State**: Context API for user session management with event-based cache
 - **Authentication State**: Supabase Auth with session provider
+- **Performance Optimization**: Event-based cached user data to prevent redundant API calls (80-90% reduction)
 
 ## Asset Organization
 

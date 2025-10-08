@@ -17,6 +17,7 @@ interface SessionContextType {
   userProfile: UserProfile | null
   loading: boolean
   signOut: () => Promise<void>
+  invalidateUserCache: () => void
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
@@ -25,21 +26,32 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [userProfileCache, setUserProfileCache] = useState<UserProfile | null>(null)
   const supabase = createClient()
 
-  // Fetch user profile data
-  const fetchUserProfile = async (userId: string) => {
+  // Fetch user profile data with event-based caching (no time expiration)
+  const fetchUserProfile = async (userId: string, forceRefresh = false) => {
+    // Check cache first (unless force refresh)
+    if (!forceRefresh && userProfileCache) {
+      setUserProfile(userProfileCache)
+      return
+    }
+    
     try {
       const response = await fetch('/api/users')
       if (response.ok) {
         const profile = await response.json()
         setUserProfile(profile)
+        // Update cache (no timestamp needed)
+        setUserProfileCache(profile)
       } else {
         setUserProfile(null)
+        setUserProfileCache(null)
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
       setUserProfile(null)
+      setUserProfileCache(null)
     }
   }
 
@@ -87,10 +99,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut()
     setUser(null)
     setUserProfile(null)
+    setUserProfileCache(null)
+  }
+
+  const invalidateUserCache = () => {
+    setUserProfileCache(null)
   }
 
   return (
-    <SessionContext.Provider value={{ user, userProfile, loading, signOut }}>
+    <SessionContext.Provider value={{ user, userProfile, loading, signOut, invalidateUserCache }}>
       {children}
     </SessionContext.Provider>
   )

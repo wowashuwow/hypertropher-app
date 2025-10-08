@@ -41,35 +41,21 @@ export default function HomePage() {
   const [userName, setUserName] = useState("User")
   const [loadingProfile, setLoadingProfile] = useState(true)
   
-  const { user } = useSession()
+  const { user, userProfile } = useSession()
 
-  // Fetch user profile data
+  // Use SessionProvider data instead of fetching separately
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        setLoadingProfile(true)
-        const response = await fetch('/api/users')
-        if (response.ok) {
-          const data = await response.json()
-          setUserCity(data.city || "Mumbai")
-          setUserName(data.name || "User")
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error)
-      } finally {
-        setLoadingProfile(false)
-      }
-    }
-
-    if (user) {
-      fetchUserProfile()
-    } else {
+    if (userProfile) {
+      setUserCity(userProfile.city || "Mumbai")
+      setUserName(userProfile.name || "User")
+      setLoadingProfile(false)
+    } else if (user === null) {
       // For unauthenticated users, set default values and stop loading
       setUserName("User")
       setUserCity("Mumbai")
       setLoadingProfile(false)
     }
-  }, [user])
+  }, [userProfile, user])
 
   // Fetch dishes from API
   useEffect(() => {

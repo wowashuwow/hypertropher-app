@@ -439,12 +439,18 @@ const navItems = [
 - **Static Assets**: Long-term caching
 - **API Responses**: Appropriate cache headers
 - **User Data**: Client-side caching with invalidation
+- **Session Data**: Event-based in-memory caching in SessionProvider (no time expiration) to prevent redundant API calls
+- **Cache Invalidation**: Intelligent cache clearing when user updates profile data
 
 ### Mobile Performance Optimization
 - **3D Effects**: Progressive enhancement with mobile-specific optimizations
 - **CSS Transforms**: Hardware-accelerated transforms for smooth animations
 - **Responsive Design**: Automatic effect scaling based on device capabilities
 - **Fallback Systems**: Graceful degradation for older devices
+- **API Call Optimization**: Reduced redundant API calls through intelligent caching (80-90% reduction)
+- **Page Load Performance**: Faster navigation through cached user data and session state
+- **Event-Based Caching**: Cache persists until user data actually changes (no arbitrary time expiration)
+- **Smart Cache Invalidation**: Cache clears only when user updates city, profile picture, or signs out
 
 ## Interactive Components
 

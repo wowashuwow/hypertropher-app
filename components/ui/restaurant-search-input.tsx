@@ -12,7 +12,7 @@ import { RestaurantResult } from "@/lib/hooks/use-google-places"
 import { cn } from "@/lib/utils"
 
 interface RestaurantSearchInputProps {
-  value: string
+  value?: string
   onChange: (value: string) => void
   onSelect: (restaurant: RestaurantResult) => void
   userCity: string
@@ -186,11 +186,12 @@ export function RestaurantSearchInput({
 
   // Handle manual search (when user presses Enter or clicks search)
   const handleManualSearch = async () => {
-    if (!value.trim() || !googleMapsLoaded) return
+    const currentValue = value || ""
+    if (!currentValue.trim() || !googleMapsLoaded) return
 
     try {
       setLoading(true)
-      const restaurants = await searchRestaurants(value)
+      const restaurants = await searchRestaurants(currentValue)
 
       if (restaurants.length > 0) {
         const bestRestaurant = restaurants[0]
@@ -268,7 +269,7 @@ export function RestaurantSearchInput({
           id="restaurant"
           type="text"
           placeholder="Search for restaurant"
-          value={value}
+          value={value || ""}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           className={`pl-10 ${value && !selectedRestaurant ? 'pr-20' : ''}`}
@@ -335,7 +336,7 @@ export function RestaurantSearchInput({
                   </button>
                 ))}
               </div>
-            ) : value.length > 2 ? (
+            ) : (value || "").length > 2 ? (
               <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
                 <AlertCircle className="w-4 h-4 mr-2" />
                 No restaurants found. Try a different search term.

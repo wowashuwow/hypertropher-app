@@ -4647,6 +4647,50 @@ The RestaurantSearchInput component's onChange handler was set to `onChange={() 
 ### Prevention Measures
 - Never disable onChange handlers in search components
 - Test text editing functionality thoroughly
+
+---
+
+## [BUG-025] - React Warning: Uncontrolled to Controlled Input
+
+**Date:** 2025-01-30
+**Severity:** Low (Console Warning)
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+React warning appeared in console: "A component is changing an uncontrolled input to be controlled" in the RestaurantSearchInput component. This warning indicates that an input field initially has no value (undefined) and then gets a string value, causing React to switch from uncontrolled to controlled mode.
+
+### Steps to Reproduce
+1. Navigate to add dish or edit dish form
+2. Open browser console
+3. Observe React warning about uncontrolled to controlled input
+4. Warning appears specifically in RestaurantSearchInput component
+
+### Expected Behavior
+No React warnings should appear in console during normal operation.
+
+### Actual Behavior
+React warning appears: "A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen."
+
+### Root Cause
+The RestaurantSearchInput component's `value` prop was initially `undefined` and then became a string, causing React to switch from uncontrolled to controlled mode. The Input component expected a string value but received `undefined` initially.
+
+### Resolution Steps
+1. **Updated Interface**: Changed `value: string` to `value?: string` in RestaurantSearchInputProps
+2. **Added Fallback Values**: Used `value={value || ""}` in Input component to ensure always string
+3. **Fixed Type Safety**: Added `const currentValue = value || ""` in functions that use the value
+4. **Consistent String Handling**: Ensured all references to value have fallback to empty string
+
+### Testing Results
+- ✅ No React warnings in console
+- ✅ Input field works correctly with undefined initial values
+- ✅ Google Maps search functionality preserved
+- ✅ No linting errors introduced
+
+### Prevention Measures
+- Always provide fallback values for optional props in input components
+- Use `value={prop || ""}` pattern for optional string props
+- Test components with undefined initial values
 - Ensure state synchronization between typing and selection
 - Maintain both manual editing and dropdown selection capabilities
 

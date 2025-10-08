@@ -24,7 +24,7 @@ export default function AccountPage() {
   const [loadingCodes, setLoadingCodes] = useState(true)
   const [loadingProfile, setLoadingProfile] = useState(true)
   const [updatingCity, setUpdatingCity] = useState(false)
-  const { user, signOut } = useSession()
+  const { user, signOut, invalidateUserCache } = useSession()
 
   // Fetch user's profile data
   useEffect(() => {
@@ -91,6 +91,8 @@ export default function AccountPage() {
       })
 
       if (response.ok) {
+        // Invalidate user cache so fresh data is fetched on next page visit
+        invalidateUserCache()
         toast.success("City updated successfully!", {
           duration: 4000,
         })
@@ -199,7 +201,11 @@ export default function AccountPage() {
               ) : (
                 <ProfilePictureUpload
                   currentImageUrl={profilePictureUrl}
-                  onImageChange={setProfilePictureUrl}
+                  onImageChange={(newImageUrl) => {
+                    setProfilePictureUrl(newImageUrl)
+                    // Invalidate user cache so fresh data is fetched
+                    invalidateUserCache()
+                  }}
                   disabled={updatingCity}
                   className="w-full"
                 />

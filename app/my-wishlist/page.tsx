@@ -33,29 +33,15 @@ export default function MyListPage() {
   const [userCity, setUserCity] = useState("Mumbai")
   const [loadingProfile, setLoadingProfile] = useState(true)
   
-  const { user } = useSession()
+  const { user, userProfile } = useSession()
 
-  // Fetch user profile data
+  // Use SessionProvider data instead of fetching separately
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        setLoadingProfile(true)
-        const response = await fetch('/api/users')
-        if (response.ok) {
-          const data = await response.json()
-          setUserCity(data.city || "Mumbai")
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error)
-      } finally {
-        setLoadingProfile(false)
-      }
+    if (userProfile) {
+      setUserCity(userProfile.city || "Mumbai")
+      setLoadingProfile(false)
     }
-
-    if (user) {
-      fetchUserProfile()
-    }
-  }, [user])
+  }, [userProfile])
 
   // Fetch wishlist dishes from API
   useEffect(() => {
