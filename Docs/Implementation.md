@@ -477,8 +477,42 @@
   - **Flexible Availability**: Dishes can be available in multiple channels simultaneously
   - **Future-Proof Architecture**: Easily extensible for new availability channels
 
-### 🎯 MVP Status: ~95% Complete - Restaurant-Centric Architecture Implemented
-The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online).
+### ✅ Completed (Stage 10 - Middle East Delivery App Expansion)
+**Middle East Market Integration - Noon, Careem, and Talabat:**
+
+- **New Delivery Apps Added**: Integrated 3 major Middle East delivery platforms:
+  - **Noon Food**: UAE, Saudi Arabia, Egypt (3 countries)
+  - **Careem**: UAE, Saudi Arabia, Qatar, Oman, Egypt, Pakistan, Jordan (7 countries)
+  - **Talabat**: Kuwait, Bahrain, UAE, Oman, Qatar, Jordan, Egypt, Iraq (8 countries)
+
+- **Geographic Expansion**: Added support for 7 new countries:
+  - Saudi Arabia, Egypt, Kuwait, Bahrain, Oman, Jordan, Iraq
+  - Updated existing countries (UAE, Qatar, Pakistan) with new delivery options
+
+- **Technical Implementation**:
+  - Created placeholder SVG logos for Noon, Careem, Talabat (`public/logos/`)
+  - Updated `DELIVERY_APPS_BY_COUNTRY` mapping with all new countries and apps
+  - Updated `DELIVERY_APP_LOGOS` mapping with new logo paths
+  - Added deep link schemes: `noon://`, `careem://`, `talabat://`
+  - Added web fallback URLs for all three apps
+  - Updated `delivery_apps_by_country.md` documentation
+
+- **Country Name Format Verification**:
+  - Used full country names per Google Maps API standard (e.g., "Saudi Arabia", "United Arab Emirates")
+  - Consistent with existing country name handling (from BUG-020 fix)
+
+- **Critical Bug Fix (BUG-021)**: Google Maps API City Format Variations
+  - **Issue**: Delivery apps not showing for UAE and Saudi Arabia cities
+  - **Root Cause**: Google Maps returns different formats - dash separator ("Dubai - United Arab Emirates"), space only ("Riyadh Saudi Arabia"), or comma ("Doha, Qatar")
+  - **Solution**: Enhanced `extractCountryFromCity()` to handle all three format variations
+  - **Impact**: Enabled delivery app functionality for all Middle East countries
+  - **Files Fixed**: `lib/delivery-apps.ts`
+
+- **Total Delivery Apps**: Expanded from 13 to 16 delivery apps
+- **Total Countries**: Expanded from 52 to 59 countries supported
+
+### 🎯 MVP Status: ~97% Complete - Restaurant-Centric Architecture + Middle East Expansion
+The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
 
 #### Sub-steps:
 - [ ] Deploy to Vercel with environment configuration

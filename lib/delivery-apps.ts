@@ -40,9 +40,9 @@ export const DELIVERY_APPS_BY_COUNTRY: CountryDeliveryApps = {
   "Hong Kong": ["Foodpanda", "Deliveroo"],
   "Kazakhstan": ["Foodpanda"],
   "Romania": ["Foodpanda"],
-  "Qatar": ["Foodpanda"],
-  "United Arab Emirates": ["Foodpanda", "Deliveroo"],
-  "Pakistan": ["Foodpanda"],
+  "Qatar": ["Foodpanda", "Careem", "Talabat"],
+  "United Arab Emirates": ["Foodpanda", "Deliveroo", "Noon", "Careem", "Talabat"],
+  "Pakistan": ["Foodpanda", "Careem"],
   "Brazil": ["Rappi", "iFood", "Uber Eats"],
   "Mexico": ["Rappi", "iFood", "Uber Eats"],
   "Chile": ["Rappi", "Foodpanda", "PedidosYa"],
@@ -55,31 +55,71 @@ export const DELIVERY_APPS_BY_COUNTRY: CountryDeliveryApps = {
   "Bolivia": ["PedidosYa"],
   "Costa Rica": ["Rappi"],
   "South Korea": ["Uber Eats"],
-  "Japan": ["Uber Eats"]
+  "Japan": ["Uber Eats"],
+  "Saudi Arabia": ["Noon", "Careem"],
+  "Egypt": ["Noon", "Careem", "Talabat"],
+  "Kuwait": ["Talabat"],
+  "Bahrain": ["Talabat"],
+  "Oman": ["Careem", "Talabat"],
+  "Jordan": ["Careem", "Talabat"],
+  "Iraq": ["Talabat"]
 }
 
 /**
- * Extracts country from city string in "City, Country" format
- * @param city - City string like "Mumbai, India" or "New York, United States"
+ * Extracts country from city string in various formats
+ * Handles multiple Google Maps API formats:
+ * - "City, Country" (e.g., "Doha, Qatar")
+ * - "City - Country" (e.g., "Dubai - United Arab Emirates")
+ * - "City Country" (e.g., "Riyadh Saudi Arabia")
+ * @param city - City string from Google Maps API
  * @returns Country name or null if format is invalid
  */
 export function extractCountryFromCity(city: string): string | null {
-  const parts = city.split(', ')
-  
-  if (parts.length < 2) {
-    return null // No comma found
-  }
-  
-  // Get the last part (country)
-  const country = parts[parts.length - 1].trim()
-  
-  // Check if country is empty
-  if (!country) {
+  if (!city || !city.trim()) {
     return null
   }
+
+  // Try comma-separated format first: "City, Country"
+  if (city.includes(',')) {
+    const parts = city.split(',').map(p => p.trim())
+    const lastPart = parts[parts.length - 1]
+    
+    // Check if it's a dash-separated format within the comma-split part
+    // e.g., "Dubai - United Arab Emirates" from "Dubai - United Arab Emirates, Dubai - United Arab Emirates"
+    if (lastPart.includes(' - ')) {
+      const dashParts = lastPart.split(' - ').map(p => p.trim())
+      const country = dashParts[dashParts.length - 1]
+      if (country && country in DELIVERY_APPS_BY_COUNTRY) {
+        return country
+      }
+    }
+    
+    // Check if last part is a valid country
+    if (lastPart && lastPart in DELIVERY_APPS_BY_COUNTRY) {
+      return lastPart
+    }
+  }
   
-  // Check if country exists in our mapping
-  return country in DELIVERY_APPS_BY_COUNTRY ? country : null
+  // Try dash-separated format: "City - Country"
+  if (city.includes(' - ')) {
+    const parts = city.split(' - ').map(p => p.trim())
+    const country = parts[parts.length - 1]
+    if (country && country in DELIVERY_APPS_BY_COUNTRY) {
+      return country
+    }
+  }
+  
+  // Try space-separated format by checking if any known country appears in the string
+  // This handles formats like "Riyadh Saudi Arabia"
+  const knownCountries = Object.keys(DELIVERY_APPS_BY_COUNTRY)
+  for (const country of knownCountries) {
+    // Check if the city string ends with or contains the country name
+    if (city.endsWith(country) || city.includes(` ${country}`)) {
+      return country
+    }
+  }
+  
+  return null
 }
 
 /**
@@ -100,6 +140,9 @@ export const DELIVERY_APP_LOGOS: Record<string, string> = {
   "iFood": "/logos/ifood.svg",
   "PedidosYa": "/logos/pedidosya.svg",
   "Rappi": "/logos/rappi.svg",
+  "Noon": "/logos/noon.svg",
+  "Careem": "/logos/careem.svg",
+  "Talabat": "/logos/talabat.svg",
 }
 
 /**

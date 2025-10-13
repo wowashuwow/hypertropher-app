@@ -33,9 +33,9 @@
 | Hong Kong         | Foodpanda, Deliveroo                                                                                                         |
 | Kazakhstan        | Foodpanda                                                                                                                    |
 | Romania           | Foodpanda                                                                                                                    |
-| Qatar             | Foodpanda                                                                                                                    |
-| United Arab Emirates | Foodpanda, Deliveroo                                                                                                      |
-| Pakistan          | Foodpanda                                                                                                                    |
+| Qatar             | Foodpanda, Careem, Talabat                                                                                                   |
+| United Arab Emirates | Foodpanda, Deliveroo, Noon, Careem, Talabat                                                                               |
+| Pakistan          | Foodpanda, Careem                                                                                                            |
 | Brazil            | Rappi, iFood, Uber Eats                                                                                                      |
 | Mexico            | Rappi, iFood, Uber Eats                                                                                                      |
 | Chile             | Rappi, Foodpanda, PedidosYa                                                                                                  |
@@ -49,3 +49,10 @@
 | Bolivia           | PedidosYa                                                                                                                    |
 | South Korea       | Uber Eats                                                                                                                    |
 | Japan             | Uber Eats                                                                                                                    |
+| Saudi Arabia      | Noon, Careem                                                                                                                 |
+| Egypt             | Noon, Careem, Talabat                                                                                                        |
+| Kuwait            | Talabat                                                                                                                      |
+| Bahrain           | Talabat                                                                                                                      |
+| Oman              | Careem, Talabat                                                                                                              |
+| Jordan            | Careem, Talabat                                                                                                              |
+| Iraq              | Talabat                                                                                                                      |

@@ -29,6 +29,13 @@ This document outlines the database schema for the Hypertropher application, bui
     - [`protein_rating_type` ENUM](#protein_rating_type-enum)
     - [`taste_rating_type` ENUM](#taste_rating_type-enum)
     - [`satisfaction_rating_type` ENUM](#satisfaction_rating_type-enum)
+  - [Schema Evolution \& Migration History](#schema-evolution--migration-history)
+    - [Major Architecture Changes](#major-architecture-changes)
+      - [1. Restaurant-Centric Refactor (January 2025)](#1-restaurant-centric-refactor-january-2025)
+      - [2. Foreign Key Constraints (January 2025)](#2-foreign-key-constraints-january-2025)
+      - [3. Storage Security Enhancement (January 2025)](#3-storage-security-enhancement-january-2025)
+    - [Database Constraint Issues Resolved](#database-constraint-issues-resolved)
+    - [Data Migration Strategy](#data-migration-strategy)
   - [Administrative Operations](#administrative-operations)
     - [Environment Configuration for Service Operations](#environment-configuration-for-service-operations)
 

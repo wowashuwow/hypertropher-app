@@ -25,7 +25,10 @@ export const DELIVERY_APP_DEEP_LINKS: Record<string, string> = {
   'Foodpanda': 'foodpanda://',
   'iFood': 'ifood://',
   'PedidosYa': 'pedidosya://',
-  'Rappi': 'rappi://'
+  'Rappi': 'rappi://',
+  'Noon': 'noon://',
+  'Careem': 'careem://',
+  'Talabat': 'talabat://'
 }
 
 /**
@@ -45,7 +48,10 @@ export const DELIVERY_APP_WEB_URLS: Record<string, string> = {
   'Foodpanda': 'https://www.foodpanda.com',
   'iFood': 'https://www.ifood.com.br',
   'PedidosYa': 'https://www.pedidosya.com',
-  'Rappi': 'https://www.rappi.com'
+  'Rappi': 'https://www.rappi.com',
+  'Noon': 'https://www.noon.com',
+  'Careem': 'https://www.careem.com',
+  'Talabat': 'https://www.talabat.com'
 }
 
 /**
