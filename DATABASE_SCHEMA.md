@@ -298,6 +298,190 @@ Defines the possible values for overall satisfaction ratings.
 
 ---
 
+## Schema Evolution & Migration History
+
+### Major Architecture Changes
+
+#### 1. Restaurant-Centric Refactor (January 2025)
+
+**Problem Solved:**
+- Data duplication: Same dish/restaurant appearing twice (In-Restaurant vs Online)
+- Inconsistent restaurant data across dishes
+- Limited availability flexibility
+
+**Solution Implemented:**
+- Created centralized `restaurants` table
+- Implemented `dish_availability_channels` for flexible availability (In-Store/Online/Both)
+- Created `dish_delivery_apps` for online dish management
+- Migrated all existing data to new structure
+
+**Tables Created:**
+```sql
+CREATE TABLE restaurants (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  city TEXT NOT NULL,
+  place_id TEXT UNIQUE,           -- Google Maps ID
+  google_maps_address TEXT,
+  latitude NUMERIC,
+  longitude NUMERIC,
+  manual_address TEXT,            -- For cloud kitchens
+  is_cloud_kitchen BOOLEAN,
+  source_type TEXT CHECK (source_type IN ('google_maps', 'manual')),
+  verified BOOLEAN DEFAULT false
+);
+
+CREATE TABLE dish_availability_channels (
+  id UUID PRIMARY KEY,
+  dish_id UUID REFERENCES dishes(id) ON DELETE CASCADE,
+  channel TEXT CHECK (channel IN ('In-Store', 'Online')),
+  UNIQUE(dish_id, channel)
+);
+
+CREATE TABLE dish_delivery_apps (
+  id UUID PRIMARY KEY,
+  dish_id UUID REFERENCES dishes(id) ON DELETE CASCADE,
+  availability_channel_id UUID REFERENCES dish_availability_channels(id) ON DELETE CASCADE,
+  delivery_app TEXT NOT NULL,
+  UNIQUE(dish_id, availability_channel_id, delivery_app)
+);
+```
+
+**Columns Removed from `dishes` table:**
+- `restaurant_name` (moved to `restaurants.name`)
+- `city` (moved to `restaurants.city`)
+- `restaurant_address` (split into `google_maps_address` and `manual_address`)
+- `latitude`, `longitude` (moved to `restaurants`)
+- `place_id` (moved to `restaurants`)
+- `availability` (replaced by `dish_availability_channels`)
+- `delivery_app_url` (replaced by `dish_delivery_apps`)
+
+**Columns Added to `dishes` table:**
+- `restaurant_id UUID` - References restaurants table
+
+#### 2. Foreign Key Constraints (January 2025)
+
+**Problem Solved:**
+- No referential integrity between tables
+- Supabase PostgREST couldn't auto-join tables (PGRST108 errors)
+- Data inconsistencies possible
+
+**Foreign Keys Added (11 total):**
+```sql
+-- Dishes table
+ALTER TABLE dishes ADD CONSTRAINT dishes_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE dishes ADD CONSTRAINT dishes_restaurant_id_fkey 
+  FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE SET NULL;
+
+-- Availability channels
+ALTER TABLE dish_availability_channels ADD CONSTRAINT dish_availability_channels_dish_id_fkey 
+  FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE;
+
+-- Delivery apps
+ALTER TABLE dish_delivery_apps ADD CONSTRAINT dish_delivery_apps_dish_id_fkey 
+  FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE;
+
+ALTER TABLE dish_delivery_apps ADD CONSTRAINT dish_delivery_apps_availability_channel_id_fkey 
+  FOREIGN KEY (availability_channel_id) REFERENCES dish_availability_channels(id) ON DELETE CASCADE;
+
+-- Wishlist
+ALTER TABLE wishlist_items ADD CONSTRAINT wishlist_items_user_id_fkey 
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE wishlist_items ADD CONSTRAINT wishlist_items_dish_id_fkey 
+  FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE;
+
+-- Invite codes
+ALTER TABLE invite_codes ADD CONSTRAINT invite_codes_generated_by_user_id_fkey 
+  FOREIGN KEY (generated_by_user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE invite_codes ADD CONSTRAINT invite_codes_used_by_user_id_fkey 
+  FOREIGN KEY (used_by_user_id) REFERENCES users(id) ON DELETE SET NULL;
+```
+
+**Impact:**
+- Enabled Supabase PostgREST auto-joins using explicit foreign key names
+- Ensured data integrity across tables
+- Fixed navigate buttons and wishlist functionality
+
+#### 3. Storage Security Enhancement (January 2025)
+
+**Problem Solved:**
+- Users could delete any dish photo (security vulnerability)
+- No file organization by user
+- Silent deletion failures
+
+**Solution Implemented:**
+
+**File Structure Change:**
+- **Before:** `{timestamp}-{random}-{filename}` (bucket root)
+- **After:** `{user_id}/{timestamp}-{random}-{filename}` (user folders)
+
+**RLS Policies Added:**
+```sql
+-- CRITICAL: SELECT policy required for deletion to work
+CREATE POLICY "Public access to dish photos"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'dish-photos');
+
+-- User can only upload to their own folder
+CREATE POLICY "Users can upload their own dish photos"
+ON storage.objects FOR INSERT
+TO public
+WITH CHECK (
+  bucket_id = 'dish-photos'
+  AND (auth.uid())::text = (storage.foldername(name))[1]
+);
+
+-- User can only delete their own photos
+CREATE POLICY "Users can delete their own dish photos"
+ON storage.objects FOR DELETE
+TO public
+USING (
+  bucket_id = 'dish-photos'
+  AND (auth.uid())::text = (storage.foldername(name))[1]
+);
+```
+
+**Key Lesson:**
+🚨 **Supabase Storage requires BOTH SELECT and DELETE policies for deletion to work.** Missing SELECT policy causes silent failures where API returns "success" but files remain in storage. See `/Docs/Supabase_Workflow.md` for complete troubleshooting workflow.
+
+### Database Constraint Issues Resolved
+
+**Problem:** NOT NULL constraints on old columns preventing dish creation after refactor
+
+**Constraints Removed:**
+```sql
+ALTER TABLE dishes ALTER COLUMN restaurant_name DROP NOT NULL;
+ALTER TABLE dishes ALTER COLUMN availability DROP NOT NULL;
+```
+
+**Then columns were completely removed** in final cleanup migration.
+
+### Data Migration Strategy
+
+**Approach Used:**
+1. Created new tables (`restaurants`, `dish_availability_channels`, `dish_delivery_apps`)
+2. Added nullable `restaurant_id` to `dishes` table
+3. Migrated data using PostgreSQL CTEs:
+   - Created restaurant records from unique dish restaurant data
+   - Linked dishes to restaurants
+   - Created availability channels based on old `availability` field
+   - Created delivery app records from old `delivery_apps` JSONB
+4. Removed redundant columns after successful migration
+5. Made `restaurant_id` NOT NULL after data migration
+
+**Migration Verification:**
+- All 10 existing dishes migrated successfully
+- No data loss
+- All relationships preserved
+- New structure allows both in-store and online availability for same dish
+
+---
+
 ## Administrative Operations
 
 ### Environment Configuration for Service Operations
