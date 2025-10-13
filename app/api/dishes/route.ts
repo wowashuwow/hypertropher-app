@@ -16,26 +16,37 @@ export async function POST(request: NextRequest) {
 
   try {
     const dishData = await request.json();
+    console.log("🍽️ Creating dish with data:", dishData);
 
-    // Add the user_id from the authenticated user
+    // Only include non-redundant fields for dishes table
     const dishToInsert = {
-      ...dishData,
+      restaurant_id: dishData.restaurant_id,
+      dish_name: dishData.dish_name,
+      price: dishData.price,
+      protein_source: dishData.protein_source,
+      taste: dishData.taste,
+      protein_content: dishData.protein_content,
+      satisfaction: dishData.satisfaction,
+      comment: dishData.comment,
+      image_url: dishData.image_url,
       user_id: user.id,
     };
 
     const { data, error } = await supabase
       .from("dishes")
       .insert(dishToInsert)
-      .select();
+      .select()
+      .single();
 
     if (error) {
-      console.error("Error inserting dish:", error);
+      console.error("❌ Error inserting dish:", error);
       return NextResponse.json({ error: "Failed to create dish." }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    console.log("✅ Dish created successfully:", data);
+    return NextResponse.json({ dishId: data.id });
   } catch (error) {
-    console.error("Server Error:", error);
+    console.error("❌ Server Error:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
 }
@@ -68,13 +79,28 @@ export async function GET() {
       }
     }
 
-    // 1. Fetch dishes - filter by user's city if authenticated, otherwise fetch all
-    const query = supabase
+    // 1. Fetch dishes with restaurant data - filter by user's city if authenticated, otherwise fetch all
+    let query = supabase
       .from("dishes")
-      .select(`*`);
+      .select(`
+        *,
+        restaurants!dishes_restaurant_id_fkey (
+          id,
+          name,
+          city,
+          source_type,
+          place_id,
+          google_maps_address,
+          latitude,
+          longitude,
+          manual_address,
+          is_cloud_kitchen,
+          verified
+        )
+      `);
     
     if (userCity) {
-      query.eq("city", userCity);
+      query = query.eq("restaurants.city", userCity);
     }
 
     const { data: dishes, error: dishesError } = await query;
@@ -84,9 +110,10 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to fetch dishes." }, { status: 500 });
     }
 
-    // 2. Enhance each dish with the author's profile using a secure RPC call
+    // 2. Enhance each dish with availability channels and delivery apps
     const enhancedDishes = await Promise.all(
       dishes.map(async (dish) => {
+        // Get user profile
         const { data: userProfile, error: profileError } = await supabase.rpc(
           "get_user_profile_by_id",
           { user_id_input: dish.user_id }
@@ -96,10 +123,62 @@ export async function GET() {
           console.error(`Error fetching profile for user ${dish.user_id}:`, profileError);
         }
 
+        // Get availability channels
+        const { data: availabilityChannels } = await supabase
+          .from('dish_availability_channels')
+          .select('channel')
+          .eq('dish_id', dish.id);
+
+        const hasInStore = availabilityChannels?.some(ch => ch.channel === 'In-Store') || false;
+        const hasOnline = availabilityChannels?.some(ch => ch.channel === 'Online') || false;
+
+        // Get delivery apps for online availability
+        let deliveryApps = [];
+        if (hasOnline) {
+          const { data: onlineChannel } = await supabase
+            .from('dish_availability_channels')
+            .select('id')
+            .eq('dish_id', dish.id)
+            .eq('channel', 'Online')
+            .single();
+
+          if (onlineChannel) {
+            const { data: apps } = await supabase
+              .from('dish_delivery_apps')
+              .select('delivery_app')
+              .eq('availability_channel_id', onlineChannel.id);
+            
+            deliveryApps = apps?.map(app => app.delivery_app) || [];
+          }
+        }
+
+        // Get restaurant data from JOIN
+        const restaurantData = dish.restaurants || {
+          name: 'Unknown Restaurant',
+          city: 'Unknown City',
+          source_type: 'manual',
+          is_cloud_kitchen: false
+        };
+
         return {
           ...dish,
+          // Legacy fields for backward compatibility
+          restaurant_name: restaurantData.name,
+          city: restaurantData.city,
+          availability: hasInStore && hasOnline ? 'Both' : hasInStore ? 'In-Store' : 'Online',
+          delivery_apps: deliveryApps,
+          place_id: restaurantData.place_id || null,
+          restaurant_address: restaurantData.google_maps_address || restaurantData.manual_address,
+          latitude: restaurantData.latitude,
+          longitude: restaurantData.longitude,
+          
+          // New fields
+          restaurant: restaurantData,
+          hasInStore,
+          deliveryApps,
+          
           users: { 
-            name: userProfile?.name || "A User", // Use a fallback name if fetch fails
+            name: userProfile?.name || "A User",
             profile_picture_url: userProfile?.profile_picture_url || null
           },
         };
@@ -127,6 +206,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const { id, ...updateData } = await request.json();
+    console.log("🍽️ Updating dish:", id, "with data:", updateData);
 
     if (!id) {
       return NextResponse.json({ error: "Dish ID is required." }, { status: 400 });
@@ -140,7 +220,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError) {
-      console.error("Error fetching dish:", fetchError);
+      console.error("❌ Error fetching dish:", fetchError);
       return NextResponse.json({ error: "Dish not found." }, { status: 404 });
     }
 
@@ -148,22 +228,39 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "You can only update your own dishes." }, { status: 403 });
     }
 
+    // Validate and filter fields to prevent updating removed columns
+    const validFields = [
+      'restaurant_id', 'dish_name', 'price', 'protein_source',
+      'protein_content', 'taste', 'satisfaction', 'comment', 'image_url'
+    ];
+
+    const cleanedUpdateData = Object.keys(updateData)
+      .filter(key => validFields.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = updateData[key];
+        return obj;
+      }, {} as any);
+
+    console.log("🧹 Cleaned update data:", cleanedUpdateData);
+
     // Update the dish
     const { data, error } = await supabase
       .from("dishes")
-      .update(updateData)
+      .update(cleanedUpdateData)
       .eq("id", id)
       .eq("user_id", user.id) // Double-check ownership
-      .select();
+      .select()
+      .single();
 
     if (error) {
-      console.error("Error updating dish:", error);
+      console.error("❌ Error updating dish:", error);
       return NextResponse.json({ error: "Failed to update dish." }, { status: 500 });
     }
 
+    console.log("✅ Dish updated successfully:", data);
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Server Error:", error);
+    console.error("❌ Server Error:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
 }

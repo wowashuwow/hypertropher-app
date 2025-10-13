@@ -109,7 +109,7 @@ export default function MyListPage() {
             </div>
           ) : savedDishes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {savedDishes.map((dish) => (
+              {savedDishes.map((dish: any) => (
                 <DishCard 
                   key={dish.id} 
                   id={dish.id}
@@ -123,10 +123,14 @@ export default function MyListPage() {
                   comment={dish.comment}
                   addedBy={dish.addedBy}
                   addedByProfilePicture={dish.users?.profile_picture_url || null}
-                  availability={dish.availability}
                   imageUrl={dish.image_url}
+                  // New restaurant-centric props
+                  restaurant={dish.restaurant}
+                  hasInStore={dish.hasInStore}
+                  deliveryApps={dish.deliveryApps || dish.delivery_apps || []}
+                  // Legacy props for backward compatibility
+                  availability={dish.availability}
                   proteinSource={dish.protein_source}
-                  deliveryApps={dish.delivery_apps}
                   placeId={dish.place_id}
                   isBookmarked={true} 
                   onBookmarkToggle={handleBookmarkToggle} 

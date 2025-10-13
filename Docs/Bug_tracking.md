@@ -3,6 +3,301 @@
 ## Overview
 This document tracks all bugs, errors, and issues encountered during the development of Hypertropher. It serves as a knowledge base for resolving similar issues and maintaining code quality.
 
+## Recent Fixes (Restaurant-Centric Implementation)
+
+### [BUG-036] - Missing DELETE RLS Policy for Dish Photos
+**Date:** 2025-01-10
+**Severity:** High
+**Status:** ✅ Resolved
+**Documentation:** See `/Docs/Supabase_Workflow.md` for complete workflow to prevent similar issues
+
+**Description:**
+Users could not delete old dish photos when uploading new ones in the edit-dish form. The Supabase client returned "success" but photos were not actually deleted from storage.
+
+**Root Cause:**
+1. **Missing SELECT RLS policy** for the `dish-photos` storage bucket (CRITICAL - Supabase Storage requires both SELECT and DELETE policies for deletion to work)
+2. No DELETE RLS policy existed for the `dish-photos` storage bucket
+3. Photos were stored in bucket root without user ID prefixes, making secure deletion policies impossible
+4. File structure: `{timestamp}-{random}-{filename}` (no user association)
+
+**Resolution:**
+
+**Phase 1 - Added DELETE RLS Policy:**
+- Created `migration-007-add-dish-photos-delete-policy.sql`
+- Policy: Users can only delete photos in their own `{user_id}/` folder
+- Enforces security at storage level
+
+**Phase 2 - Updated Upload Functions:**
+- Modified `app/add-dish/page.tsx` uploadPhoto function
+- Modified `app/edit-dish/[id]/page.tsx` uploadPhoto function
+- New structure: `{user_id}/{timestamp}-{random}-{filename}`
+- Gets user ID from `supabase.auth.getUser()` before upload
+- Updated `extractFilePathFromUrl` to handle both new and legacy formats
+
+**Phase 3 - Created Migration API:**
+- Created `/api/migrate-dish-photos` endpoint
+- Moves existing photos from bucket root to `{user_id}/` folders
+- Updates dish `image_url` fields
+- Deletes old photos after successful migration
+- Uses service client to bypass RLS during migration
+
+**Phase 4 - Added Missing SELECT Policy (CRITICAL FIX):**
+- Created `migration-009-add-dish-photos-select-policy.sql`
+- Added SELECT RLS policy for public read access
+- **This was the root cause** - Supabase Storage requires SELECT permission to verify file existence before deletion
+- Without SELECT policy, deletions fail silently with "success" message but no actual deletion
+
+**Files Created:**
+- `migration-007-add-dish-photos-delete-policy.sql`
+- `migration-009-add-dish-photos-select-policy.sql`
+- `app/api/migrate-dish-photos/route.ts`
+- `Docs/Supabase_Workflow.md` (comprehensive workflow to prevent similar issues)
+
+**Files Modified:**
+- `app/add-dish/page.tsx` - Updated uploadPhoto function
+- `app/edit-dish/[id]/page.tsx` - Updated uploadPhoto and extractFilePathFromUrl
+- `DATABASE_SCHEMA.md` - Updated dish-photos bucket documentation
+
+**Migration Steps:**
+1. Run `migration-007-add-dish-photos-delete-policy.sql` in Supabase SQL editor
+2. Run `migration-009-add-dish-photos-select-policy.sql` in Supabase SQL editor (CRITICAL)
+3. Deploy updated frontend code (new uploads will use user ID folders)
+4. Run migration: `POST /api/migrate-dish-photos` (moves existing photos)
+5. Verify all photos migrated successfully
+6. Test photo deletion in edit-dish form
+
+**Security Benefits:**
+✅ RLS enforced at storage level
+✅ Users can only delete their own photos
+✅ No malicious deletion of other users' photos possible
+✅ Proper file organization by user
+✅ Public read access for displaying images
+✅ User-specific write/delete permissions
+
+**Testing Results:**
+✅ Add new dish with photo → stored in `{user_id}/` folder
+✅ Edit dish with new photo → old photo deleted successfully, new photo in `{user_id}/` folder
+✅ Migration API → all 10 photos migrated successfully
+✅ Photo deletion working correctly after SELECT policy added
+
+**Key Lesson Learned:**
+🚨 **Supabase Storage requires BOTH SELECT and DELETE policies for deletion operations to work.** This is not clearly documented in Supabase's official documentation. Missing SELECT policy causes silent failures where the API returns "success" but files remain in storage.
+
+**Prevention:**
+- Always check RLS policies FIRST when troubleshooting storage issues
+- Verify both SELECT and operation-specific policy exist
+- See `/Docs/Supabase_Workflow.md` for complete troubleshooting workflow
+
+---
+
+### [BUG-035] - Photo Storage Issues in Edit Dish
+**Date:** 2025-01-10
+**Severity:** Medium
+**Status:** Superseded by BUG-036
+
+**Description:**
+Multiple issues with photo storage when editing dishes:
+1. Old photos not deleted when new ones uploaded (storage waste)
+2. Photos uploaded to inconsistent subdirectory (`dish-images/`) in edit-dish vs bucket root in add-dish
+3. Filename collision risk in add-dish form
+
+**Root Cause:**
+1. Edit-dish form was creating `dish-images/` subdirectory: `const filePath = \`dish-images/${fileName}\``
+2. No deletion logic implemented for old photos
+3. Filename generation only used timestamp without randomness: `${Date.now()}-${photo.name}`
+
+**Resolution:**
+
+**Phase 1 - Fixed Folder Structure:**
+- Updated `edit-dish/[id]/page.tsx` `uploadPhoto` function
+- Removed `dish-images/` subdirectory prefix
+- Changed to direct bucket root upload matching add-dish format
+
+**Phase 2 - Added Photo Deletion:**
+- Added `extractFilePathFromUrl` helper function to parse Supabase URLs
+- Added `deleteOldPhoto` function to remove old images from storage
+- Updated `handleSubmit` to call `deleteOldPhoto` before uploading new photo
+- Implemented graceful error handling (deletion failures don't block updates)
+
+**Phase 3 - Improved Filename Uniqueness:**
+- Updated both add-dish and edit-dish forms
+- Changed from `${Date.now()}-${photo.name}` to `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${photo.name}`
+- Prevents collisions if multiple users upload at same millisecond
+
+**Files Modified:**
+- `app/edit-dish/[id]/page.tsx` - Added deletion logic, fixed upload path, improved filename
+- `app/add-dish/page.tsx` - Improved filename uniqueness
+
+**Testing Required:**
+- Edit a dish and upload a new photo
+- Verify old photo deleted from Supabase storage
+- Verify new photo uploaded to bucket root (not subdirectory)
+- Test filename uniqueness with rapid uploads
+
+**Benefits:**
+✅ Prevents storage bloat from orphaned photos
+✅ Consistent file organization across add/edit flows
+✅ Better filename collision prevention
+
+---
+
+### [BUG-001] - Missing Checkbox Component Import Error
+**Date:** 2024-12-19
+**Severity:** Critical
+**Status:** Resolved
+
+**Description:**
+Build error occurred due to missing `@/components/ui/checkbox` import in `restaurant-input.tsx` component.
+
+**Error Message:**
+```
+Module not found: Can't resolve '@/components/ui/checkbox'
+```
+
+**Root Cause:**
+The `Checkbox` component doesn't exist in the UI components library, but was imported and used in the new `RestaurantInput` component.
+
+**Resolution:**
+1. Removed the `Checkbox` import
+2. Replaced `Checkbox` usage with regular HTML `<input type="checkbox">` elements
+3. Updated the `onCheckedChange` prop to use `onChange` with `e.target.checked`
+
+**Files Modified:**
+- `components/ui/restaurant-input.tsx`
+
+**Testing Results:**
+✅ Build error resolved
+✅ Checkbox functionality works correctly
+✅ No linting errors
+
+---
+
+### [BUG-002] - TypeScript Import Conflicts
+**Date:** 2024-12-19
+**Severity:** Medium
+**Status:** Resolved
+
+**Description:**
+TypeScript error due to import conflicts in `restaurant-input.tsx` when `isolatedModules` is enabled.
+
+**Error Message:**
+```
+Import 'RestaurantInput' conflicts with local value, so must be declared with a type-only import
+```
+
+**Root Cause:**
+The component name `RestaurantInput` conflicted with the imported type of the same name.
+
+**Resolution:**
+Changed import from:
+```typescript
+import { RestaurantInput, Restaurant } from "@/types/restaurant"
+```
+To:
+```typescript
+import type { RestaurantInput, Restaurant } from "@/types/restaurant"
+```
+
+**Files Modified:**
+- `components/ui/restaurant-input.tsx`
+
+**Testing Results:**
+✅ TypeScript compilation successful
+✅ No import conflicts
+
+---
+
+### [BUG-003] - Missing cn Utility Import
+**Date:** 2024-12-19
+**Severity:** Medium
+**Status:** Resolved
+
+**Description:**
+Missing `cn` utility import in `add-dish/page.tsx` causing undefined function errors.
+
+**Root Cause:**
+The `cn` utility function was used in the component but not imported.
+
+**Resolution:**
+Added import:
+```typescript
+import { cn } from "@/lib/utils"
+```
+
+**Files Modified:**
+- `app/add-dish/page.tsx`
+
+**Testing Results:**
+✅ Component renders without errors
+✅ Conditional styling works correctly
+
+---
+
+### [BUG-004] - API Type Safety Issues
+**Date:** 2024-12-19
+**Severity:** Medium
+**Status:** Resolved
+
+**Description:**
+TypeScript errors in API endpoints due to incorrect type assumptions for Supabase query results.
+
+**Error Message:**
+```
+Property 'user_id' does not exist on type '{ user_id: any; }[]'
+```
+
+**Root Cause:**
+Supabase queries with joins return arrays, but the code was accessing them as single objects.
+
+**Resolution:**
+Updated type checking to handle arrays:
+```typescript
+// Before
+if (channel.dishes.user_id !== user.id)
+
+// After  
+if (channel.dishes && Array.isArray(channel.dishes) && channel.dishes[0]?.user_id !== user.id)
+```
+
+**Files Modified:**
+- `app/api/dishes/availability-channels/route.ts`
+- `app/api/dishes/delivery-apps/route.ts`
+
+**Testing Results:**
+✅ API endpoints compile without errors
+✅ Type safety maintained
+✅ Authorization checks work correctly
+
+---
+
+### [BUG-005] - Missing GET Handler for Availability Channels
+**Date:** 2024-12-19
+**Severity:** Medium
+**Status:** Resolved
+
+**Description:**
+Edit dish form couldn't fetch existing availability channels due to missing GET handler.
+
+**Root Cause:**
+The availability channels API only had POST and DELETE handlers, but the edit form needed to fetch existing channels.
+
+**Resolution:**
+Added GET handler to `app/api/dishes/availability-channels/route.ts`:
+```typescript
+export async function GET(request: NextRequest) {
+  // Fetch availability channels for a dish
+}
+```
+
+**Files Modified:**
+- `app/api/dishes/availability-channels/route.ts`
+
+**Testing Results:**
+✅ Edit form can fetch existing availability channels
+✅ Form pre-populates correctly with existing data
+
+---
+
 ## Bug Reporting Process
 
 ### 1. Issue Identification
@@ -4647,6 +4942,50 @@ The RestaurantSearchInput component's onChange handler was set to `onChange={() 
 ### Prevention Measures
 - Never disable onChange handlers in search components
 - Test text editing functionality thoroughly
+
+---
+
+## [BUG-027] - Restaurant Input Typing Regression (Restaurant-Centric Implementation)
+
+**Date:** 2025-01-30
+**Severity:** High (User Experience)
+**Status:** ✅ Resolved
+**Reporter:** User
+
+### Description
+After implementing the restaurant-centric architecture, the restaurant name input field stopped working again. Users couldn't type in the restaurant search input, which was the same issue that had been previously fixed in BUG-024.
+
+### Root Cause
+During the restaurant-centric refactor, the RestaurantInput component was updated but the onChange handler was incorrectly set to `onChange={() => setSelectedGoogleMapsRestaurant(null)}`, which is essentially the same problem as `onChange={() => {}}` - it doesn't update the input value.
+
+### Resolution Steps
+1. **Added Internal Input Value State**: Created `inputValue` state in RestaurantInput component
+2. **Fixed onChange Handler**: Created proper `handleInputChange` function that updates input value and clears selectedRestaurant when user manually edits
+3. **State Synchronization**: Ensured proper synchronization between typing and restaurant selection
+4. **Preserved Google Maps Functionality**: Maintained search suggestions and restaurant selection from dropdown
+
+### Additional Fix: Location Permission UI
+Also added missing location permission request UI that was removed during the refactor:
+1. **Location Permission Request**: Added UI to request location access with clear benefits
+2. **Status Messages**: Show location granted/denied status with appropriate messaging
+3. **Fallback Messaging**: Explain city-based search when location is denied
+4. **Integration**: Connected with existing `useGeolocation` hook
+
+### Testing Results
+- ✅ **Text editing works correctly** (backspace, typing)
+- ✅ **Google Maps search suggestions** still appear
+- ✅ **Restaurant selection from dropdown** works
+- ✅ **Manual editing clears selectedRestaurant** appropriately
+- ✅ **Location permission request** shows with clear benefits
+- ✅ **Location status messages** display correctly
+- ✅ **Form validation** works correctly
+- ✅ **Both add-dish and edit-dish forms** work properly
+
+### Prevention Measures
+- Always check Bug_tracking.md for previously solved issues before implementing fixes
+- Follow the established workflow of checking documentation first
+- Test text editing functionality thoroughly after any component refactoring
+- Ensure location permission UI is preserved during major refactors
 
 ---
 

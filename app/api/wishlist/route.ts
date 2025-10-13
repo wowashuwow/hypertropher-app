@@ -36,12 +36,9 @@ export async function GET() {
       .select(`
         dish_id,
         created_at,
-        dishes!inner (
+        dishes!wishlist_items_dish_id_fkey (
           id,
           dish_name,
-          restaurant_name,
-          city,
-          availability,
           image_url,
           price,
           protein_source,
@@ -49,44 +46,104 @@ export async function GET() {
           protein_content,
           satisfaction,
           comment,
-          delivery_apps,
-          place_id,
           created_at,
+          restaurant_id,
+          restaurants!dishes_restaurant_id_fkey (
+            id,
+            name,
+            city,
+            place_id,
+            google_maps_address,
+            manual_address,
+            is_cloud_kitchen
+          ),
           users!dishes_user_id_fkey (
             name
           )
         )
       `)
-      .eq("user_id", user.id)
-      .eq("dishes.city", userCity);
+      .eq("user_id", user.id);
 
     if (wishlistError) {
-      console.error("Error fetching wishlist:", wishlistError);
+      console.error("❌ Error fetching wishlist:", wishlistError);
       return NextResponse.json({ error: "Failed to fetch wishlist." }, { status: 500 });
     }
 
-    // Transform the data to match the expected format
-    const wishlistDishes = wishlistItems.map((item: any) => ({
-      id: item.dishes.id,
-      dish_name: item.dishes.dish_name,
-      restaurant_name: item.dishes.restaurant_name,
-      city: item.dishes.city,
-      price: `₹${item.dishes.price}`,
-      protein: item.dishes.protein_content as "💪 Overloaded" | "👍 Great",
-      taste: item.dishes.taste as "🤤 Amazing" | "👍 Great",
-      satisfaction: item.dishes.satisfaction as "🤩 Would Eat Everyday" | "👍 Great",
-      comment: item.dishes.comment,
-      addedBy: item.dishes.users?.name || "Unknown",
-      availability: item.dishes.availability as "In-Store" | "Online",
-      image_url: item.dishes.image_url || "/delicious-high-protein-meal.jpg",
-      protein_source: item.dishes.protein_source,
-      delivery_apps: item.dishes.delivery_apps || [],
-      place_id: item.dishes.place_id,
-      users: item.dishes.users,
-      wishlisted_at: item.created_at
-    }));
+    // Filter by city in JavaScript since Supabase doesn't support nested relationship filtering
+    const cityFilteredItems = userCity 
+      ? wishlistItems?.filter((item: any) => item.dishes?.restaurants?.city === userCity)
+      : wishlistItems;
 
-    return NextResponse.json(wishlistDishes);
+    // Get availability channels and delivery apps for each dish
+    const enhancedWishlistDishes = await Promise.all(
+      (cityFilteredItems || []).map(async (item: any) => {
+        const dish = item.dishes;
+        
+        // Get availability channels
+        const { data: availabilityChannels } = await supabase
+          .from('dish_availability_channels')
+          .select('channel')
+          .eq('dish_id', dish.id);
+
+        const hasInStore = availabilityChannels?.some((ch: any) => ch.channel === 'In-Store') || false;
+        const hasOnline = availabilityChannels?.some((ch: any) => ch.channel === 'Online') || false;
+
+        // Get delivery apps for online availability
+        let deliveryApps = [];
+        if (hasOnline) {
+          const { data: onlineChannel } = await supabase
+            .from('dish_availability_channels')
+            .select('id')
+            .eq('dish_id', dish.id)
+            .eq('channel', 'Online')
+            .single();
+
+          if (onlineChannel) {
+            const { data: apps } = await supabase
+              .from('dish_delivery_apps')
+              .select('delivery_app')
+              .eq('availability_channel_id', onlineChannel.id);
+            
+            deliveryApps = apps?.map((app: any) => app.delivery_app) || [];
+          }
+        }
+
+        // Get restaurant data from JOIN
+        const restaurantData = dish.restaurants || {
+          name: 'Unknown Restaurant',
+          city: 'Unknown City',
+          source_type: 'manual',
+          is_cloud_kitchen: false
+        };
+
+        return {
+          id: dish.id,
+          dish_name: dish.dish_name,
+          restaurant_name: restaurantData.name,
+          city: restaurantData.city,
+          price: `₹${dish.price}`,
+          protein: dish.protein_content as "💪 Overloaded" | "👍 Great",
+          taste: dish.taste as "🤤 Amazing" | "👍 Great",
+          satisfaction: dish.satisfaction as "🤩 Would Eat Everyday" | "👍 Great",
+          comment: dish.comment,
+          addedBy: dish.users?.name || "Unknown",
+          availability: hasInStore && hasOnline ? "Both" : hasInStore ? "In-Store" : "Online",
+          image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
+          protein_source: dish.protein_source,
+          delivery_apps: deliveryApps,
+          place_id: restaurantData.place_id || null,
+          restaurant_address: restaurantData.google_maps_address || restaurantData.manual_address,
+          users: dish.users,
+          wishlisted_at: item.created_at,
+          // New restaurant-centric fields
+          restaurant: restaurantData,
+          hasInStore,
+          deliveryApps
+        };
+      })
+    );
+
+    return NextResponse.json(enhancedWishlistDishes);
   } catch (error) {
     console.error("Server Error:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

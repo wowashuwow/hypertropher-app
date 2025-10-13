@@ -434,8 +434,51 @@
 - **Accessibility Compliance**: Implemented `richColors={true}` and proper `duration` for WCAG compliance
 - **Mobile-Friendly Offset**: Added 16px top offset for optimal mobile positioning
 
-### 🎯 MVP Status: ~95% Complete - Critical System Restored
-The core functionality is working and secure. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Critical issue resolved**: User signup flow restored with modern Secret API key security.
+### ✅ Completed (Stage 9 - Restaurant-Centric Architecture Implementation)
+**Major Architecture Overhaul - Restaurant-Centric Schema Implementation:**
+
+- **Database Schema Redesign**: Implemented new restaurant-centric architecture with 4 new tables:
+  - `restaurants` table for centralized restaurant data (Google Maps + manual entries)
+  - `dish_availability_channels` table for flexible availability (In-Store, Online, Both)
+  - `dish_delivery_apps` table for delivery app associations
+  - Updated `dishes` table with `restaurant_id` foreign key
+
+- **Automatic Availability Logic**: Simplified user experience with intelligent defaults:
+  - Google Maps restaurants automatically get "In-Store" availability
+  - Manual entries (cloud kitchens) automatically get "Online" availability only
+  - Delivery app selection automatically creates "Online" availability
+  - No more manual availability checkboxes for users
+
+- **Data Migration**: Successfully migrated existing data from old schema to new restaurant-centric structure:
+  - Created restaurant records from existing unique restaurant_name + city combinations
+  - Migrated availability channels and delivery apps to new tables
+  - Preserved all existing dish data and relationships
+
+- **API Endpoints**: Created new RESTful endpoints for restaurant management:
+  - `/api/restaurants` for restaurant creation and retrieval
+  - `/api/dishes/availability-channels` for availability channel management
+  - `/api/dishes/delivery-apps` for delivery app associations
+
+- **Frontend Components**: Updated all forms and components:
+  - New `RestaurantInput` component with Google Maps integration and manual entry
+  - Simplified add-dish and edit-dish forms with automatic availability logic
+  - Updated `DishCard` component to display new availability structure
+  - Removed unnecessary availability checkboxes and manual selections
+
+- **Type Safety**: Added comprehensive TypeScript interfaces:
+  - `RestaurantInput` and `Restaurant` types for restaurant data
+  - Updated `Dish` interface with new restaurant-centric fields
+  - Maintained backward compatibility during transition
+
+- **Benefits Achieved**:
+  - **Eliminated Data Duplication**: Same restaurant appears only once in database
+  - **Simplified User Experience**: No manual availability type selection required
+  - **Better Data Integrity**: Centralized restaurant data with proper relationships
+  - **Flexible Availability**: Dishes can be available in multiple channels simultaneously
+  - **Future-Proof Architecture**: Easily extensible for new availability channels
+
+### 🎯 MVP Status: ~95% Complete - Restaurant-Centric Architecture Implemented
+The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online).
 
 #### Sub-steps:
 - [ ] Deploy to Vercel with environment configuration

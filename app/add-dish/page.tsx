@@ -1,41 +1,37 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Upload, MapPin, AlertCircle } from "lucide-react"
+import { Upload, AlertCircle } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-// import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DeliveryAppPills } from "@/components/ui/delivery-app-pills"
-import { RestaurantSearchInput } from "@/components/ui/restaurant-search-input"
+import { RestaurantInput } from "@/components/ui/restaurant-input"
+import { RestaurantInput as RestaurantInputType } from "@/types/restaurant"
 import { useGeolocation } from "@/lib/hooks/use-geolocation"
-import { RestaurantResult } from "@/lib/hooks/use-google-places"
 import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 export default function AddDishPage() {
   const router = useRouter()
-  const [sourceType, setSourceType] = useState<"In-Restaurant" | "Online">("In-Restaurant")
-  const [deliveryApps, setDeliveryApps] = useState<string[]>([])
-  const [onlineRestaurant, setOnlineRestaurant] = useState("")
-  const [restaurant, setRestaurant] = useState("")
-  const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantResult | null>(null)
-  const [userCity, setUserCity] = useState("Mumbai")
+  
+  // Form state
+  const [restaurant, setRestaurant] = useState<RestaurantInputType | null>(null)
   const [dishName, setDishName] = useState("")
-  const [proteinSource, setProteinSource] = useState<
-    "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other" | ""
-  >("")
-  const [photo, setPhoto] = useState<File | null>(null)
+  const [proteinSource, setProteinSource] = useState<"Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other" | "">("")
+  const [deliveryApps, setDeliveryApps] = useState<string[]>([])
+  const [price, setPrice] = useState<string>("")
   const [taste, setTaste] = useState<"Mouthgasm" | "Pretty Good" | "">("")
   const [protein, setProtein] = useState<"Overloaded" | "Pretty Good" | "">("")
-  const [price, setPrice] = useState<string>("")
-  const [comment, setComment] = useState("")
   const [satisfaction, setSatisfaction] = useState<"Would Eat Everyday" | "Pretty Good" | "">("")
+  const [comment, setComment] = useState("")
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [userCity, setUserCity] = useState("Mumbai")
   const [isLoading, setIsLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'completed' | 'error'>('idle')
@@ -72,14 +68,11 @@ export default function AddDishPage() {
     fetchUserProfile()
   }, [])
 
-  // Handle restaurant selection
-  const handleRestaurantSelect = (restaurant: RestaurantResult) => {
-    console.log('🏗️ AddDish: Restaurant selected:', restaurant.name)
-    console.log('🏗️ AddDish: Current restaurant state:', restaurant)
-    setSelectedRestaurant(restaurant)
-    setRestaurant(restaurant.name)
-    console.log('🏗️ AddDish: Called setRestaurant with:', restaurant.name)
-  }
+  // Automatic availability logic
+  const isGoogleMapsRestaurant = restaurant?.type === 'google_maps'
+  const isCloudKitchen = restaurant?.type === 'manual'
+  const hasInStore = isGoogleMapsRestaurant // Google Maps restaurants automatically have In-Store
+  const hasOnlineAvailability = deliveryApps.length > 0 // Delivery apps automatically mean Online
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -88,194 +81,185 @@ export default function AddDishPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!proteinSource || !price) {
-      alert("Protein source and price are required.");
-      return;
-    }
-    if (sourceType === "Online" && !onlineRestaurant) {
-      alert("Restaurant name is required for online dishes.");
-      return;
-    }
-    if (sourceType === "Online" && deliveryApps.length === 0) {
-      alert("At least one delivery app is required for online dishes.");
-      return;
+  // Helper functions for API calls
+  const createOrFindRestaurant = async (restaurantInput: RestaurantInputType, city: string) => {
+    console.log("🏪 Frontend: Creating/finding restaurant with:", {
+      type: restaurantInput.type,
+      googleMapsData: restaurantInput.googleMapsData,
+      manualData: restaurantInput.manualData,
+      city
+    })
+
+    const response = await fetch('/api/restaurants', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: restaurantInput.type,
+        googleMapsData: restaurantInput.googleMapsData,
+        manualData: restaurantInput.manualData,
+        city
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error("❌ Frontend: Restaurant API failed:", errorData)
+      throw new Error('Failed to create/find restaurant')
     }
 
-    if (sourceType === "Online" && !hasApps) {
-      alert("No delivery apps are available for your location");
-      return;
-    }
-    if (sourceType === "In-Restaurant" && !restaurant) {
-      alert("Please search for and select a restaurant.");
-      return;
-    }
-    setIsLoading(true);
-    setUploadStatus('idle');
-    setUploadProgress(0);
-    setUploadFileSize('');
+    const { restaurant } = await response.json()
+    console.log("✅ Frontend: Restaurant created/found:", restaurant)
+    return restaurant.id
+  }
 
-    const supabase = createClient();
-    let imageUrl = "";
-    const submissionStartTime = Date.now();
-
-    // 1. Handle Photo Upload to Supabase Storage
-    if (photo) {
-      console.log('📸 Starting photo upload...');
-      const uploadStartTime = Date.now();
-      setUploadStatus('uploading');
-      setUploadProgress(0);
-      
-      // Display file size to user
-      const fileSizeMB = photo.size / (1024 * 1024);
-      setUploadFileSize(fileSizeMB < 1 ? `${Math.round(fileSizeMB * 1024)}KB` : `${fileSizeMB.toFixed(1)}MB`);
-      
-      const fileName = `${Date.now()}-${photo.name}`;
-      
-      // Simulate progress updates based on file size and estimated upload time
-      // Estimate upload time: 1MB = ~2 seconds on average connection
-      const estimatedUploadTime = Math.max(fileSizeMB * 2000, 3000); // At least 3 seconds
-      const progressSteps = Math.min(Math.floor(estimatedUploadTime / 200), 30); // Update every 200ms, max 30 steps
-      
-      let currentStep = 0;
-      const progressInterval = setInterval(() => {
-        currentStep++;
-        // Use a logarithmic curve that feels more natural
-        const progress = Math.min(85, Math.floor((currentStep / progressSteps) * 85));
-        setUploadProgress(progress);
-      }, 200);
+  const uploadPhoto = async (photo: File) => {
+    const supabase = createClient()
+    
+    // Get current user ID
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error('You must be logged in to upload photos')
+    }
+    
+    // Add randomness to prevent collisions if multiple users upload at same millisecond
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${photo.name}`
+    // Use user ID prefix for security: {user_id}/{filename}
+    const filePath = `${user.id}/${fileName}`
       
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("dish-photos") // NOTE: We will need to create this bucket in Supabase.
-        .upload(fileName, photo);
-
-      clearInterval(progressInterval);
-      setUploadProgress(100);
+      .from("dish-photos")
+      .upload(filePath, photo)
 
       if (uploadError) {
-        console.error("Error uploading photo:", uploadError);
-        setUploadStatus('error');
-        alert("Failed to upload photo. Please try again.");
-        setIsLoading(false);
-        return;
-      }
-      
-      // Get the public URL of the uploaded image
+      throw new Error(`Failed to upload photo: ${uploadError.message}`)
+    }
+
       const { data: urlData } = supabase.storage
         .from("dish-photos")
-        .getPublicUrl(uploadData.path);
-      
-      imageUrl = urlData.publicUrl;
-      setUploadStatus('completed');
-      
-      const uploadTime = Date.now() - uploadStartTime;
-      console.log(`📸 Photo upload completed in ${uploadTime}ms`);
-    }
+      .getPublicUrl(uploadData.path)
+    
+    return urlData.publicUrl
+  }
 
-    // 2. Validate rating values and prepare clean data
-    const cleanTaste = taste.replace(/^[^\w\s]*\s*/, '');
-    const cleanProtein = protein.replace(/^[^\w\s]*\s*/, '');
-    const cleanSatisfaction = satisfaction.replace(/^[^\w\s]*\s*/, '');
-
-    // Validate that we have valid ENUM values
-    const validRatings = {
-      protein: ['Overloaded', 'Pretty Good'],
-      taste: ['Mouthgasm', 'Pretty Good'],
-      satisfaction: ['Would Eat Everyday', 'Pretty Good']
-    };
-
-    if (!validRatings.taste.includes(cleanTaste)) {
-      throw new Error(`Invalid taste rating: "${cleanTaste}". Valid values are: ${validRatings.taste.join(', ')}`);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validation
+    if (!restaurant) {
+      alert("Please select or add a restaurant.")
+      return
     }
-    if (!validRatings.protein.includes(cleanProtein)) {
-      throw new Error(`Invalid protein rating: "${cleanProtein}". Valid values are: ${validRatings.protein.join(', ')}`);
+    if (!dishName.trim()) {
+      alert("Dish name is required.")
+      return
     }
-    if (!validRatings.satisfaction.includes(cleanSatisfaction)) {
-      throw new Error(`Invalid satisfaction rating: "${cleanSatisfaction}". Valid values are: ${validRatings.satisfaction.join(', ')}`);
+    if (!proteinSource) {
+      alert("Protein source is required.")
+      return
     }
+    if (!hasInStore && deliveryApps.length === 0) {
+      alert("Please select at least one availability option (In-Store or delivery apps).")
+      return
+    }
+    if (!price) {
+      alert("Price is required.")
+      return
+    }
+    setIsLoading(true)
 
-    // Validate restaurant selection for In-Restaurant dishes
-    if (sourceType === "In-Restaurant") {
-      if (!selectedRestaurant) {
-        throw new Error("Please select a restaurant from the dropdown suggestions. Just typing the name is not enough - you need to click on a suggestion from the list.");
+    try {
+      // 1. Create or find restaurant
+      const restaurantId = await createOrFindRestaurant(restaurant, userCity)
+
+      // 2. Upload photo if provided
+      let imageUrl = ""
+      if (photo) {
+        setUploadStatus('uploading')
+        const fileSizeMB = photo.size / (1024 * 1024)
+        setUploadFileSize(fileSizeMB < 1 ? `${Math.round(fileSizeMB * 1024)}KB` : `${fileSizeMB.toFixed(1)}MB`)
+        
+        imageUrl = await uploadPhoto(photo)
+        setUploadStatus('completed')
       }
-      if (!selectedRestaurant.formatted_address) {
-        throw new Error("Selected restaurant is missing address information. Please try selecting a different restaurant.");
-      }
-      // Check if we have valid coordinates (not placeholder 0,0)
-      if (selectedRestaurant.geometry?.location?.lat === 0 && selectedRestaurant.geometry?.location?.lng === 0) {
-        console.warn('⚠️ Restaurant has placeholder coordinates (0,0) - this might indicate a Google Places API issue');
-      }
-    }
 
-    console.log('🏗️ AddDish: Original rating values:', { taste, protein, satisfaction });
-    console.log('🏗️ AddDish: Cleaned rating values:', { cleanTaste, cleanProtein, cleanSatisfaction });
-    console.log('🏗️ AddDish: Restaurant selection state:', { 
-      sourceType, 
-      restaurant, 
-      selectedRestaurant,
-      restaurantAddress: selectedRestaurant?.formatted_address,
-      latitude: selectedRestaurant?.geometry?.location?.lat,
-      longitude: selectedRestaurant?.geometry?.location?.lng,
-      userLocation,
-      userCity,
-      locationPermissionGranted
-    });
-
-    // 3. Prepare Dish Data for API
+      // 3. Create dish
     const dishData = {
-      dish_name: dishName,
-      restaurant_name: sourceType === "Online" ? onlineRestaurant : (selectedRestaurant?.name || restaurant),
-      city: userCity,
-      availability: sourceType === 'In-Restaurant' ? 'In-Store' : sourceType,
-      image_url: imageUrl,
+        restaurant_id: restaurantId,
+        dish_name: dishName.trim(),
       price: parseFloat(price),
       protein_source: proteinSource,
-      taste: cleanTaste, // Use validated clean value
-      protein_content: cleanProtein, // Use validated clean value
-      satisfaction: cleanSatisfaction, // Use validated clean value
-      comment,
-      delivery_apps: sourceType === "Online" ? deliveryApps : [],
-      restaurant_address: selectedRestaurant?.formatted_address || null,
-      latitude: selectedRestaurant?.geometry.location.lat || null,
-      longitude: selectedRestaurant?.geometry.location.lng || null,
-      place_id: selectedRestaurant?.place_id || null,
-    };
+        taste: taste || null,
+        protein_content: protein || null,
+        satisfaction: satisfaction || null,
+        comment: comment.trim() || null,
+        image_url: imageUrl || null,
+      }
 
-    console.log('🏗️ AddDish: Final dish data to be submitted:', dishData);
-
-    // 4. Submit Dish Data to our API
-    console.log('🚀 Starting API call to create dish...');
-    const apiStartTime = Date.now();
-    
-    try {
-      const response = await fetch('/api/dishes', {
+      const dishResponse = await fetch('/api/dishes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dishData),
-      });
+      })
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit dish.");
+      if (!dishResponse.ok) {
+        throw new Error('Failed to create dish')
       }
 
-      const apiTime = Date.now() - apiStartTime;
-      console.log(`🚀 API call completed in ${apiTime}ms`);
-      console.log('✅ Total submission time:', Date.now() - submissionStartTime, 'ms');
+      const { dishId } = await dishResponse.json()
 
-      alert("Dish submitted successfully!");
-      // Redirect to homepage using Next.js router for faster navigation
-      router.push('/');
+      // 4. Create availability channels
+      if (hasInStore) {
+        await fetch('/api/dishes/availability-channels', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dish_id: dishId,
+            channel: 'In-Store',
+          }),
+        })
+      }
 
+      if (hasOnlineAvailability) {
+        const channelResponse = await fetch('/api/dishes/availability-channels', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dish_id: dishId,
+            channel: 'Online',
+          }),
+        })
+
+        const { availabilityChannel } = await channelResponse.json()
+        const availabilityChannelId = availabilityChannel.id
+
+        // 5. Add delivery apps
+        for (const app of deliveryApps) {
+          const deliveryAppResponse = await fetch('/api/dishes/delivery-apps', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              dish_id: dishId,
+              availability_channel_id: availabilityChannelId,
+              delivery_app: app,
+            }),
+          })
+          
+          if (!deliveryAppResponse.ok) {
+            console.error(`Failed to add delivery app ${app}:`, await deliveryAppResponse.text())
+            throw new Error(`Failed to add delivery app ${app}`)
+          }
+        }
+      }
+
+      alert("Dish submitted successfully!")
+      router.push('/')
     } catch (error) {
-      console.error("Submission Error:", error);
-      alert((error as Error).message);
+      console.error("Submission Error:", error)
+      alert((error as Error).message)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const ButtonGroup = ({
     options,
@@ -314,103 +298,17 @@ export default function AddDishPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label>Source Type</Label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={sourceType === "In-Restaurant" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSourceType("In-Restaurant")}
-                    className="flex-1"
-                  >
-                    In-Restaurant
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={sourceType === "Online" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSourceType("Online")}
-                    className="flex-1"
-                  >
-                    Online
-                  </Button>
-                </div>
-              </div>
-
-              {/* Location Permission Request */}
-              {sourceType === "In-Restaurant" && 
-               (!locationPermissionRequested || !locationPermissionGranted) && 
-               checkGeolocationSupport && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mx-0">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h3 className="font-medium text-blue-900 text-sm">Find restaurants near you</h3>
-                      <p className="text-blue-800 text-xs mt-1">
-                        Allow location access to search restaurants closest to your current location. 
-                        Otherwise, we'll search within your selected city ({userCity}).
-                      </p>
-                      <div className="mt-3">
-                        <Button 
-                          size="sm" 
-                          onClick={requestLocationPermission}
-                          disabled={locationLoading}
-                          className="text-xs"
-                        >
-                          {locationLoading ? "Requesting..." : "Allow Location"}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Location Error Display */}
-              {locationError && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
-                    <span className="text-yellow-800 text-sm">{locationError}</span>
-                  </div>
-                </div>
-              )}
-
-              {sourceType === "In-Restaurant" ? (
-                <RestaurantSearchInput
+              {/* Restaurant Selection */}
+              <RestaurantInput
                   value={restaurant}
-                  onChange={(value) => {
-                    console.log('🏗️ AddDish: onChange called with:', value)
-                    setRestaurant(value)
-                  }}
-                  onSelect={handleRestaurantSelect}
+                onChange={setRestaurant}
                   userCity={userCity}
                   userLocation={userLocation}
-                />
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <Label>Delivery Apps *</Label>
-                    <DeliveryAppPills
-                      availableApps={hasApps ? availableApps : []}
-                      selectedApps={deliveryApps}
-                      onSelectionChange={setDeliveryApps}
-                      disabled={!hasApps}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="onlineRestaurant">Restaurant Name</Label>
-                    <Input
-                      id="onlineRestaurant"
-                      type="text"
-                      placeholder="Enter Restaurant Name"
-                      value={onlineRestaurant}
-                      onChange={(e) => setOnlineRestaurant(e.target.value)}
-                      required
-                    />
-                  </div>
-                </>
-              )}
+                locationPermissionGranted={locationPermissionGranted}
+                locationPermissionRequested={locationPermissionRequested}
+                locationError={locationError}
+                onRequestLocationPermission={requestLocationPermission}
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="dishName">Dish Name</Label>
@@ -448,6 +346,20 @@ export default function AddDishPage() {
                     </Button>
                   ))}
                 </div>
+              </div>
+
+              {/* Delivery Apps Selection - Always visible */}
+              <div className="space-y-2">
+                <Label>Delivery Apps (Optional)</Label>
+                <p className="text-sm text-muted-foreground">
+                  Select delivery apps if this dish is available online
+                </p>
+                <DeliveryAppPills
+                  availableApps={hasApps ? availableApps : []}
+                  selectedApps={deliveryApps}
+                  onSelectionChange={setDeliveryApps}
+                  disabled={!hasApps}
+                />
               </div>
 
               <div className="space-y-2">
@@ -516,17 +428,22 @@ export default function AddDishPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isLoading || !proteinSource || !price || (sourceType === "Online" && deliveryApps.length === 0) || (sourceType === "Online" && !hasApps)}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                size="lg" 
+                disabled={isLoading || !restaurant || !dishName || !proteinSource || (!hasInStore && deliveryApps.length === 0) || !price}
+              >
                 {isLoading ? (
                   uploadStatus === 'uploading' ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Uploading {uploadFileSize}... {uploadProgress}%</span>
+                      <span>Uploading {uploadFileSize}...</span>
                     </div>
                   ) : uploadStatus === 'completed' ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Creating dish...
+                      <span>Creating dish...</span>
                     </div>
                   ) : (
                     "Submitting..."

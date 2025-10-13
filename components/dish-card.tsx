@@ -22,10 +22,26 @@ interface DishCardProps {
   comment?: string
   addedBy: string
   addedByProfilePicture?: string | null
-  availability: "Online" | "In-Store"
+  // Legacy props for backward compatibility
+  availability?: "Online" | "In-Store" | "Both"
   proteinSource?: string
   deliveryApps?: string[]
   placeId?: string | null
+  // New props for restaurant-centric approach
+  restaurant?: {
+    id: string
+    name: string
+    city: string
+    source_type: 'google_maps' | 'manual'
+    place_id?: string
+    google_maps_address?: string
+    latitude?: number
+    longitude?: number
+    manual_address?: string
+    is_cloud_kitchen: boolean
+    verified: boolean
+  }
+  hasInStore?: boolean
   isBookmarked?: boolean
   onBookmarkToggle?: (id: string) => void
   showActions?: boolean
@@ -46,10 +62,14 @@ export function DishCard({
   comment,
   addedBy,
   addedByProfilePicture,
+  // Legacy props
   availability,
   proteinSource,
   deliveryApps = [],
   placeId,
+  // New props
+  restaurant,
+  hasInStore,
   isBookmarked = false,
   onBookmarkToggle,
   showActions = false,
@@ -65,12 +85,36 @@ export function DishCard({
     onBookmarkToggle?.(id)
   }
 
+  // Determine availability and navigation data
+  const currentPlaceId = restaurant?.place_id || placeId
+  const currentRestaurantName = restaurant?.name || restaurantName
+  const isCloudKitchen = restaurant?.is_cloud_kitchen || false
+  const hasGoogleMapsData = restaurant?.source_type === 'google_maps' && currentPlaceId
+  const hasOnlineAvailability = deliveryApps && deliveryApps.length > 0
+  const hasInStoreAvailability = hasInStore !== undefined ? hasInStore : (availability === 'In-Store' || availability === 'Both')
+  
+  // Determine availability display
+  const getAvailabilityInfo = () => {
+    if (hasInStoreAvailability && hasOnlineAvailability) {
+      return { type: 'both', label: 'In-Store + Online' }
+    } else if (hasInStoreAvailability) {
+      return { type: 'in-store', label: 'In-Store' }
+    } else if (hasOnlineAvailability) {
+      return { type: 'online', label: 'Online' }
+    } else {
+      // Fallback to legacy availability
+      return { type: availability?.toLowerCase() || 'unknown', label: availability || 'Unknown' }
+    }
+  }
+
+  const availabilityInfo = getAvailabilityInfo()
+
   const handleNavigate = () => {
-    if (placeId) {
+    if (hasGoogleMapsData) {
       // Open restaurant page with reviews, photos, etc.
-      const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${placeId}`
+      const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${currentPlaceId}`
       window.open(restaurantPageUrl, '_blank')
-      toast.success(`Opening ${restaurantName} in Google Maps`)
+      toast.success(`Opening ${currentRestaurantName} in Google Maps`)
     } else {
       toast.error("Location data not available for this restaurant")
     }
@@ -153,7 +197,17 @@ export function DishCard({
         <div className="flex items-start justify-between mb-0.5 gap-2">
           <h2 className="text-lg font-semibold text-card-foreground leading-tight">{dishName}</h2>
           <div className="flex flex-wrap gap-1 self-start">
-            {availability === "Online" && deliveryApps.length > 0 ? (
+            {/* Availability badges */}
+            {availabilityInfo.type === 'both' ? (
+              <>
+                <span className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-blue-100 text-blue-800">
+                  In-Store
+                </span>
+                <span className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-green-100 text-green-800">
+                  Online
+                </span>
+              </>
+            ) : availabilityInfo.type === 'online' && deliveryApps && deliveryApps.length > 0 ? (
               deliveryApps.map((app) => (
                 <span
                   key={app}
@@ -166,10 +220,17 @@ export function DishCard({
               <span
                 className={cn(
                   "inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
-                  availability === "Online" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
+                  availabilityInfo.type === 'online' ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
                 )}
               >
-                {availability === "Online" ? "Online" : "In-Store"}
+                {availabilityInfo.label}
+              </span>
+            )}
+            
+            {/* Cloud Kitchen indicator */}
+            {isCloudKitchen && (
+              <span className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-orange-100 text-orange-800">
+                Cloud Kitchen
               </span>
             )}
           </div>
@@ -224,7 +285,49 @@ export function DishCard({
 
       {/* Action Section - Fixed Bottom */}
       <div className="p-4 pt-0 space-y-3 mt-auto">
-        {availability === "Online" && deliveryApps.length > 0 ? (
+        {/* Action buttons based on availability */}
+        {availabilityInfo.type === 'both' ? (
+          <div className="space-y-2">
+            {/* In-Store button */}
+            <Button 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 flex items-center justify-center gap-2"
+              onClick={handleNavigate}
+              disabled={!hasGoogleMapsData}
+            >
+              <MapPin className="h-4 w-4 flex-shrink-0" />
+              <span>Navigate to Restaurant</span>
+            </Button>
+            
+            {/* Delivery apps buttons */}
+            {deliveryApps && deliveryApps.length > 0 && (
+              <div className="space-y-1">
+                {deliveryApps.map((app) => (
+                  <Button 
+                    key={app}
+                    onClick={() => handleDeliveryAppClick(app)}
+                    disabled={copyingStates[app]}
+                    className={cn(
+                      "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm flex items-center justify-center gap-2",
+                      copyingStates[app] && "opacity-75 cursor-not-allowed"
+                    )}
+                  >
+                    <img 
+                      src={getDeliveryAppLogo(app)} 
+                      alt={`${app} logo`}
+                      className="h-4 w-4 flex-shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.src = "/logos/placeholder.svg"
+                      }}
+                    />
+                    <span className="truncate">
+                      {copyingStates[app] ? "Copying..." : `Order on ${app}`}
+                    </span>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : availabilityInfo.type === 'online' && deliveryApps && deliveryApps.length > 0 ? (
           <div className="space-y-2">
             {deliveryApps.map((app) => (
               <Button 
@@ -250,11 +353,9 @@ export function DishCard({
               </Button>
             ))}
           </div>
-        ) : availability === "Online" ? (
+        ) : availabilityInfo.type === 'online' ? (
           <Button 
-            className={cn(
-              "w-full bg-green-600 hover:bg-green-700 text-white border-0 flex items-center justify-center gap-2"
-            )}
+            className="w-full bg-green-600 hover:bg-green-700 text-white border-0 flex items-center justify-center gap-2"
             disabled
           >
             <img 
@@ -266,10 +367,9 @@ export function DishCard({
           </Button>
         ) : (
           <Button 
-            className={cn(
-              "w-full bg-blue-600 hover:bg-blue-700 text-white border-0 flex items-center justify-center gap-2"
-            )}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 flex items-center justify-center gap-2"
             onClick={handleNavigate}
+            disabled={!hasGoogleMapsData}
           >
             <MapPin className="h-4 w-4 flex-shrink-0" />
             <span>Navigate</span>

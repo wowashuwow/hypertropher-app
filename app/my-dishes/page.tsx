@@ -21,12 +21,29 @@ interface Dish {
   comment?: string
   addedBy: string
   addedByProfilePicture?: string | null
-  availability: "In-Store" | "Online"
   image_url: string
   protein_source: string
+  users: { name: string; profile_picture_url?: string | null }
+  // New restaurant-centric fields
+  restaurant?: {
+    id: string
+    name: string
+    city: string
+    source_type: 'google_maps' | 'manual'
+    place_id?: string
+    google_maps_address?: string
+    latitude?: number
+    longitude?: number
+    manual_address?: string
+    is_cloud_kitchen: boolean
+    verified: boolean
+  }
+  hasInStore?: boolean
+  deliveryApps?: string[]
+  // Legacy fields for backward compatibility
+  availability?: "In-Store" | "Online" | "Both"
   delivery_apps?: string[]
   place_id?: string | null
-  users: { name: string; profile_picture_url?: string | null }
 }
 
 export default function MyDishesPage() {
@@ -74,10 +91,14 @@ export default function MyDishesPage() {
           comment: dish.comment,
           addedBy: dish.users?.name || "Unknown",
           addedByProfilePicture: dish.users?.profile_picture_url || null,
-          availability: dish.availability as "In-Store" | "Online",
           image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
+          // New restaurant-centric fields
+          restaurant: dish.restaurant,
+          hasInStore: dish.hasInStore,
+          deliveryApps: dish.deliveryApps || dish.delivery_apps || [],
+          // Legacy fields for backward compatibility
+          availability: dish.availability as "In-Store" | "Online",
           protein_source: dish.protein_source,
-          delivery_apps: dish.delivery_apps || [],
           place_id: dish.place_id,
           users: dish.users
         }))
@@ -179,10 +200,14 @@ export default function MyDishesPage() {
                   comment={dish.comment}
                   addedBy={dish.addedBy}
                   addedByProfilePicture={dish.addedByProfilePicture}
-                  availability={dish.availability}
                   imageUrl={dish.image_url}
+                  // New restaurant-centric props
+                  restaurant={dish.restaurant}
+                  hasInStore={dish.hasInStore}
+                  deliveryApps={dish.deliveryApps}
+                  // Legacy props for backward compatibility
+                  availability={dish.availability}
                   proteinSource={dish.protein_source}
-                  deliveryApps={dish.delivery_apps}
                   placeId={dish.place_id}
                   isBookmarked={bookmarkedDishes.has(dish.id)}
                   onBookmarkToggle={handleBookmarkToggle}

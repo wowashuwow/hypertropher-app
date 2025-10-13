@@ -15,6 +15,9 @@ hypertropher-app/
 │   │   │   ├── login/            # User login
 │   │   │   └── signup/           # User registration
 │   │   ├── dishes/               # Dish CRUD operations
+│   │   │   ├── availability-channels/ # Dish availability channel management
+│   │   │   └── delivery-apps/    # Dish delivery app associations
+│   │   ├── restaurants/          # Restaurant management
 │   │   ├── invite-codes/         # Invite code management
 │   │   ├── upload-profile-picture/ # Profile picture upload endpoint
 │   │   ├── users/                # User management
@@ -47,6 +50,7 @@ hypertropher-app/
 │   │   ├── multi-select.tsx      # Multi-selection dropdown
 │   │   ├── popover.tsx           # Popover components
 │   │   ├── profile-picture-upload.tsx # Profile picture upload component
+│   │   ├── restaurant-input.tsx  # Restaurant selection component (Google Maps + manual)
 │   │   ├── restaurant-search-input.tsx # Google Maps restaurant search component
 │   │   ├── city-search-input.tsx # Google Maps city search component
 │   │   ├── delivery-app-pills.tsx # Delivery app selection pills component
@@ -94,6 +98,7 @@ hypertropher-app/
 │   ├── Bug_tracking.md           # Error tracking and resolution
 │   ├── Implementation.md         # Development roadmap and tasks
 │   ├── project_structure.md      # This file - project organization
+│   ├── Supabase_Workflow.md      # Supabase Storage & RLS best practices
 │   └── UI_UX_doc.md              # Design system and UX guidelines
 ├── .cursor/                      # Cursor IDE rules
 ├── components.json               # Shadcn UI configuration
@@ -109,8 +114,10 @@ hypertropher-app/
 ├── tailwind.config.ts            # Tailwind CSS configuration
 ├── tsconfig.json                 # TypeScript configuration
 ├── tsconfig.tsbuildinfo          # TypeScript build cache
-└── types/                        # TypeScript type definitions
-    └── google-maps.d.ts          # Google Maps API type definitions
+├── types/                        # TypeScript type definitions
+│   ├── restaurant.ts             # Restaurant data type definitions
+│   ├── dish.ts                   # Dish data type definitions
+│   └── google-maps.d.ts          # Google Maps API type definitions
 ```
 
 ## Detailed Structure
@@ -136,6 +143,9 @@ The main application directory using Next.js 14 App Router conventions:
 - **`/auth/login`**: User authentication and login
 - **`/auth/signup`**: User registration with invite code validation
 - **`/dishes`**: CRUD operations for dishes (GET, POST, PUT, DELETE)
+- **`/dishes/availability-channels`**: Dish availability channel management (GET, POST, DELETE)
+- **`/dishes/delivery-apps`**: Dish delivery app associations (POST, DELETE)
+- **`/restaurants`**: Restaurant management (POST for creation/retrieval)
 - **`/invite-codes`**: Invite code management and retrieval
 - **`/users`**: User profile management (GET, POST, PUT)
 - **`/wishlist`**: Wishlist management (GET, POST, DELETE)
@@ -160,6 +170,10 @@ Shadcn UI components for consistent design:
 - **`label.tsx`**: Form labels
 - **`multi-select.tsx`**: Multi-selection dropdown component
 - **`popover.tsx`**: Popover components
+- **`profile-picture-upload.tsx`**: Profile picture upload component
+- **`restaurant-input.tsx`**: Restaurant selection component (Google Maps + manual entry)
+- **`restaurant-search-input.tsx`**: Google Maps restaurant search component
+- **`city-search-input.tsx`**: Google Maps city search component
 - **`delivery-app-pills.tsx`**: Delivery app selection pills with SVG logos
 - **`select.tsx`**: Dropdown selection components
 
