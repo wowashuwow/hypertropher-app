@@ -1,8 +1,0 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="200" rx="20" fill="#FF3008"/>
-  <path d="M40 70h120v20H40z" fill="white"/>
-  <path d="M40 100h100v20H40z" fill="white"/>
-  <path d="M40 130h80v20H40z" fill="white"/>
-  <circle cx="160" cy="90" r="15" fill="white"/>
-  <text x="160" y="97" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#FF3008">D</text>
-</svg>

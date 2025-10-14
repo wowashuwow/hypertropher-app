@@ -1,8 +1,0 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="200" rx="20" fill="#000000"/>
-  <path d="M50 70h100v15H50z" fill="white"/>
-  <path d="M50 95h80v15H50z" fill="white"/>
-  <path d="M50 120h60v15H50z" fill="white"/>
-  <circle cx="160" cy="85" r="12" fill="white"/>
-  <text x="160" y="92" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#000000">U</text>
-</svg>

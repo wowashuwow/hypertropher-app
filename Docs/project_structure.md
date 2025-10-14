@@ -209,9 +209,10 @@ Static files served directly:
 - **User Images**: Placeholder user avatars
 
 #### Logos (`/public/logos`)
-- **Delivery App Logos**: SVG logos for 16 delivery apps (Swiggy, Zomato, Uber Eats, DoorDash, Grubhub, Postmates, Just Eat Takeaway, Deliveroo, Grab, Foodpanda, iFood, PedidosYa, Rappi, Noon, Careem, Talabat)
+- **Delivery App Logos**: Official WebP logos for 16 delivery apps (Swiggy, Zomato, Uber Eats, DoorDash, Grubhub, Postmates, Just Eat Takeaway, Deliveroo, Grab, Foodpanda, iFood, PedidosYa, Rappi, Noon, Careem, Talabat)
+  - WebP format for optimal compression and loading performance
   - Country-specific availability defined in `lib/delivery-apps.ts` and `delivery_apps_by_country.md`
-  - Placeholder logo for unknown apps
+  - SVG placeholder logo for fallback scenarios
 - **App Logos**: Application branding assets
 
 #### Icons
