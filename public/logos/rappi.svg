@@ -1,7 +1,8 @@
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="16" height="16" rx="2" fill="#00D4AA"/>
-  <path d="M3 5.5C3 4.11929 4.11929 3 5.5 3H10.5C11.8807 3 13 4.11929 13 5.5V10.5C13 11.8807 11.8807 13 10.5 13H5.5C4.11929 13 3 11.8807 3 10.5V5.5Z" fill="white"/>
-  <path d="M6.5 7.5C6.5 7.22386 6.72386 7 7 7H9C9.27614 7 9.5 7.22386 9.5 7.5C9.5 7.77614 9.27614 8 9 8H7C6.72386 8 6.5 7.77614 6.5 7.5Z" fill="#00D4AA"/>
-  <path d="M6.5 9.5C6.5 9.22386 6.72386 9 7 9H9C9.27614 9 9.5 9.22386 9.5 9.5C9.5 9.77614 9.27614 10 9 10H7C6.72386 10 6.5 9.77614 6.5 9.5Z" fill="#00D4AA"/>
-  <circle cx="5.5" cy="5.5" r="0.5" fill="#00D4AA"/>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="20" fill="#00E676"/>
+  <path d="M50 70h100v20H50z" fill="white"/>
+  <path d="M50 100h80v20H50z" fill="white"/>
+  <path d="M50 130h60v20H50z" fill="white"/>
+  <circle cx="160" cy="90" r="15" fill="white"/>
+  <text x="160" y="97" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#00E676">R</text>
 </svg>

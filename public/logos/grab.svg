@@ -1,6 +1,8 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="24" height="24" rx="4" fill="#00B14F"/>
-  <text x="12" y="16" text-anchor="middle" fill="white" font-size="10" font-weight="bold">
-    GR
-  </text>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="20" fill="#00B14F"/>
+  <path d="M50 70h100v20H50z" fill="white"/>
+  <path d="M50 100h80v20H50z" fill="white"/>
+  <path d="M50 130h60v20H50z" fill="white"/>
+  <circle cx="160" cy="90" r="15" fill="white"/>
+  <text x="160" y="97" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#00B14F">G</text>
 </svg>

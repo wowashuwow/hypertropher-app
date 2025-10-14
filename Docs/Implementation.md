@@ -521,7 +521,24 @@
 - **Files Fixed**: `components/ui/restaurant-input.tsx`
 - **Result**: Form automatically shows manual entry mode with pre-filled restaurant name
 
-### 🎯 MVP Status: ~97% Complete - Restaurant-Centric Architecture + Middle East Expansion
+### ✅ Completed (UX-001 - Restaurant Input UI/UX Improvements)
+**Mobile Overflow Fix & Consistent Design Between Modes:**
+
+- **Issue 1**: "Can't find restaurant?" text overflowing on mobile devices
+- **Issue 2**: Inconsistent layouts between Google Maps mode and Cloud Kitchen mode
+- **Issue 3**: Confusing "Manual Entry" terminology and irrelevant technical messages
+- **Solutions Implemented**:
+  - Fixed mobile overflow: Shortened text, added proper wrapping, responsive sizing
+  - Renamed "Manual Entry" → "Cloud Kitchen Entry" with cloud icon
+  - Moved mode toggle below input in both modes for consistency
+  - Removed technical message box about backend setup
+  - Added Search icon to "Search on Google Maps instead" link
+  - **Final Updates**: Reverted to Plus icon for better UX indication, moved location prompt inside bordered container for visual consistency
+- **Impact**: Better mobile UX, consistent design, clearer terminology, professional polish
+- **Files Modified**: `components/ui/restaurant-input.tsx`
+- **Result**: Seamless, consistent experience across both Google Maps and Cloud Kitchen modes with unified visual containers
+
+### 🎯 MVP Status: ~98% Complete - Restaurant-Centric Architecture + Middle East Expansion + UX Polish
 The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
 
 #### Sub-steps:

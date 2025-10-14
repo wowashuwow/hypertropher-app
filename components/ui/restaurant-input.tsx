@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, MapPin, Plus, AlertCircle, MapPinIcon } from "lucide-react"
+import { Search, MapPin, Plus, AlertCircle, MapPinIcon, Cloud } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -105,63 +105,63 @@ export function RestaurantInput({
     <div className={cn("space-y-3", className)}>
       <Label className="text-base font-semibold">Select Restaurant *</Label>
       
-      {/* Location Permission Request */}
-      {!isManualEntry && !locationPermissionGranted && !locationPermissionRequested && (
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start gap-2">
-            <MapPin className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-blue-900">
-                Find restaurants near you
-              </p>
-              <p className="text-xs text-blue-700 mt-1">
-                Allow location access to see restaurants ranked by distance from your current location.
-              </p>
-              <Button
-                type="button"
-                size="sm"
-                onClick={onRequestLocationPermission}
-                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={disabled}
-              >
-                Allow Location Access
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Location Status Messages */}
-      {!isManualEntry && locationPermissionRequested && (
-        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-yellow-800">
-              <p className="font-medium">Location Access Denied</p>
-              <p className="text-xs mt-1">
-                No problem! We'll search restaurants in {userCity} instead.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!isManualEntry && locationPermissionGranted && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-start gap-2">
-            <MapPin className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-green-800">
-              <p className="font-medium">Location Access Granted</p>
-              <p className="text-xs mt-1">
-                Searching restaurants near your location for better results.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {!isManualEntry ? (
-        <div className="space-y-3">
+        <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/30">
+          {/* Location Permission Request */}
+          {!locationPermissionGranted && !locationPermissionRequested && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-900">
+                    Find restaurants near you
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Allow location access to see restaurants ranked by distance from your current location.
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={onRequestLocationPermission}
+                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={disabled}
+                  >
+                    Allow Location Access
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Location Status Messages */}
+          {locationPermissionRequested && (
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-yellow-800">
+                  <p className="font-medium">Location Access Denied</p>
+                  <p className="text-xs mt-1">
+                    No problem! We'll search restaurants in {userCity} instead.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {locationPermissionGranted && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-green-800">
+                  <p className="font-medium">Location Access Granted</p>
+                  <p className="text-xs mt-1">
+                    Searching restaurants near your location for better results.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <RestaurantSearchInput
             value={inputValue}
             onChange={handleInputChange}
@@ -189,27 +189,19 @@ export function RestaurantInput({
               variant="ghost"
               size="sm"
               onClick={() => setIsManualEntry(true)}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground h-auto py-2 px-3 whitespace-normal text-center"
               disabled={disabled}
             >
-              <Plus className="w-4 h-4 mr-2" />
-              Can't find the restaurant? Must be a cloud kitchen. Add it manually.
+              <Plus className="w-4 h-4 mr-2 flex-shrink-0" />
+              <span className="text-xs sm:text-sm">Can't find the restaurant? Must be a cloud kitchen. Add it manually.</span>
             </Button>
           </div>
         </div>
       ) : (
         <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/30">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Manual Entry</Label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsManualEntry(false)}
-              disabled={disabled}
-            >
-              Search on Google Maps instead
-            </Button>
+          <div className="flex items-center gap-2">
+            <Cloud className="w-4 h-4 text-muted-foreground" />
+            <Label className="text-sm font-medium">Cloud Kitchen Entry</Label>
           </div>
           
           <div className="space-y-3">
@@ -225,14 +217,18 @@ export function RestaurantInput({
               />
             </div>
             
-            <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-orange-800">
-                <p className="font-medium">Cloud Kitchen</p>
-                <p className="text-xs mt-1">
-                  This restaurant will be automatically set as delivery-only (cloud kitchen).
-                </p>
-              </div>
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsManualEntry(false)}
+                className="text-muted-foreground hover:text-foreground"
+                disabled={disabled}
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Search on Google Maps instead
+              </Button>
             </div>
           </div>
         </div>
