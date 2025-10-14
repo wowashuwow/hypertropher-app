@@ -511,6 +511,16 @@
 - **Total Delivery Apps**: Expanded from 13 to 16 delivery apps
 - **Total Countries**: Expanded from 52 to 59 countries supported
 
+### ✅ Completed (BUG-022 - Cloud Kitchen Edit Form Fix)
+**Cloud Kitchen Manual Entry Mode Auto-Detection:**
+
+- **Issue**: Edit form not showing manual entry mode for cloud kitchen dishes
+- **Root Cause**: `RestaurantInput` component always initialized `isManualEntry` state as `false`
+- **Solution**: Initialize state based on incoming value prop: `useState(value?.type === 'manual')`
+- **Impact**: Users can now edit cloud kitchen dishes without extra manual steps
+- **Files Fixed**: `components/ui/restaurant-input.tsx`
+- **Result**: Form automatically shows manual entry mode with pre-filled restaurant name
+
 ### 🎯 MVP Status: ~97% Complete - Restaurant-Centric Architecture + Middle East Expansion
 The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
 

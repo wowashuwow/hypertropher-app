@@ -37,7 +37,7 @@ export function RestaurantInput({
   locationError = null,
   onRequestLocationPermission,
 }: RestaurantInputProps) {
-  const [isManualEntry, setIsManualEntry] = useState(false)
+  const [isManualEntry, setIsManualEntry] = useState(value?.type === 'manual')
   const [selectedGoogleMapsRestaurant, setSelectedGoogleMapsRestaurant] = useState<RestaurantResult | null>(
     value?.type === 'google_maps' && value.googleMapsData
       ? {

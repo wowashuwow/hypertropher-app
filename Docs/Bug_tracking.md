@@ -5604,6 +5604,142 @@ After fix:
 
 ---
 
+## [BUG-022] - Cloud Kitchen Edit Form Not Showing Manual Entry Mode on Load
+
+**Date Reported**: January 13, 2025  
+**Date Fixed**: January 13, 2025  
+**Status**: ✅ Resolved  
+**Priority**: High  
+**Component**: Edit Dish Form, Restaurant Input Component, Cloud Kitchen Handling
+
+### Description
+When editing a dish whose restaurant is a cloud kitchen (manual entry), the edit form failed to automatically show the manual entry mode. Instead, it showed the Google Maps search interface with an empty restaurant field, causing validation errors when trying to save changes without re-selecting the cloud kitchen option.
+
+### User Impact
+- Users had to click "Can't find the restaurant? Must be a cloud kitchen" every time they edited a cloud kitchen dish
+- Simple edits (like changing protein rating) required unnecessary extra steps
+- Confusing user experience - form appeared broken or incomplete
+
+### Steps to Reproduce
+1. Add a dish with a cloud kitchen restaurant (manual entry)
+2. Navigate to "My Dishes"
+3. Click "Edit" on the cloud kitchen dish
+4. Observe: Form shows Google Maps search mode (wrong!)
+5. Observe: Restaurant field is empty (wrong!)
+6. Try to change only the protein rating
+7. Click "Save Changes"
+8. Error: "Please select or add a restaurant"
+9. Have to manually click "Can't find restaurant? Must be cloud kitchen"
+10. Only then can save changes
+
+### Expected Behavior
+1. Load edit form for cloud kitchen dish
+2. Form automatically shows **Manual Entry** mode (screenshot state)
+3. Restaurant name is pre-filled with "Test Cloud Kitchen"
+4. User can change ratings or other fields
+5. Click "Save Changes" → Works immediately
+
+### Actual Behavior (Before Fix)
+- Manual entry mode **not** initialized on load
+- Always showed Google Maps search mode
+- Restaurant field empty
+- Required extra user interaction to get to correct state
+
+### Root Cause Analysis
+
+**File**: `components/ui/restaurant-input.tsx`  
+**Line**: 40
+
+```typescript
+// BEFORE (Bug):
+const [isManualEntry, setIsManualEntry] = useState(false)  // ❌ Always false!
+```
+
+**Problem**:
+- `isManualEntry` state was hardcoded to `false` regardless of incoming `value` prop
+- Even when `value?.type === 'manual'` (cloud kitchen), form initialized in Google Maps mode
+- The component already had logic to pre-fill manual restaurant name (lines 59-61)
+- But the UI mode toggle wasn't respecting the initial value
+
+**Why It Worked in Add Dish**:
+- Add dish form starts with `value = null`, so `false` is correct
+- User manually clicks "Can't find restaurant?" to enter manual mode
+- Edit dish starts with `value = { type: 'manual', ...}`, but still initialized as `false`
+
+### Solution Implemented
+
+**One-Line Fix**:
+```typescript
+// AFTER (Fixed):
+const [isManualEntry, setIsManualEntry] = useState(value?.type === 'manual')
+```
+
+**Logic**:
+- Initialize `isManualEntry` based on the incoming `value` prop
+- If `value?.type === 'manual'` → Start in manual entry mode
+- If `value?.type === 'google_maps'` → Start in Google Maps mode
+- If `value === null` → Start in Google Maps mode (default for new dishes)
+
+### Testing Results
+
+**Test 1: Edit Cloud Kitchen Dish** ✅
+- Loaded edit form for cloud kitchen dish
+- ✅ Manual entry mode shown immediately
+- ✅ Restaurant name pre-filled ("Test Cloud Kitchen")
+- ✅ Changed protein rating
+- ✅ Clicked "Save Changes" → Worked immediately (no errors)
+
+**Test 2: Edit Google Maps Restaurant Dish** ✅
+- Loaded edit form for Google Maps restaurant
+- ✅ Google Maps search mode shown
+- ✅ Restaurant pre-selected correctly
+- ✅ Made changes and saved → Worked correctly
+- ✅ No regression
+
+**Test 3: Add New Dish (Regression Test)** ✅
+- Loaded add dish form
+- ✅ Google Maps mode shown by default (correct)
+- ✅ "Can't find restaurant?" link works
+- ✅ Manual entry mode activates correctly
+- ✅ No regression
+
+### Files Modified
+- ✅ `components/ui/restaurant-input.tsx` - Fixed state initialization (line 40)
+
+### Impact
+- **Critical UX Improvement**: Users can now edit cloud kitchen dishes without extra steps
+- **Reduced Confusion**: Form initializes in the correct mode automatically
+- **Better Developer Experience**: State initialization now respects component props
+- **No Regressions**: All existing functionality preserved
+
+### Related Code Patterns
+
+**Good Practice Demonstrated**:
+```typescript
+// Initialize state based on props
+const [state, setState] = useState(deriveInitialState(props))
+
+// NOT:
+const [state, setState] = useState(hardcodedValue)
+```
+
+**Similar Components to Check**:
+- Any component with mode toggles should initialize based on incoming props
+- Review other form components for similar hardcoded initial state issues
+
+### Prevention Measures
+- Always consider prop-based initialization for stateful components
+- Test edit/update flows, not just create flows
+- Document expected initial state for components with mode toggles
+
+### Notes
+- This was a single-line fix but had major UX impact
+- The bug only affected edit flow, not add flow
+- All data handling was correct - only the UI mode initialization was wrong
+- Fix maintains backward compatibility with add dish form
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
