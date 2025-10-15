@@ -119,6 +119,9 @@ export function CitySearchInput({
           disabled={disabled}
           className="pl-10"
           onFocus={() => {
+            // Select all text when input is focused for easy replacement
+            inputRef.current?.select()
+            
             if (suggestions.length > 0 && hasUserInteracted) {
               setIsOpen(true)
             }

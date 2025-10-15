@@ -5,6 +5,60 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [BUG-037] - Bottom Navigation Separator Removal
+**Date:** 2025-01-10
+**Severity:** Low
+**Status:** ✅ Resolved
+
+**Description:**
+A vertical separator line was visible between the "Discover" and "Add Dish" icons in the bottom navigation bar, creating visual clutter and inconsistent spacing.
+
+**Root Cause:**
+The `authenticatedNavItems` array in `components/bottom-navigation.tsx` contained a separator object with `type: "separator"` that was being rendered as a vertical line between navigation items.
+
+**Resolution:**
+- Removed the separator object from the `authenticatedNavItems` array
+- Eliminated the conditional rendering logic for separator elements
+- Maintained all existing navigation functionality
+
+**Files Modified:**
+- `components/bottom-navigation.tsx` - Removed separator from authenticatedNavItems array
+
+**Testing Results:**
+- ✅ No vertical separator visible between navigation items
+- ✅ All navigation functionality remains intact
+- ✅ Proper spacing and alignment maintained
+- ✅ Works correctly for both authenticated and unauthenticated states
+
+### [BUG-038] - City Input Text Selection Improvement
+**Date:** 2025-01-10
+**Severity:** Low
+**Status:** ✅ Resolved
+
+**Description:**
+When users clicked on the city input field in Account Settings, they had to manually backspace each character to enter a new city name. This created a poor user experience for city changes.
+
+**Root Cause:**
+The `CitySearchInput` component's `onFocus` handler did not automatically select all text when the input field was clicked, requiring users to manually clear the existing text.
+
+**Resolution:**
+- Added `inputRef.current?.select()` to the `onFocus` handler in `components/ui/city-search-input.tsx`
+- This automatically selects all text when the input is focused/clicked
+- Users can now immediately start typing to replace the selected text
+- All existing functionality preserved (Google Places API integration, suggestion handling, state management)
+- Note: On mobile devices, this may trigger the context menu (cut/copy/paste), but this is acceptable behavior
+
+**Files Modified:**
+- `components/ui/city-search-input.tsx` - Added text selection on focus
+
+**Testing Results:**
+- ✅ Clicking city input selects all text immediately (both desktop and mobile)
+- ✅ Typing after selection replaces the selected text
+- ✅ Google Places suggestions still work correctly
+- ✅ Original city is preserved if no valid selection is made
+- ✅ No regression in existing functionality
+- ✅ Mobile context menu may appear but is acceptable behavior
+
 ### [BUG-036] - Missing DELETE RLS Policy for Dish Photos
 **Date:** 2025-01-10
 **Severity:** High

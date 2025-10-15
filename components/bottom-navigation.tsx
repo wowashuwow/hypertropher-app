@@ -21,9 +21,6 @@ export function BottomNavigation() {
 
   const authenticatedNavItems = [
     {
-      type: "separator" as const,
-    },
-    {
       href: "/add-dish",
       icon: PlusCircle,
       label: "Add Dish",
