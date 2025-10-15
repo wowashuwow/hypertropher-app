@@ -17,6 +17,7 @@ import { useGeolocation } from "@/lib/hooks/use-geolocation"
 import { ArrowLeft, Save, X, AlertCircle, Camera } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
+import { compressImageWithTimeout, formatFileSize, getCompressionRatio } from "@/lib/image-compression"
 
 interface Dish {
   id: string
@@ -70,6 +71,9 @@ export default function EditDishPage() {
   
   // Photo state
   const [photo, setPhoto] = useState<File | null>(null)
+  const [compressedPhoto, setCompressedPhoto] = useState<File | null>(null)
+  const [isCompressing, setIsCompressing] = useState(false)
+  const [compressionComplete, setCompressionComplete] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string>("")
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'completed'>('idle')
   const [uploadFileSize, setUploadFileSize] = useState<string>("")
@@ -250,7 +254,7 @@ export default function EditDishPage() {
     return urlData.publicUrl
   }
 
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       // Validate file type
@@ -268,6 +272,8 @@ export default function EditDishPage() {
       }
 
       setPhoto(file)
+      setIsCompressing(true)
+      setCompressionComplete(false)
       
       // Create preview
       const reader = new FileReader()
@@ -275,6 +281,25 @@ export default function EditDishPage() {
         setPhotoPreview(reader.result as string)
       }
       reader.readAsDataURL(file)
+      
+      try {
+        // Start compression in background
+        const compressed = await compressImageWithTimeout(file)
+        setCompressedPhoto(compressed)
+        setCompressionComplete(true)
+        
+        // Log compression results for debugging
+        const originalSize = formatFileSize(file.size)
+        const compressedSize = formatFileSize(compressed.size)
+        const ratio = getCompressionRatio(file.size, compressed.size)
+        console.log(`Image compressed: ${originalSize} → ${compressedSize} (${ratio.toFixed(1)}% reduction)`)
+      } catch (error) {
+        console.warn('Compression failed, will use original file:', error)
+        setCompressedPhoto(null)
+        setCompressionComplete(true)
+      } finally {
+        setIsCompressing(false)
+      }
     }
   }
 
@@ -356,6 +381,12 @@ export default function EditDishPage() {
         alert("Price is required.")
         return
       }
+      
+      // Check if compression is still running
+      if (isCompressing) {
+        alert("Please wait, image is still being processed...")
+        return
+      }
 
       // Validate rating values
       const validRatings = ["Pretty Good", "Overloaded", "Mouthgasm", "Would Eat Everyday"];
@@ -395,11 +426,12 @@ export default function EditDishPage() {
       // 1. Create or find restaurant
       const restaurantId = await createOrFindRestaurant(restaurant, dish.city)
 
-      // 2. Upload new photo if provided
+      // 2. Upload new photo if provided (use compressed version if available)
       let finalImageUrl = imageUrl // Start with existing image
       if (photo) {
         setUploadStatus('uploading')
-        const fileSizeMB = photo.size / (1024 * 1024)
+        const fileToUpload = compressedPhoto || photo // Use compressed version if available
+        const fileSizeMB = fileToUpload.size / (1024 * 1024)
         setUploadFileSize(fileSizeMB < 1 ? `${Math.round(fileSizeMB * 1024)}KB` : `${fileSizeMB.toFixed(1)}MB`)
         
         // Delete old photo before uploading new one
@@ -408,7 +440,7 @@ export default function EditDishPage() {
         }
         
         // Upload new photo
-        finalImageUrl = await uploadPhoto(photo)
+        finalImageUrl = await uploadPhoto(fileToUpload)
         setImageUrl(finalImageUrl)
         setUploadStatus('completed')
       }
