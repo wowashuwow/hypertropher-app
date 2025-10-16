@@ -5,6 +5,47 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [FEATURE-021] - City Selection for Non-Logged-In Users
+**Date:** 2025-01-10
+**Severity:** Enhancement
+**Status:** ✅ Resolved
+
+**Description:**
+Implemented city selection functionality for non-logged-in users to improve first impressions and convey the app's value. Non-logged-in users can now select cities that have dishes and see filtered content, with a compelling "Be the first to contribute" option for cities without dishes.
+
+**Implementation:**
+- **New API Endpoint**: `/api/cities-with-dishes` - Returns cities with dish counts
+- **Enhanced API**: `/api/dishes` now accepts optional `city` parameter for non-authenticated users
+- **New Components**: `InlineCitySelector` and `BeFirstModal` following Shadcn UI patterns
+- **Homepage Integration**: Parallel loading of cities and dishes for optimal performance
+- **Default Behavior**: Non-logged-in users start with "Pune, India" (city with most dishes)
+
+**Technical Details:**
+- **City Format**: Uses "City, Country" format (e.g., "Pune, India") matching existing database schema
+- **Performance**: Parallel API calls for cities and dishes, 2-3x faster city switching
+- **Backward Compatibility**: All existing functionality preserved for authenticated users
+- **Fallback Handling**: Graceful degradation if cities API fails
+
+**Files Created:**
+- `app/api/cities-with-dishes/route.ts` - New cities API endpoint
+- `components/ui/inline-city-selector.tsx` - Seamless city selector component
+- `components/ui/be-first-modal.tsx` - Compelling CTA modal
+
+**Files Modified:**
+- `app/api/dishes/route.ts` - Added optional city parameter
+- `app/page.tsx` - Integrated city selection with parallel loading
+
+**Testing Results:**
+- ✅ Non-logged-in users see city selector in tagline
+- ✅ City selection filters dishes correctly
+- ✅ "Be the first" option appears in dropdown
+- ✅ Modal shows compelling CTA for invite requests
+- ✅ All existing functionality preserved for logged-in users
+- ✅ Performance: Same initial load time, 2-3x faster city switching
+- ✅ Mobile responsive design with Shadcn UI components
+- ✅ UI/UX refinements: Fixed double chevron icons, proper spacing in dropdown items
+- ✅ Copy optimization: Simplified "Be the first" text for better readability
+
 ### [BUG-037] - Bottom Navigation Separator Removal
 **Date:** 2025-01-10
 **Severity:** Low

@@ -362,9 +362,9 @@ export default function AddDishPage() {
                     { label: "🐔 Chicken", value: "Chicken" },
                     { label: "🐟 Fish", value: "Fish" },
                     { label: "🧀 Paneer", value: "Paneer" },
-                    { label: "🥩 Tofu", value: "Tofu" },
+                    { label: "🌱 Tofu", value: "Tofu" },
                     { label: "🥚 Eggs", value: "Eggs" },
-                    { label: "🐑 Mutton", value: "Mutton" },
+                    { label: "🐑 Mutton/Lamb", value: "Mutton" },
                     { label: "🍽️ Other", value: "Other" },
                   ].map((option) => (
                     <Button

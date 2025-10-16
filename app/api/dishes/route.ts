@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET handler for fetching dishes filtered by user's city
-export async function GET() {
+export async function GET(request: NextRequest) {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
 
@@ -60,6 +60,10 @@ export async function GET() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // NEW: Get optional city parameter for non-authenticated users
+  const { searchParams } = new URL(request.url);
+  const cityParam = searchParams.get('city');
 
   try {
     // First, get the user's current city (if authenticated)
@@ -79,7 +83,18 @@ export async function GET() {
       }
     }
 
-    // 1. Fetch dishes with restaurant data - filter by user's city if authenticated, otherwise fetch all
+    // Determine which city to filter by
+    let filterCity = null;
+    if (user && userCity) {
+      // Authenticated users: use their selected city (existing behavior)
+      filterCity = userCity;
+    } else if (cityParam) {
+      // Non-authenticated users: use provided city parameter (new behavior)
+      filterCity = cityParam;
+    }
+    // If neither, fetch all dishes (existing behavior for non-authenticated)
+
+    // 1. Fetch dishes with restaurant data - apply city filter if we have one
     let query = supabase
       .from("dishes")
       .select(`
@@ -99,8 +114,9 @@ export async function GET() {
         )
       `);
     
-    if (userCity) {
-      query = query.eq("restaurants.city", userCity);
+    // Apply city filter if we have one
+    if (filterCity) {
+      query = query.eq("restaurants.city", filterCity);
     }
 
     const { data: dishes, error: dishesError } = await query;
