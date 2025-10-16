@@ -731,6 +731,7 @@ export default function EditDishPage() {
                       { label: "🌱 Tofu", value: "Tofu" },
                       { label: "🥚 Eggs", value: "Eggs" },
                       { label: "🐑 Mutton/Lamb", value: "Mutton" },
+                      { label: "🥩 Beef", value: "Beef" },
                       { label: "🍽️ Other", value: "Other" },
                     ].map((option) => (
                       <Button

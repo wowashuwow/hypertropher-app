@@ -10,7 +10,7 @@ import { InlineCitySelector } from "@/components/ui/inline-city-selector"
 import { BeFirstModal } from "@/components/ui/be-first-modal"
 
 
-type ProteinSource = "All" | "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other"
+type ProteinSource = "All" | "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other"
 
 interface Dish {
   id: string
@@ -368,6 +368,7 @@ export default function HomePage() {
     { label: "🌱 Tofu", value: "Tofu" },
     { label: "🥚 Eggs", value: "Eggs" },
     { label: "🐑 Mutton/Lamb", value: "Mutton" },
+    { label: "🥩 Beef", value: "Beef" },
     { label: "🍽️ Other", value: "Other" },
   ]
 

@@ -24,7 +24,7 @@ export default function AddDishPage() {
   // Form state
   const [restaurant, setRestaurant] = useState<RestaurantInputType | null>(null)
   const [dishName, setDishName] = useState("")
-  const [proteinSource, setProteinSource] = useState<"Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Other" | "">("")
+  const [proteinSource, setProteinSource] = useState<"Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other" | "">("")
   const [deliveryApps, setDeliveryApps] = useState<string[]>([])
   const [price, setPrice] = useState<string>("")
   const [taste, setTaste] = useState<"Mouthgasm" | "Pretty Good" | "">("")
@@ -365,6 +365,7 @@ export default function AddDishPage() {
                     { label: "🌱 Tofu", value: "Tofu" },
                     { label: "🥚 Eggs", value: "Eggs" },
                     { label: "🐑 Mutton/Lamb", value: "Mutton" },
+                    { label: "🥩 Beef", value: "Beef" },
                     { label: "🍽️ Other", value: "Other" },
                   ].map((option) => (
                     <Button
