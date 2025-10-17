@@ -5,6 +5,65 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [BUG-039] - City and Profile Picture Changes Not Propagating to Other Pages
+**Date:** 2025-01-17
+**Severity:** High
+**Status:** ✅ Resolved
+
+**Description:**
+When users changed their city or profile picture in account settings, the changes didn't appear on other pages (homepage showing old city, header showing old profile picture) until browser reload. The cache invalidation was clearing the cache but not updating the actual userProfile state that other pages were consuming.
+
+**Root Cause:**
+The `invalidateUserCache()` function only cleared the cache (`setUserProfileCache(null)`) but didn't update the `userProfile` state in SessionProvider. Other pages reading from `userProfile` context continued to see stale data until the browser was manually reloaded.
+
+**Resolution:**
+- **Added `updateUserCity()` function**: Updates only the city field in both userProfile and cache without re-fetching
+- **Added `updateUserProfilePicture()` function**: Updates only the profile picture field in both userProfile and cache without re-fetching
+- **Surgical Updates**: Each function updates only the specific field that changed, keeping all other cached data intact
+- **No Loading Flickers**: Updates happen instantly without showing loading states for unchanged fields (name remains cached)
+
+**Implementation:**
+```typescript
+// lib/auth/session-provider.tsx
+const updateUserCity = (newCity: string) => {
+  if (userProfile) {
+    const updatedProfile = { ...userProfile, city: newCity }
+    setUserProfile(updatedProfile)
+    setUserProfileCache(updatedProfile)
+  }
+}
+
+const updateUserProfilePicture = (newUrl: string | null) => {
+  if (userProfile) {
+    const updatedProfile = { 
+      ...userProfile, 
+      profile_picture_url: newUrl,
+      profile_picture_updated_at: new Date().toISOString()
+    }
+    setUserProfile(updatedProfile)
+    setUserProfileCache(updatedProfile)
+  }
+}
+```
+
+**Files Modified:**
+- `lib/auth/session-provider.tsx` - Added updateUserCity and updateUserProfilePicture functions
+- `app/account/page.tsx` - Updated to use new functions instead of invalidateUserCache
+
+**Technical Details:**
+- **Surgical Updates**: Only changed fields are updated, preserving cached values for other fields
+- **Performance**: No additional API calls, updates happen instantly
+- **Cache Consistency**: Both userProfile and userProfileCache are updated in sync
+- **No Side Effects**: Dishes cache remains independent and unaffected
+
+**Testing Results:**
+- ✅ City changes propagate instantly to homepage without reload
+- ✅ Profile picture changes propagate instantly to header without reload
+- ✅ User name never shows loading state (remains cached)
+- ✅ No performance degradation or additional API calls
+- ✅ Dishes continue to fetch fresh on page load (unchanged)
+- ✅ No breaking changes to existing functionality
+
 ### [FEATURE-021] - City Selection for Non-Logged-In Users
 **Date:** 2025-01-10
 **Severity:** Enhancement

@@ -54,6 +54,8 @@ hypertropher-app/
 │   │   ├── restaurant-search-input.tsx # Google Maps restaurant search component
 │   │   ├── city-search-input.tsx # Google Maps city search component
 │   │   ├── delivery-app-pills.tsx # Delivery app selection pills component
+│   │   ├── inline-city-selector.tsx # Inline city selector for non-logged-in users
+│   │   ├── be-first-modal.tsx # Modal for encouraging user contributions
 │   │   └── select.tsx            # Dropdown selection components
 │   ├── bottom-navigation.tsx     # Mobile navigation
 │   ├── dish-card.tsx             # Dish display component
@@ -142,7 +144,8 @@ The main application directory using Next.js 14 App Router conventions:
 #### API Routes (`/app/api`)
 - **`/auth/login`**: User authentication and login
 - **`/auth/signup`**: User registration with invite code validation
-- **`/dishes`**: CRUD operations for dishes (GET, POST, PUT, DELETE)
+- **`/cities-with-dishes`**: Returns cities with dish counts for non-logged-in users
+- **`/dishes`**: CRUD operations for dishes (GET, POST, PUT, DELETE) with optional city filtering
 - **`/dishes/availability-channels`**: Dish availability channel management (GET, POST, DELETE)
 - **`/dishes/delivery-apps`**: Dish delivery app associations (POST, DELETE)
 - **`/restaurants`**: Restaurant management (POST for creation/retrieval)
@@ -175,6 +178,8 @@ Shadcn UI components for consistent design:
 - **`restaurant-search-input.tsx`**: Google Maps restaurant search component
 - **`city-search-input.tsx`**: Google Maps city search component
 - **`delivery-app-pills.tsx`**: Delivery app selection pills with SVG logos
+- **`inline-city-selector.tsx`**: Inline city selector for non-logged-in users with responsive design
+- **`be-first-modal.tsx`**: Modal component for encouraging user contributions in new cities
 - **`select.tsx`**: Dropdown selection components
 
 ### `/lib` - Utilities and Configuration
@@ -182,7 +187,7 @@ Shared libraries and configurations:
 
 #### Authentication (`/lib/auth`)
 - **`route-protection.tsx`**: Component for protecting authenticated routes
-- **`session-provider.tsx`**: React context provider for user session management with event-based caching
+- **`session-provider.tsx`**: React context provider for user session management with event-based caching and surgical update functions
 
 #### Custom Hooks (`/lib/hooks`)
 - **`use-geolocation.ts`**: Location permission handling and user location management
@@ -353,7 +358,7 @@ import { cn } from "@/lib/utils"
 - **Local State**: `useState` for component-level state
 - **Server State**: Supabase queries for data fetching with intelligent caching
 - **Form State**: Controlled components with React state
-- **Session State**: Context API for user session management with event-based cache
+- **Session State**: Context API for user session management with event-based cache and surgical field updates
 - **Authentication State**: Supabase Auth with session provider
 - **Performance Optimization**: Event-based cached user data to prevent redundant API calls (80-90% reduction)
 

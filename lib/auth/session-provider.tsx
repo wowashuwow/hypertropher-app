@@ -18,6 +18,8 @@ interface SessionContextType {
   loading: boolean
   signOut: () => Promise<void>
   invalidateUserCache: () => void
+  updateUserCity: (newCity: string) => void
+  updateUserProfilePicture: (newUrl: string | null) => void
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
@@ -106,8 +108,30 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setUserProfileCache(null)
   }
 
+  const updateUserCity = (newCity: string) => {
+    // Update only city field in both userProfile and cache
+    if (userProfile) {
+      const updatedProfile = { ...userProfile, city: newCity }
+      setUserProfile(updatedProfile)
+      setUserProfileCache(updatedProfile)
+    }
+  }
+
+  const updateUserProfilePicture = (newUrl: string | null) => {
+    // Update only profile_picture_url field in both userProfile and cache
+    if (userProfile) {
+      const updatedProfile = { 
+        ...userProfile, 
+        profile_picture_url: newUrl,
+        profile_picture_updated_at: new Date().toISOString()
+      }
+      setUserProfile(updatedProfile)
+      setUserProfileCache(updatedProfile)
+    }
+  }
+
   return (
-    <SessionContext.Provider value={{ user, userProfile, loading, signOut, invalidateUserCache }}>
+    <SessionContext.Provider value={{ user, userProfile, loading, signOut, invalidateUserCache, updateUserCity, updateUserProfilePicture }}>
       {children}
     </SessionContext.Provider>
   )

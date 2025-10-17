@@ -447,9 +447,11 @@ const navItems = [
 ### Caching Strategy
 - **Static Assets**: Long-term caching
 - **API Responses**: Appropriate cache headers
-- **User Data**: Client-side caching with invalidation
+- **User Data**: Client-side caching with surgical updates
 - **Session Data**: Event-based in-memory caching in SessionProvider (no time expiration) to prevent redundant API calls
 - **Cache Invalidation**: Intelligent cache clearing when user updates profile data
+- **Surgical Updates**: Field-specific update functions (updateUserCity, updateUserProfilePicture) that update only changed fields without re-fetching entire profile
+- **Performance Optimization**: Updates propagate instantly without loading states or additional API calls
 
 ### Mobile Performance Optimization
 - **3D Effects**: Progressive enhancement with mobile-specific optimizations

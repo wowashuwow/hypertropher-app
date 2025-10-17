@@ -397,6 +397,15 @@
 - **Input Component Stability**: Ensured input fields always receive string values, preventing React warnings
 - **Code Quality**: Eliminated console warnings for cleaner development experience
 
+### ✅ Completed (Stage 8.3 - Surgical Cache Update Functions)
+- **Problem Fixed**: City and profile picture changes not propagating to other pages without browser reload
+- **Added updateUserCity()**: Updates only city field in userProfile state without re-fetching entire profile
+- **Added updateUserProfilePicture()**: Updates only profile picture field without re-fetching entire profile
+- **Surgical Updates**: Each function updates only the changed field, preserving cached values for other fields
+- **Performance**: No additional API calls, instant updates without loading states
+- **User Experience**: Name remains cached when city changes, no unnecessary loading flickers
+- **Files Modified**: `lib/auth/session-provider.tsx`, `app/account/page.tsx`
+
 ### 🚧 In Progress (Stage 5 - Remaining)
 - **Advanced Features**: Advanced filtering and sorting (deferred to V2)
 
@@ -589,7 +598,7 @@ The core functionality is working and secure with a new restaurant-centric archi
 - [ ] Add UX improvements to auth flow
 - [ ] Conduct comprehensive testing
 - [ ] Optimize performance and fix bugs
-- [ ] **Future Enhancement**: Add city selection for non-logged-in users
+- [ ] **Future Enhancement**: Add city selection for non-logged-in users ✅ COMPLETED (FEATURE-021)
   - Allow non-logged-in users to select a city if at least one dish exists for that city
   - This will help convey the real value of the app by showing users dishes in their specific city
   - Brainstorm implementation approach (dropdown, location detection, etc.)
