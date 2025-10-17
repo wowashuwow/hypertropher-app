@@ -30,12 +30,23 @@ export interface RestaurantInput {
   }
 }
 
+export interface RestaurantResult {
+  place_id: string
+  name: string
+  formatted_address: string
+  geometry: {
+    location: {
+      lat: number
+      lng: number
+    }
+  }
+  rating?: number
+  user_ratings_total?: number
+}
+
 export interface DishAvailabilityChannel {
   id: string
   dishId: string
   channel: 'In-Store' | 'Online'
   deliveryApps?: string[]
 }
-
-// Re-export RestaurantResult from existing hook
-export type { RestaurantResult } from '@/lib/hooks/use-google-places'
