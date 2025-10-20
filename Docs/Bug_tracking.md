@@ -6324,6 +6324,75 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 ---
 
+## [UI-019] - Inline City Selector Layout and Truncation Issues - FIXED
+
+**Date**: 2024-12-19  
+**Priority**: Medium  
+**Status**: ✅ Resolved  
+
+### Problem
+The inline city selector component had two major visual issues:
+1. **City name truncation**: City names like "Pune, India" were being cut off to "Pune, Ind..." too early
+2. **Poor pill positioning**: The "13 dishes" count pill was positioned immediately after the truncated city name instead of being right-aligned within the selector box
+3. **Insufficient width**: The selector box was too narrow for longer city names on tablet and desktop
+
+### Root Cause
+- **Layout structure**: Used `flex items-center gap-3` which pushed the pill next to the truncated text
+- **Width constraints**: Fixed width classes didn't accommodate longer city names adequately
+- **Space allocation**: No priority given to city name text space vs. pill space
+
+### Solution Implemented
+**File**: `components/ui/inline-city-selector.tsx`
+
+#### Layout Changes:
+1. **Increased responsive widths**:
+   - Mobile: `w-full` (unchanged)
+   - Tablet: `sm:w-80` (320px width)  
+   - Desktop: `md:w-96` (384px width)
+
+2. **Improved layout structure**:
+   - Changed from `flex items-center gap-3` to `flex items-center justify-between w-full`
+   - City name: `flex-1 mr-3` for maximum space allocation
+   - Dishes pill: `flex-shrink-0` to prevent compression
+
+3. **Enhanced text handling**:
+   - Added `truncate` class to city name for proper text overflow
+   - Updated SelectContent width to match: `w-80 md:w-96`
+
+### Technical Details
+```typescript
+// Before
+<div className="flex items-center gap-3">
+  <span className="text-lg sm:text-xl font-medium">{selectedCity}</span>
+  <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-md whitespace-nowrap">
+    {dishCount} dishes
+  </span>
+</div>
+
+// After  
+<div className="flex items-center justify-between w-full">
+  <span className="text-lg sm:text-xl font-medium truncate flex-1 mr-3">{selectedCity}</span>
+  <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-md whitespace-nowrap flex-shrink-0">
+    {dishCount} dishes
+  </span>
+</div>
+```
+
+### Expected Results
+- ✅ City names like "Pune, India" now display fully instead of "Pune, Ind..."
+- ✅ The "13 dishes" pill is right-aligned within the selector box
+- ✅ Better visual hierarchy and readability across all screen sizes
+- ✅ Responsive design maintains proper layout on mobile, tablet, and desktop
+
+### Files Modified
+- `components/ui/inline-city-selector.tsx` - Updated layout and responsive widths
+- `Docs/UI_UX_doc.md` - Added component specifications and layout guidelines
+
+### Related Issues
+- **FEATURE-017**: Non-logged-in City Selection Feature (improves the main city selector component)
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
