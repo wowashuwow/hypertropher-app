@@ -6393,6 +6393,54 @@ The inline city selector component had two major visual issues:
 
 ---
 
+## [BUG-020] - Google Maps Navigation Links Not Working on Mobile - FIXED
+
+**Date**: 2024-12-19  
+**Priority**: Medium  
+**Status**: ✅ Resolved  
+
+### Problem
+Google Maps navigation links from dish cards were working correctly on desktop but failing on mobile devices. When users tapped the "Navigate to Restaurant" button on mobile, Google Maps would open but show "No results found on Google Maps" error with the place_id being searched.
+
+### Root Cause
+The Google Maps URL format being used was not compatible with mobile devices:
+- **Current format**: `https://www.google.com/maps/place/?q=place_id:${placeId}`
+- **Issue**: The `www` subdomain and URL structure caused mobile Google Maps to fail resolving the place_id
+
+### Solution Implemented
+**File**: `components/dish-card.tsx`
+
+Changed the Google Maps URL format from:
+```typescript
+const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${currentPlaceId}`
+```
+
+To:
+```typescript
+const restaurantPageUrl = `https://maps.google.com/maps/place?q=place_id:${currentPlaceId}`
+```
+
+### Technical Details
+- Removed `www.` from the URL domain
+- Changed `/place/?q=place_id:` to `/place?q=place_id:`
+- Uses standard Google Maps place ID URL format that works across all platforms
+
+### Expected Results
+- ✅ Google Maps navigation works correctly on mobile devices
+- ✅ No more "No results found" errors on mobile
+- ✅ Maintains existing desktop functionality
+- ✅ Universal compatibility across all platforms
+
+### Files Modified
+- `components/dish-card.tsx` - Updated handleNavigate function with mobile-compatible URL format
+
+### Testing Results
+- ✅ Desktop functionality maintained (no regression)
+- ✅ Mobile Google Maps links now work correctly
+- ✅ Place ID resolution successful on mobile devices
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
