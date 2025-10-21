@@ -516,7 +516,7 @@ export default function HomePage() {
                 <SelectValue placeholder="Sort by Price" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="default">Sort by Price</SelectItem>
                 <SelectItem value="low-to-high">Price: Low to High</SelectItem>
                 <SelectItem value="high-to-low">Price: High to Low</SelectItem>
               </SelectContent>
@@ -532,7 +532,7 @@ export default function HomePage() {
                 <SelectValue placeholder="Sort by Distance" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="default">Sort by Distance</SelectItem>
                 <SelectItem value="nearest">
                   {locationLoading ? "Getting Location..." : 
                    locationPermissionGranted ? "Nearest First" : 

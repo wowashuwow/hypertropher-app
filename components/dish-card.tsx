@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bookmark, Link, MapPin, ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react"
+import { Bookmark, Link, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -210,51 +210,22 @@ export function DishCard({
         <div className="flex items-start justify-between mb-0.5 gap-2">
           <h2 className="text-lg font-semibold text-card-foreground leading-tight">{dishName}</h2>
           <div className="flex flex-wrap gap-1 self-start">
-            {/* Availability badges */}
-            {availabilityInfo.type === 'both' ? (
-              <>
-                <span className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-blue-100 text-blue-800">
-                  In-Store
-                </span>
-                <span className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-green-100 text-green-800">
-                  Online
-                </span>
-              </>
-            ) : availabilityInfo.type === 'online' && deliveryApps && deliveryApps.length > 0 ? (
-              deliveryApps.map((app) => (
-                <span
-                  key={app}
-                  className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-green-100 text-green-800"
-                >
-                  {app}
-                </span>
-              ))
-            ) : (
-              <span
-                className={cn(
-                  "inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
-                  availabilityInfo.type === 'online' ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
-                )}
-              >
-                {availabilityInfo.label}
-              </span>
-            )}
-            
-            {/* Cloud Kitchen indicator */}
-            {isCloudKitchen && (
-              <span className="inline-flex items-center rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-orange-100 text-orange-800">
+            {/* Distance or Cloud Kitchen indicator */}
+            {isCloudKitchen ? (
+              <span className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-green-100 text-green-800">
+                <Cloud className="h-3 w-3" />
                 Cloud Kitchen
               </span>
-            )}
+            ) : distance !== undefined ? (
+              <span className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-blue-100 text-blue-800">
+                <MapPin className="h-3 w-3" />
+                {formatDistance(distance)}
+              </span>
+            ) : null}
           </div>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
           {restaurantName} · {city}
-          {distance !== undefined && (
-            <span className="ml-1 px-1.5 py-0.5 bg-muted rounded text-xs font-medium">
-              {formatDistance(distance)}
-            </span>
-          )}
         </p>
 
         <div className="space-y-1.5 mb-3 flex-grow">
