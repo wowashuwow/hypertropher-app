@@ -40,8 +40,8 @@ export const useGeolocation = () => {
 
     const geolocationOptions: PositionOptions = {
       enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 300000, // 5 minutes
+      timeout: 15000, // Increased timeout for mobile
+      maximumAge: 0, // Always get fresh location on mobile
     };
 
     navigator.geolocation.getCurrentPosition(
@@ -65,7 +65,7 @@ export const useGeolocation = () => {
         
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. We\'ll search restaurants in your selected city instead.';
+            errorMessage = 'Location access denied. Please enable location permissions for this website in your browser settings.';
             break;
           case error.POSITION_UNAVAILABLE:
             errorMessage = 'Location information is unavailable.';
@@ -128,11 +128,22 @@ export const useGeolocation = () => {
           
           // Update state based on actual browser permission
           const isPermissionGranted = result.state === 'granted';
-          setState(prev => ({
-            ...prev,
-            locationPermissionGranted: isPermissionGranted,
-            locationPermissionRequested: result.state === 'granted' || result.state === 'denied',
-          }));
+          // Only update permission state if we're certain about the status
+          // Don't interfere with the initial state on mobile
+          if (result.state === 'granted') {
+            setState(prev => ({
+              ...prev,
+              locationPermissionGranted: true,
+              locationPermissionRequested: true,
+            }));
+          } else if (result.state === 'denied') {
+            setState(prev => ({
+              ...prev,
+              locationPermissionGranted: false,
+              locationPermissionRequested: true,
+            }));
+          }
+          // Don't set anything for 'prompt' or other states - let the UI show the button
 
           // If permission is granted but we don't have location yet, try to get it
           if (isPermissionGranted) {
