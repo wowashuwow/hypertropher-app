@@ -6448,6 +6448,94 @@ const restaurantPageUrl = `https://www.google.com/maps/search/?api=1&query=${enc
 
 ---
 
+## [UI-020] - Delivery App Button Text and Visual Improvements
+**Date**: Current Session  
+**Priority**: Medium  
+**Status**: ✅ Resolved  
+
+### Problem
+Several UI inconsistencies were identified in delivery app buttons and navigation elements:
+1. Delivery app button text "Order on [App]" was misleading - users copy restaurant name to search manually
+2. Toast notification "Copied restaurant name to clipboard" was getting obscured by browser's "Open in app" dialog
+3. Delivery app logos had sharp square corners inconsistent with rounded button design
+4. Navigation button text "Navigate to Restaurant" was vague about opening Google Maps
+
+### Root Cause
+1. **Misleading Button Text**: "Order on [App]" implied direct ordering when users actually copy restaurant name to search manually
+2. **Toast Timing Issue**: Deep link was triggered immediately, causing browser dialog to obscure the clipboard confirmation toast
+3. **Design Inconsistency**: Square logos without rounding didn't match the overall rounded design aesthetic
+4. **Unclear Navigation**: Button text didn't specify that it opens Google Maps specifically
+
+### Solution Implemented
+
+#### 1. **Updated Button Text** - `components/dish-card.tsx`
+Changed delivery app button text for better clarity:
+```typescript
+// Before
+{copyingStates[app] ? "Copying..." : `Order on ${app}`}
+{copyingStates[app] ? "Copying..." : `Open ${app}`}
+
+// After  
+{copyingStates[app] ? "Copying..." : `Check on ${app}`}
+```
+
+#### 2. **Fixed Toast Visibility** - `components/dish-card.tsx`
+Added 1-second delay to allow users to see clipboard confirmation:
+```typescript
+// Before: Immediate deep link
+window.location.href = deepLink
+
+// After: Delayed deep link
+setTimeout(() => {
+  window.location.href = deepLink
+}, 1000)
+```
+
+#### 3. **Added Logo Rounding** - `components/dish-card.tsx` & `components/ui/delivery-app-pills.tsx`
+Applied subtle rounding to delivery app logos:
+```typescript
+// Before
+className="h-4 w-4 flex-shrink-0"
+
+// After
+className="h-4 w-4 flex-shrink-0 rounded-[3px]"
+```
+
+#### 4. **Updated Navigation Button Text** - `components/dish-card.tsx`
+Made navigation button text more specific:
+```typescript
+// Before
+<span>Navigate to Restaurant</span>
+<span>Navigate</span>
+
+// After
+<span>Open in Google Maps</span>
+```
+
+### Technical Details
+- **Button Text**: "Check on [App]" better indicates the search/check action users perform
+- **Toast Timing**: 1-second delay ensures clipboard confirmation is visible before browser dialog appears
+- **Logo Rounding**: 3px border-radius provides subtle rounding for 16px logos without making them circular
+- **Navigation Clarity**: "Open in Google Maps" explicitly states the destination app
+
+### Expected Results
+- ✅ Clearer button text indicating manual search action
+- ✅ Users see clipboard confirmation before browser dialog
+- ✅ Visual consistency with rounded design aesthetic
+- ✅ Clear indication that navigation opens Google Maps
+
+### Files Modified
+- `components/dish-card.tsx` - Updated button text, added toast delay, logo rounding, navigation text
+- `components/ui/delivery-app-pills.tsx` - Added logo rounding to form selection pills
+
+### Testing Results
+- ✅ Button text now accurately reflects user action
+- ✅ Toast notification visible before browser dialog
+- ✅ Logo rounding provides subtle visual improvement
+- ✅ Navigation button clearly indicates Google Maps destination
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

@@ -52,7 +52,7 @@ export function DeliveryAppPills({
           <img 
             src={getDeliveryAppLogo(app)} 
             alt={`${app} logo`}
-            className="w-4 h-4"
+            className="w-4 h-4 rounded-[3px]"
           />
           {app}
         </Button>

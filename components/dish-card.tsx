@@ -136,21 +136,23 @@ export function DishCard({
         toast.error("Failed to copy restaurant name")
       }
       
-      // Try deep link first, then fallback to web URL
+      // Delay deep link trigger by 1 second to allow user to see the toast
       const deepLink = getDeepLinkUrl(appName)
       const webUrl = getWebFallbackUrl(appName)
       
-      // Try to open deep link (mobile app)
-      try {
-        window.location.href = deepLink
-        // If deep link fails, fallback to web URL
-        setTimeout(() => {
+      // Wait 1 second for user to see toast, then trigger deep link
+      setTimeout(() => {
+        try {
+          window.location.href = deepLink
+          // If deep link fails, fallback to web URL after another 1 second
+          setTimeout(() => {
+            window.open(webUrl, '_blank')
+          }, 1000)
+        } catch (error) {
+          // If deep link fails immediately, open web URL
           window.open(webUrl, '_blank')
-        }, 1000)
-      } catch (error) {
-        // If deep link fails immediately, open web URL
-        window.open(webUrl, '_blank')
-      }
+        }
+      }, 1000)
       
     } catch (error) {
       console.error('Error in handleDeliveryAppClick:', error)
@@ -296,7 +298,7 @@ export function DishCard({
               disabled={!hasGoogleMapsData}
             >
               <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>Navigate to Restaurant</span>
+              <span>Open in Google Maps</span>
             </Button>
             
             {/* Delivery apps buttons */}
@@ -315,13 +317,13 @@ export function DishCard({
                     <img 
                       src={getDeliveryAppLogo(app)} 
                       alt={`${app} logo`}
-                      className="h-4 w-4 flex-shrink-0"
+                      className="h-4 w-4 flex-shrink-0 rounded-[3px]"
                       onError={(e) => {
                         e.currentTarget.src = "/logos/placeholder.svg"
                       }}
                     />
                     <span className="truncate">
-                      {copyingStates[app] ? "Copying..." : `Order on ${app}`}
+                      {copyingStates[app] ? "Copying..." : `Check on ${app}`}
                     </span>
                   </Button>
                 ))}
@@ -343,13 +345,13 @@ export function DishCard({
                 <img 
                   src={getDeliveryAppLogo(app)} 
                   alt={`${app} logo`}
-                  className="h-4 w-4 flex-shrink-0"
+                  className="h-4 w-4 flex-shrink-0 rounded-[3px]"
                   onError={(e) => {
                     e.currentTarget.src = "/logos/placeholder.svg"
                   }}
                 />
                 <span className="truncate">
-                  {copyingStates[app] ? "Copying..." : `Open ${app}`}
+                  {copyingStates[app] ? "Copying..." : `Check on ${app}`}
                 </span>
               </Button>
             ))}
@@ -373,7 +375,7 @@ export function DishCard({
             disabled={!hasGoogleMapsData}
           >
             <MapPin className="h-4 w-4 flex-shrink-0" />
-            <span>Navigate</span>
+            <span>Open in Google Maps</span>
           </Button>
         )}
         
