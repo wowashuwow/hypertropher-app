@@ -6536,6 +6536,175 @@ Made navigation button text more specific:
 
 ---
 
+## BUG-023: Sorting UI/UX Improvements and Location Permission Handling
+
+### Issue Summary
+**Date**: January 30, 2025
+**Status**: Resolved
+**Priority**: High
+**Category**: UI/UX Enhancement + Location Services
+
+### Problem Description
+**Multiple Issues with Sorting Interface and Location Handling:**
+
+1. **Confusing Sorting UX**: Two separate dropdowns ("Sort by Price" and "Sort by Distance") showing "Default" text created poor UX
+2. **Mutually Exclusive Sorting**: Selecting one sort automatically reset the other, preventing users from combining distance and price sorting
+3. **Inconsistent Secondary Sorting**: When distance was primary, price was always sorted low-to-high regardless of user's preference
+4. **Location Permission Edge Cases**: Users with "Always Allow" permission weren't getting automatic location fetching
+
+### Root Cause Analysis
+1. **UI Confusion**: `SelectValue` components showing "Default" instead of descriptive text
+2. **State Management**: Handler functions forced mutual exclusivity with automatic resets
+3. **Sorting Logic**: Hard-coded secondary sorting instead of respecting user preference
+4. **Location Hook**: Missing auto-fetch logic for users with pre-granted permissions
+
+### Solution Implemented
+
+#### 1. **Simplified Sorting Interface** - `app/page.tsx`
+**Replaced two dropdowns with single clear dropdown:**
+```typescript
+// Before: Two confusing dropdowns
+<Select value={priceSort} onValueChange={handlePriceSortChange}>
+  <SelectTrigger>
+    <SelectValue placeholder="Sort by Price" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="default">Default</SelectItem> // ❌ Confusing
+    // ...
+  </SelectContent>
+</Select>
+
+// After: Single clear dropdown
+<Select value={sortBy} onValueChange={handleSortChange}>
+  <SelectTrigger>
+    <SelectValue placeholder="Sort by" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="default">Sort by</SelectItem>
+    <SelectItem value="nearest">Nearest</SelectItem>
+    <SelectItem value="cheapest">Cheapest</SelectItem>
+    <SelectItem value="nearest-cheapest">Nearest & Cheapest</SelectItem>
+    <SelectItem value="nearest-expensive">Nearest & Most Expensive</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+#### 2. **Fixed Mutual Exclusivity** - `app/page.tsx`
+**Removed automatic resets to allow combined sorting:**
+```typescript
+// Before: Forced mutual exclusivity
+const handlePriceSortChange = (value: string) => {
+  setPriceSort(value)
+  if (value !== "default") {
+    setDistanceSort("default") // ❌ Bad UX
+  }
+}
+
+// After: Allow both to coexist
+const handleSortChange = (value: string) => {
+  setSortBy(value)
+  // No automatic resets - much better UX
+}
+```
+
+#### 3. **Improved Sorting Logic** - `app/page.tsx`
+**Implemented proper multi-level sorting with user preference respect:**
+```typescript
+// Before: Hard-coded secondary sorting
+if (distanceSortAvailable) {
+  const distanceDiff = a.distance! - b.distance!
+  if (distanceDiff !== 0) return distanceDiff
+  return va - vb // ❌ Always low-to-high
+}
+
+// After: Respect user's price preference
+switch (sortBy) {
+  case 'nearest-cheapest':
+    if (a.distance !== undefined && b.distance !== undefined) {
+      const distanceDiff = a.distance - b.distance
+      if (distanceDiff !== 0) return distanceDiff
+      return comparePrices(a, b, "low-to-high") // ✅ User preference
+    }
+    // ...
+}
+```
+
+#### 4. **Enhanced Location Permission Handling** - `lib/hooks/use-geolocation.ts`
+**Added auto-fetch for users with pre-granted permissions:**
+```typescript
+// Added logic to automatically fetch location when permission is granted
+if (isPermissionGranted) {
+  const hasCachedLocation = cachedLocation && lastUpdated && 
+    (Date.now() - parseInt(lastUpdated)) < 300000;
+  
+  if (!hasCachedLocation) {
+    console.log('📍 Permission granted but no recent location cache, fetching location...');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Auto-fetch location for users with "Always Allow" permission
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setState(prev => ({
+          ...prev,
+          userLocation: location,
+          loading: false,
+        }));
+      },
+      // Error handling...
+    );
+  }
+}
+```
+
+#### 5. **Always Show Distance When Available** - `app/page.tsx`
+**Distance always calculated for display purposes regardless of sorting choice:**
+```typescript
+// Always calculate distances when location is available (for display purposes)
+if (userLocation && userLocation.lat && userLocation.lng) {
+  filtered = filtered.map((dish) => {
+    if (dish.restaurant?.latitude && dish.restaurant?.longitude && !dish.restaurant?.is_cloud_kitchen) {
+      const distance = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        dish.restaurant.latitude,
+        dish.restaurant.longitude
+      )
+      return { ...dish, distance }
+    }
+    return dish
+  })
+}
+```
+
+### Technical Details
+- **State Management**: Replaced `priceSort` + `distanceSort` with single `sortBy` state
+- **Helper Functions**: Added `parsePrice()` and `comparePrices()` for cleaner sorting logic
+- **Location Services**: Enhanced permission detection and automatic location fetching
+- **UI Simplification**: Single dropdown with clear, actionable options
+- **Multi-level Sorting**: Proper primary/secondary sort implementation
+
+### Expected Results
+- ✅ Clear, intuitive sorting options without confusion
+- ✅ Users can combine distance and price sorting intelligently
+- ✅ Secondary sorting respects user's price preference
+- ✅ Users with "Always Allow" permission get automatic location fetching
+- ✅ Distance always visible when location is available, regardless of sorting choice
+
+### Files Modified
+- `app/page.tsx` - Simplified sorting UI, improved logic, enhanced location handling
+- `lib/hooks/use-geolocation.ts` - Added auto-fetch for pre-granted permissions
+
+### Testing Results
+- ✅ Single dropdown provides clear sorting options ("Nearest", "Cheapest", "Nearest & Cheapest", "Nearest & Most Expensive")
+- ✅ No more confusing "Default" text, all options are descriptive
+- ✅ Distance-based sorting works with "Always Allow" permission users
+- ✅ Secondary price sorting respects user preference (low-to-high OR high-to-low)
+- ✅ Distance data always displayed when location available, even for price-only sorting
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

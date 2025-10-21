@@ -127,11 +127,49 @@ export const useGeolocation = () => {
           console.log('🌐 Actual browser permission status:', result.state);
           
           // Update state based on actual browser permission
+          const isPermissionGranted = result.state === 'granted';
           setState(prev => ({
             ...prev,
-            locationPermissionGranted: result.state === 'granted',
+            locationPermissionGranted: isPermissionGranted,
             locationPermissionRequested: result.state !== 'prompt',
           }));
+
+          // If permission is granted but we don't have location yet, try to get it
+          if (isPermissionGranted) {
+            const hasCachedLocation = cachedLocation && lastUpdated && 
+              (Date.now() - parseInt(lastUpdated)) < 300000;
+            
+            if (!hasCachedLocation) {
+              console.log('📍 Permission granted but no recent location cache, fetching location...');
+              // Get current position since permission is already granted
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  const location = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                  };
+                  setState(prev => ({
+                    ...prev,
+                    userLocation: location,
+                    loading: false,
+                  }));
+                  console.log('✅ Auto-fetched location after permission check:', location);
+                },
+                (error) => {
+                  console.warn('⚠️ Failed to get location despite permission:', error);
+                  setState(prev => ({
+                    ...prev,
+                    loading: false,
+                  }));
+                },
+                {
+                  enableHighAccuracy: true,
+                  timeout: 10000,
+                  maximumAge: 60000, // Accept location up to 1 minute old
+                }
+              );
+            }
+          }
           
           // If permission is denied, clear cached location
           if (result.state === 'denied') {

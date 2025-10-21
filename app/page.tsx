@@ -56,8 +56,7 @@ export default function HomePage() {
   const [dishes, setDishes] = useState<Dish[]>([])
   const [bookmarkedDishes, setBookmarkedDishes] = useState<Set<string>>(new Set())
   const [selectedProteinFilter, setSelectedProteinFilter] = useState<ProteinSource>("All")
-  const [priceSort, setPriceSort] = useState("default")
-  const [distanceSort, setDistanceSort] = useState("default")
+  const [sortBy, setSortBy] = useState("default")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userCity, setUserCity] = useState("Pune, India") // Default to Pune
@@ -215,13 +214,30 @@ export default function HomePage() {
     fetchWishlist()
   }, [user])
 
-  // Handle location permission denial - reset distance sort if permission was denied
+  // Handle location permission denial - reset sort if permission was denied for distance-based sorts
   useEffect(() => {
-    if (locationPermissionRequested && !locationPermissionGranted && !locationLoading && distanceSort === 'nearest') {
-      // Permission was requested but denied, reset to default
-      setDistanceSort('default')
+    if (locationPermissionRequested && !locationPermissionGranted && !locationLoading) {
+      if (sortBy === 'nearest' || sortBy === 'nearest-cheapest' || sortBy === 'nearest-expensive') {
+        // Permission was requested but denied, reset to default
+        setSortBy('default')
+      }
     }
-  }, [locationPermissionRequested, locationPermissionGranted, locationLoading, distanceSort])
+  }, [locationPermissionRequested, locationPermissionGranted, locationLoading, sortBy])
+
+  // Handle case where user has permission but no location data yet for distance-based sorting
+  useEffect(() => {
+    const needsLocationData = sortBy === 'nearest' || sortBy === 'nearest-cheapest' || sortBy === 'nearest-expensive'
+    
+    if (needsLocationData && 
+        locationPermissionGranted && 
+        !userLocation && 
+        !locationLoading && 
+        locationPermissionRequested) {
+      // User has permission but we don't have location data, request it
+      console.log('📍 User selected distance sorting, permission granted but no location, requesting...')
+      requestLocationPermission()
+    }
+  }, [sortBy, locationPermissionGranted, userLocation, locationLoading, locationPermissionRequested, requestLocationPermission])
 
   const handleBookmarkToggle = async (dishId: string) => {
     const isCurrentlyBookmarked = bookmarkedDishes.has(dishId)
@@ -353,35 +369,42 @@ export default function HomePage() {
     return R * c // Distance in kilometers
   }
 
-  // Handle price sort selection
-  const handlePriceSortChange = (value: string) => {
-    setPriceSort(value)
-    // Reset distance sort when price sort is changed (unless it's default)
-    if (value !== "default") {
-      setDistanceSort("default")
-    }
+  // Helper function to parse price string and return numeric value
+  const parsePrice = (p: string | undefined): number => {
+        if (!p) return NaN
+        const n = Number(String(p).replace(/[^0-9.]/g, ""))
+        return isNaN(n) ? NaN : n
+      }
+
+  // Helper function to compare prices based on user's sort preference
+  const comparePrices = (a: Dish, b: Dish, sortType: string): number => {
+      const pa = parsePrice(a.price)
+      const pb = parsePrice(b.price)
+
+    if (sortType === "low-to-high") {
+        const va = isNaN(pa) ? Number.POSITIVE_INFINITY : pa
+        const vb = isNaN(pb) ? Number.POSITIVE_INFINITY : pb
+        return va - vb
+    } else if (sortType === "high-to-low") {
+        const va = isNaN(pa) ? Number.NEGATIVE_INFINITY : pa
+        const vb = isNaN(pb) ? Number.NEGATIVE_INFINITY : pb
+        return vb - va
+      }
+    
+    // Default to low-to-high if no valid sort type
+    const va = isNaN(pa) ? Number.POSITIVE_INFINITY : pa
+    const vb = isNaN(pb) ? Number.POSITIVE_INFINITY : pb
+    return va - vb
   }
 
-  // Handle distance sort selection and location permission
-  const handleDistanceSortChange = (value: string) => {
-    if (value === 'nearest') {
-      // If user selects nearest but doesn't have permission, request it
-      if (!locationPermissionGranted && !locationLoading) {
-        requestLocationPermission()
-        // Keep the selection so UI shows the intent
-        setDistanceSort(value)
-        setPriceSort("default")
-      } else {
-        // Permission already granted, proceed normally
-        setDistanceSort(value)
-        setPriceSort("default")
-      }
-    } else {
-      // For default or other values, proceed normally
-      setDistanceSort(value)
-      if (value !== "default") {
-        setPriceSort("default")
-      }
+  // Handle sort selection
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
+    
+    // If user selects any option that requires distance, request location permission
+    if ((value === 'nearest' || value === 'nearest-cheapest' || value === 'nearest-expensive') && 
+        !locationPermissionGranted && !locationLoading) {
+      requestLocationPermission()
     }
   }
 
@@ -395,66 +418,69 @@ export default function HomePage() {
       return cityMatch && proteinMatch
     })
 
-    // If distance sorting is enabled, filter out restaurants without coordinates and calculate distances
-    if (distanceSort === "nearest" && userLocation && userLocation.lat && userLocation.lng) {
-      filtered = filtered
-        .filter((dish) => {
-          // Filter out cloud kitchens and restaurants without coordinates
-          return dish.restaurant?.latitude && dish.restaurant?.longitude && !dish.restaurant?.is_cloud_kitchen
-        })
-        .map((dish) => {
+    // Always calculate distances when location is available (for display purposes)
+    if (userLocation && userLocation.lat && userLocation.lng) {
+      filtered = filtered.map((dish) => {
+        if (dish.restaurant?.latitude && dish.restaurant?.longitude && !dish.restaurant?.is_cloud_kitchen) {
           const distance = calculateDistance(
             userLocation.lat,
             userLocation.lng,
-            dish.restaurant!.latitude!,
-            dish.restaurant!.longitude!
+            dish.restaurant.latitude,
+            dish.restaurant.longitude
           )
           return { ...dish, distance }
-        })
+        }
+        return dish
+      })
     }
 
-    // Sort the filtered dishes
+    // Sort the filtered dishes based on selected sort option
     return filtered.sort((a, b) => {
-      // Distance sorting (primary when enabled)
-      if (distanceSort === "nearest" && userLocation && a.distance !== undefined && b.distance !== undefined) {
-        const distanceDiff = a.distance - b.distance
-        if (distanceDiff !== 0) return distanceDiff
-        
-        // Secondary sort by price when distances are equal
-        const parsePrice = (p: string | undefined) => {
-          if (!p) return NaN
-          const n = Number(String(p).replace(/[^0-9.]/g, ""))
-          return isNaN(n) ? NaN : n
-        }
-        const pa = parsePrice(a.price)
-        const pb = parsePrice(b.price)
-        const va = isNaN(pa) ? Number.POSITIVE_INFINITY : pa
-        const vb = isNaN(pb) ? Number.POSITIVE_INFINITY : pb
-        return va - vb
+      switch (sortBy) {
+        case 'nearest':
+          // Only show and sort by distance - filter out restaurants without coordinates
+          if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance
+          }
+          // If one has distance and other doesn't, prioritize the one with distance
+          if (a.distance !== undefined && b.distance === undefined) return -1
+          if (a.distance === undefined && b.distance !== undefined) return 1
+          return 0
+          
+        case 'cheapest':
+          return comparePrices(a, b, "low-to-high")
+          
+        case 'nearest-cheapest':
+          // Sort by nearest first, then cheapest for equal distances
+          if (a.distance !== undefined && b.distance !== undefined) {
+            const distanceDiff = a.distance - b.distance
+            if (distanceDiff !== 0) return distanceDiff
+            return comparePrices(a, b, "low-to-high")
+          }
+          // If one has distance and other doesn't, prioritize distance
+          if (a.distance !== undefined && b.distance === undefined) return -1
+          if (a.distance === undefined && b.distance !== undefined) return 1
+          // If neither has distance, fall back to cheapest
+          return comparePrices(a, b, "low-to-high")
+          
+        case 'nearest-expensive':
+          // Sort by nearest first, then most expensive for equal distances
+          if (a.distance !== undefined && b.distance !== undefined) {
+            const distanceDiff = a.distance - b.distance
+            if (distanceDiff !== 0) return distanceDiff
+            return comparePrices(a, b, "high-to-low")
+          }
+          // If one has distance and other doesn't, prioritize distance
+          if (a.distance !== undefined && b.distance === undefined) return -1
+          if (a.distance === undefined && b.distance !== undefined) return 1
+          // If neither has distance, fall back to most expensive
+          return comparePrices(a, b, "high-to-low")
+          
+        default:
+          return 0
       }
-
-      // Price sorting (when distance sort is not active)
-      const parsePrice = (p: string | undefined) => {
-        if (!p) return NaN
-        const n = Number(String(p).replace(/[^0-9.]/g, ""))
-        return isNaN(n) ? NaN : n
-      }
-      const pa = parsePrice(a.price)
-      const pb = parsePrice(b.price)
-
-      if (priceSort === "low-to-high") {
-        const va = isNaN(pa) ? Number.POSITIVE_INFINITY : pa
-        const vb = isNaN(pb) ? Number.POSITIVE_INFINITY : pb
-        return va - vb
-      }
-      if (priceSort === "high-to-low") {
-        const va = isNaN(pa) ? Number.NEGATIVE_INFINITY : pa
-        const vb = isNaN(pb) ? Number.NEGATIVE_INFINITY : pb
-        return vb - va
-      }
-      return 0
     })
-  }, [dishes, user, userCity, selectedCity, selectedProteinFilter, distanceSort, userLocation, priceSort])
+  }, [dishes, user, userCity, selectedCity, selectedProteinFilter, sortBy, userLocation])
 
   const proteinCategories: { label: string; value: ProteinSource }[] = [
     { label: "All", value: "All" },
@@ -510,33 +536,32 @@ export default function HomePage() {
         </div>
 
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-56">
-            <Select value={priceSort} onValueChange={handlePriceSortChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sort by Price" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">Sort by Price</SelectItem>
-                <SelectItem value="low-to-high">Price: Low to High</SelectItem>
-                <SelectItem value="high-to-low">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="w-56">
+          <div className="w-64">
             <Select 
-              value={distanceSort} 
-              onValueChange={handleDistanceSortChange}
-              disabled={locationLoading}
+              value={sortBy} 
+              onValueChange={handleSortChange}
+              disabled={locationLoading && (sortBy === 'nearest' || sortBy === 'nearest-cheapest' || sortBy === 'nearest-expensive')}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Sort by Distance" />
+                <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">Sort by Distance</SelectItem>
+                <SelectItem value="default">Sort by</SelectItem>
                 <SelectItem value="nearest">
                   {locationLoading ? "Getting Location..." : 
-                   locationPermissionGranted ? "Nearest First" : 
-                   "Nearest First (Enable Location)"}
+                   locationPermissionGranted ? "Nearest" : 
+                   "Nearest (Enable Location)"}
+                </SelectItem>
+                <SelectItem value="cheapest">Cheapest</SelectItem>
+                <SelectItem value="nearest-cheapest">
+                  {locationLoading ? "Getting Location..." : 
+                   locationPermissionGranted ? "Nearest & Cheapest" : 
+                   "Nearest & Cheapest (Enable Location)"}
+                </SelectItem>
+                <SelectItem value="nearest-expensive">
+                  {locationLoading ? "Getting Location..." : 
+                   locationPermissionGranted ? "Nearest & Most Expensive" : 
+                   "Nearest & Most Expensive (Enable Location)"}
                 </SelectItem>
               </SelectContent>
             </Select>

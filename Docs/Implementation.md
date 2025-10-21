@@ -588,6 +588,9 @@
 - **Files Modified**: `lib/image-compression.ts` (new), `app/add-dish/page.tsx`, `app/edit-dish/[id]/page.tsx`
 - **Impact**: Dramatically improved upload performance and page loading speeds while maintaining image quality
 
+### ✅ Completed (BUG-023 - Sorting UI/UX Improvements and Location Permission Handling)
+- Simplified sorting interface with single clear dropdown, fixed mutual exclusivity issues, enhanced location permission handling for "Always Allow" users
+
 ### 🎯 MVP Status: ~99% Complete - Restaurant-Centric Architecture + Middle East Expansion + UX Polish + Performance Optimization
 The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
 
