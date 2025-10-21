@@ -111,8 +111,8 @@ export function DishCard({
 
   const handleNavigate = () => {
     if (hasGoogleMapsData) {
-      // Open restaurant page with reviews, photos, etc.
-      const restaurantPageUrl = `https://maps.google.com/maps/place?q=place_id:${currentPlaceId}`
+      // Open restaurant page with reviews, photos, etc. - using universal format for cross-platform compatibility
+      const restaurantPageUrl = `https://maps.google.com/?q=place_id:${currentPlaceId}`
       window.open(restaurantPageUrl, '_blank')
       toast.success(`Opening ${currentRestaurantName} in Google Maps`)
     } else {
