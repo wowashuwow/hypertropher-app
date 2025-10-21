@@ -131,7 +131,7 @@ export const useGeolocation = () => {
           setState(prev => ({
             ...prev,
             locationPermissionGranted: isPermissionGranted,
-            locationPermissionRequested: result.state !== 'prompt',
+            locationPermissionRequested: result.state === 'granted' || result.state === 'denied',
           }));
 
           // If permission is granted but we don't have location yet, try to get it
