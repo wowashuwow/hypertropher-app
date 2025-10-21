@@ -389,6 +389,32 @@ interface DishCardProps {
 - **Actions**: Bookmark and navigation buttons
 - **Comments**: Expandable accordion for long comments
 
+### Inline City Selector Component
+```typescript
+interface InlineCitySelectorProps {
+  selectedCity: string
+  onCityChange: (city: string) => void
+  cities: Array<{ city: string; dishCount: number }>
+  onBeFirstClick: () => void
+  className?: string
+}
+```
+
+**Visual Specifications:**
+- **Responsive Width**: 
+  - Mobile: `w-full` (full width)
+  - Tablet/Small Desktop: `sm:w-80` (320px)
+  - Large Desktop: `md:w-96` (384px)
+- **Layout**: City name with right-aligned dish count pill
+- **Typography**: City name gets priority space with proper truncation
+- **Interaction**: Dropdown with city list and "Be the first" option
+
+**Layout Guidelines:**
+- City name takes maximum available space with `flex-1 mr-3`
+- Dish count pill is right-aligned with `flex-shrink-0` to prevent compression
+- Uses `justify-between` layout for optimal space distribution
+- Proper text truncation with ellipsis for long city names
+
 ### Navigation Components
 ```typescript
 // Header Navigation (Desktop)

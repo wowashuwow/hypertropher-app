@@ -18,6 +18,10 @@ export const useGeolocation = () => {
   });
 
   const requestLocationPermission = useCallback(async () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    
     if (!navigator.geolocation) {
       setState(prev => ({
         ...prev,
@@ -89,12 +93,20 @@ export const useGeolocation = () => {
 
   // Check if geolocation is supported
   const checkGeolocationSupport = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
     return 'geolocation' in navigator;
   }, []);
 
   // Check actual browser permission status and restore cached data
   useEffect(() => {
     const checkPermissionStatus = async () => {
+      // Check if we're in browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
+
       // First, restore cached permission status
       const cachedLocation = localStorage.getItem('userLocation');
       const lastUpdated = localStorage.getItem('locationLastUpdated');
@@ -182,6 +194,11 @@ export const useGeolocation = () => {
 
   // Save location and permission status to localStorage when updated
   useEffect(() => {
+    // Check if we're in browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Save permission status regardless of location
     localStorage.setItem('locationPermissionGranted', state.locationPermissionGranted.toString());
     localStorage.setItem('locationPermissionRequested', state.locationPermissionRequested.toString());

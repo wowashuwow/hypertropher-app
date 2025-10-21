@@ -53,6 +53,8 @@ Mark tasks complete only when:
 - All task list items completed (if applicable)
 - If new files are created, or any changes to the project directory structure are made, document in `/Docs/project_structure.md`
 - If there are any changes to the backend setup, document in `/DATABASE_SCHEMA.md`
+- If there are any changes to the UI UX philosophy or user journeys, document in `/Docs/UI_UX_doc.md`
+- If there are any changes to the product vision, goals, or scope, document in `PRD.md`
 
 ### File Reference Priority
 1. `/Docs/Bug_tracking.md` - Check for known issues first

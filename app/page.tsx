@@ -8,6 +8,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { useSession } from "@/lib/auth/session-provider"
 import { InlineCitySelector } from "@/components/ui/inline-city-selector"
 import { BeFirstModal } from "@/components/ui/be-first-modal"
+import { useGeolocation } from "@/lib/hooks/use-geolocation"
 
 
 type ProteinSource = "All" | "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other"
@@ -47,6 +48,8 @@ interface Dish {
   availability?: "In-Store" | "Online" | "Both"
   delivery_apps?: string[]
   place_id?: string | null
+  // Distance field for sorting
+  distance?: number
 }
 
 export default function HomePage() {
@@ -54,6 +57,7 @@ export default function HomePage() {
   const [bookmarkedDishes, setBookmarkedDishes] = useState<Set<string>>(new Set())
   const [selectedProteinFilter, setSelectedProteinFilter] = useState<ProteinSource>("All")
   const [priceSort, setPriceSort] = useState("default")
+  const [distanceSort, setDistanceSort] = useState("default")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userCity, setUserCity] = useState("Pune, India") // Default to Pune
@@ -67,6 +71,7 @@ export default function HomePage() {
   const [loadingCities, setLoadingCities] = useState(false)
   
   const { user, userProfile } = useSession()
+  const { userLocation, locationPermissionGranted, locationPermissionRequested, locationError, requestLocationPermission, loading: locationLoading } = useGeolocation()
 
   // Use SessionProvider data instead of fetching separately
   useEffect(() => {
@@ -91,36 +96,36 @@ export default function HomePage() {
 
         if (user) {
           // Authenticated users: existing flow (unchanged)
-          const response = await fetch('/api/dishes')
-          if (!response.ok) {
-            throw new Error('Failed to fetch dishes')
-          }
-          const data = await response.json()
-          
-          const transformedDishes = data.map((dish: any) => ({
-            id: dish.id,
-            dish_name: dish.dish_name,
-            restaurant_name: dish.restaurant_name,
-            city: dish.city,
-            price: `₹${dish.price}`,
-            protein: dish.protein_content,
-            taste: dish.taste,
-            satisfaction: dish.satisfaction,
-            comment: dish.comment,
-            addedBy: dish.users?.name || "Unknown",
-            addedByProfilePicture: dish.users?.profile_picture_url || null,
-            availability: dish.availability as "In-Store" | "Online" | "Both",
-            image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
-            protein_source: dish.protein_source,
-            delivery_apps: dish.delivery_apps || [],
-            place_id: dish.place_id,
-            users: dish.users,
-            restaurant: dish.restaurant,
-            hasInStore: dish.hasInStore,
-            deliveryApps: dish.deliveryApps || dish.delivery_apps || []
-          }))
-          
-          setDishes(transformedDishes)
+        const response = await fetch('/api/dishes')
+        if (!response.ok) {
+          throw new Error('Failed to fetch dishes')
+        }
+        const data = await response.json()
+        
+        const transformedDishes = data.map((dish: any) => ({
+          id: dish.id,
+          dish_name: dish.dish_name,
+          restaurant_name: dish.restaurant_name,
+          city: dish.city,
+          price: `₹${dish.price}`,
+          protein: dish.protein_content,
+          taste: dish.taste,
+          satisfaction: dish.satisfaction,
+          comment: dish.comment,
+          addedBy: dish.users?.name || "Unknown",
+          addedByProfilePicture: dish.users?.profile_picture_url || null,
+          availability: dish.availability as "In-Store" | "Online" | "Both",
+          image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
+          protein_source: dish.protein_source,
+          delivery_apps: dish.delivery_apps || [],
+          place_id: dish.place_id,
+          users: dish.users,
+          restaurant: dish.restaurant,
+          hasInStore: dish.hasInStore,
+          deliveryApps: dish.deliveryApps || dish.delivery_apps || []
+        }))
+        
+        setDishes(transformedDishes)
         } else {
           // Non-authenticated users: parallel loading
           const [dishesResponse, citiesResponse] = await Promise.all([
@@ -209,6 +214,14 @@ export default function HomePage() {
 
     fetchWishlist()
   }, [user])
+
+  // Handle location permission denial - reset distance sort if permission was denied
+  useEffect(() => {
+    if (locationPermissionRequested && !locationPermissionGranted && !locationLoading && distanceSort === 'nearest') {
+      // Permission was requested but denied, reset to default
+      setDistanceSort('default')
+    }
+  }, [locationPermissionRequested, locationPermissionGranted, locationLoading, distanceSort])
 
   const handleBookmarkToggle = async (dishId: string) => {
     const isCurrentlyBookmarked = bookmarkedDishes.has(dishId)
@@ -327,18 +340,100 @@ export default function HomePage() {
       .sort((a, b) => b.dishCount - a.dishCount)
   }
 
-  const filteredDishes = dishes
-    .filter((dish) => {
-      // For non-logged-in users, filter by selected city
-      // For logged-in users, filter by their selected city (existing logic)
+  // Distance calculation function using Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371 // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    return R * c // Distance in kilometers
+  }
+
+  // Handle price sort selection
+  const handlePriceSortChange = (value: string) => {
+    setPriceSort(value)
+    // Reset distance sort when price sort is changed (unless it's default)
+    if (value !== "default") {
+      setDistanceSort("default")
+    }
+  }
+
+  // Handle distance sort selection and location permission
+  const handleDistanceSortChange = (value: string) => {
+    if (value === 'nearest') {
+      // If user selects nearest but doesn't have permission, request it
+      if (!locationPermissionGranted && !locationLoading) {
+        requestLocationPermission()
+        // Keep the selection so UI shows the intent
+        setDistanceSort(value)
+        setPriceSort("default")
+      } else {
+        // Permission already granted, proceed normally
+        setDistanceSort(value)
+        setPriceSort("default")
+      }
+    } else {
+      // For default or other values, proceed normally
+      setDistanceSort(value)
+      if (value !== "default") {
+        setPriceSort("default")
+      }
+    }
+  }
+
+  const filteredDishes = useMemo(() => {
+    // First filter dishes by city and protein
+    let filtered = dishes.filter((dish) => {
       const cityMatch = user 
         ? dish.city === userCity 
         : dish.city === selectedCity
       const proteinMatch = selectedProteinFilter === "All" || dish.protein_source === selectedProteinFilter
       return cityMatch && proteinMatch
     })
-    .sort((a, b) => {
-      // Extract numeric value from price strings like "₹320"; fallback to Infinity/0
+
+    // If distance sorting is enabled, filter out restaurants without coordinates and calculate distances
+    if (distanceSort === "nearest" && userLocation && userLocation.lat && userLocation.lng) {
+      filtered = filtered
+        .filter((dish) => {
+          // Filter out cloud kitchens and restaurants without coordinates
+          return dish.restaurant?.latitude && dish.restaurant?.longitude && !dish.restaurant?.is_cloud_kitchen
+        })
+        .map((dish) => {
+          const distance = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            dish.restaurant!.latitude!,
+            dish.restaurant!.longitude!
+          )
+          return { ...dish, distance }
+        })
+    }
+
+    // Sort the filtered dishes
+    return filtered.sort((a, b) => {
+      // Distance sorting (primary when enabled)
+      if (distanceSort === "nearest" && userLocation && a.distance !== undefined && b.distance !== undefined) {
+        const distanceDiff = a.distance - b.distance
+        if (distanceDiff !== 0) return distanceDiff
+        
+        // Secondary sort by price when distances are equal
+        const parsePrice = (p: string | undefined) => {
+          if (!p) return NaN
+          const n = Number(String(p).replace(/[^0-9.]/g, ""))
+          return isNaN(n) ? NaN : n
+        }
+        const pa = parsePrice(a.price)
+        const pb = parsePrice(b.price)
+        const va = isNaN(pa) ? Number.POSITIVE_INFINITY : pa
+        const vb = isNaN(pb) ? Number.POSITIVE_INFINITY : pb
+        return va - vb
+      }
+
+      // Price sorting (when distance sort is not active)
       const parsePrice = (p: string | undefined) => {
         if (!p) return NaN
         const n = Number(String(p).replace(/[^0-9.]/g, ""))
@@ -359,6 +454,7 @@ export default function HomePage() {
       }
       return 0
     })
+  }, [dishes, user, userCity, selectedCity, selectedProteinFilter, distanceSort, userLocation, priceSort])
 
   const proteinCategories: { label: string; value: ProteinSource }[] = [
     { label: "All", value: "All" },
@@ -415,7 +511,7 @@ export default function HomePage() {
 
         <div className="flex items-center gap-4 mb-8">
           <div className="w-56">
-            <Select value={priceSort} onValueChange={setPriceSort}>
+            <Select value={priceSort} onValueChange={handlePriceSortChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Sort by Price" />
               </SelectTrigger>
@@ -427,13 +523,20 @@ export default function HomePage() {
             </Select>
           </div>
           <div className="w-56">
-            <Select disabled>
+            <Select 
+              value={distanceSort} 
+              onValueChange={handleDistanceSortChange}
+              disabled={locationLoading}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sort by Distance" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="nearest" disabled>
-                  Nearest First
+                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="nearest">
+                  {locationLoading ? "Getting Location..." : 
+                   locationPermissionGranted ? "Nearest First" : 
+                   "Nearest First (Enable Location)"}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -478,6 +581,7 @@ export default function HomePage() {
                 isBookmarked={bookmarkedDishes.has(dish.id)}
                 onBookmarkToggle={handleBookmarkToggle}
                 showActions={false}
+                distance={dish.distance}
               />
             ))}
           </div>

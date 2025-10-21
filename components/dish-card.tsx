@@ -47,6 +47,7 @@ interface DishCardProps {
   showActions?: boolean
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  distance?: number
 }
 
 export function DishCard({
@@ -75,6 +76,7 @@ export function DishCard({
   showActions = false,
   onEdit,
   onDelete,
+  distance,
 }: DishCardProps) {
   const [bookmarked, setBookmarked] = useState(isBookmarked)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -108,6 +110,14 @@ export function DishCard({
   }
 
   const availabilityInfo = getAvailabilityInfo()
+
+  // Format distance display
+  const formatDistance = (distance: number): string => {
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)}m`
+    }
+    return `${distance.toFixed(1)}km`
+  }
 
   const handleNavigate = () => {
     if (hasGoogleMapsData) {
@@ -240,6 +250,11 @@ export function DishCard({
         </div>
         <p className="text-xs text-muted-foreground mb-3">
           {restaurantName} · {city}
+          {distance !== undefined && (
+            <span className="ml-1 px-1.5 py-0.5 bg-muted rounded text-xs font-medium">
+              {formatDistance(distance)}
+            </span>
+          )}
         </p>
 
         <div className="space-y-1.5 mb-3 flex-grow">
