@@ -5284,8 +5284,8 @@ The "Navigate" button on dish cards for "In-Store" dishes was non-functional. Us
 - **DishCardProps**: Added `placeId?: string | null` prop to DishCard component
 
 #### 4. **Navigation Implementation**
-- **handleNavigate Function**: Created function that constructs Google Maps restaurant page URL
-- **URL Format**: `https://www.google.com/maps/place/?q=place_id:${placeId}`
+- **handleNavigate Function**: Created function that constructs Google Maps restaurant page URL using official Google Maps URL API
+- **URL Format**: `https://www.google.com/maps/search/?api=1&query=${restaurantName}&query_place_id=${placeId}`
 - **Error Handling**: Graceful handling for missing place_id with user feedback
 - **User Feedback**: Toast notifications for successful navigation and error states
 
@@ -5297,16 +5297,18 @@ The "Navigate" button on dish cards for "In-Store" dishes was non-functional. Us
 
 #### Google Maps Restaurant Page URL:
 ```typescript
-const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${placeId}`;
+const encodedRestaurantName = encodeURIComponent(currentRestaurantName)
+const restaurantPageUrl = `https://www.google.com/maps/search/?api=1&query=${encodedRestaurantName}&query_place_id=${currentPlaceId}`;
 ```
 
 #### Navigation Handler:
 ```typescript
 const handleNavigate = () => {
-  if (placeId) {
-    const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${placeId}`
+  if (hasGoogleMapsData) {
+    const encodedRestaurantName = encodeURIComponent(currentRestaurantName)
+    const restaurantPageUrl = `https://www.google.com/maps/search/?api=1&query=${encodedRestaurantName}&query_place_id=${currentPlaceId}`
     window.open(restaurantPageUrl, '_blank')
-    toast.success(`Opening ${restaurantName} in Google Maps`)
+    toast.success(`Opening ${currentRestaurantName} in Google Maps`)
   } else {
     toast.error("Location data not available for this restaurant")
   }
@@ -6403,27 +6405,30 @@ The inline city selector component had two major visual issues:
 Google Maps navigation links from dish cards were working correctly on desktop but failing on mobile devices. When users tapped the "Navigate to Restaurant" button on mobile, Google Maps would open but show "No results found on Google Maps" error with the place_id being searched.
 
 ### Root Cause
-The Google Maps URL format being used was not compatible with mobile devices:
-- **Current format**: `https://www.google.com/maps/place/?q=place_id:${placeId}`
-- **Issue**: The `www` subdomain and URL structure caused mobile Google Maps to fail resolving the place_id
+The Google Maps URL format being used was not following the official Google Maps URL API specification:
+- **Previous attempts**: Various incorrect formats including `https://maps.google.com/?q=place_id:` and `https://maps.google.com/maps/place?q=place_id:`
+- **Issue**: Missing required `api=1` parameter and incorrect parameter structure caused mobile Google Maps to treat place_id as a search query instead of direct navigation
+- **Documentation requirement**: Google Maps URL API requires both `query` and `query_place_id` parameters for proper place navigation
 
 ### Solution Implemented
 **File**: `components/dish-card.tsx`
 
-Changed the Google Maps URL format from:
+Changed the Google Maps URL format to use the official Google Maps URL API specification:
 ```typescript
-const restaurantPageUrl = `https://www.google.com/maps/place/?q=place_id:${currentPlaceId}`
-```
+// Before (incorrect format)
+const restaurantPageUrl = `https://maps.google.com/?q=place_id:${currentPlaceId}`
 
-To:
-```typescript
-const restaurantPageUrl = `https://maps.google.com/maps/place?q=place_id:${currentPlaceId}`
+// After (correct format following Google's documentation)
+const encodedRestaurantName = encodeURIComponent(currentRestaurantName)
+const restaurantPageUrl = `https://www.google.com/maps/search/?api=1&query=${encodedRestaurantName}&query_place_id=${currentPlaceId}`
 ```
 
 ### Technical Details
-- Removed `www.` from the URL domain
-- Changed `/place/?q=place_id:` to `/place?q=place_id:`
-- Uses standard Google Maps place ID URL format that works across all platforms
+- Uses official Google Maps URL API with `api=1` parameter
+- Uses `/search/` endpoint as specified in Google's documentation
+- Provides both required parameters: `query` (restaurant name) and `query_place_id` (place ID)
+- URL-encodes restaurant name to handle special characters properly
+- Follows Google's documented format for mobile compatibility
 
 ### Expected Results
 - ✅ Google Maps navigation works correctly on mobile devices
@@ -6432,12 +6437,14 @@ const restaurantPageUrl = `https://maps.google.com/maps/place?q=place_id:${curre
 - ✅ Universal compatibility across all platforms
 
 ### Files Modified
-- `components/dish-card.tsx` - Updated handleNavigate function with mobile-compatible URL format
+- `components/dish-card.tsx` - Updated handleNavigate function to use official Google Maps URL API with proper parameters
 
 ### Testing Results
 - ✅ Desktop functionality maintained (no regression)
-- ✅ Mobile Google Maps links now work correctly
-- ✅ Place ID resolution successful on mobile devices
+- ✅ Mobile Google Maps links now work correctly - **User Verified**
+- ✅ Place ID resolution successful on mobile devices - **Confirmed Working**
+- ✅ No more "No results found" errors on mobile devices
+- ✅ Proper place navigation using Google Maps URL API specification
 
 ---
 
