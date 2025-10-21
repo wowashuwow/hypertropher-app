@@ -22,7 +22,10 @@ export const useGeolocation = () => {
       return;
     }
     
+    console.log('🔍 requestLocationPermission called');
+    
     if (!navigator.geolocation) {
+      console.log('❌ Geolocation not supported');
       setState(prev => ({
         ...prev,
         locationError: 'Geolocation is not supported by this browser.',
@@ -32,6 +35,7 @@ export const useGeolocation = () => {
       return;
     }
 
+    console.log('📍 Starting location request...');
     setState(prev => ({
       ...prev,
       loading: true,
@@ -40,12 +44,13 @@ export const useGeolocation = () => {
 
     const geolocationOptions: PositionOptions = {
       enableHighAccuracy: true,
-      timeout: 15000, // Increased timeout for mobile
-      maximumAge: 0, // Always get fresh location on mobile
+      timeout: 20000, // Longer timeout
+      maximumAge: 0, // Always get fresh location
     };
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('✅ Location success:', position);
         const location = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
@@ -61,17 +66,18 @@ export const useGeolocation = () => {
         }));
       },
       (error) => {
+        console.log('❌ Location error:', error);
         let errorMessage = 'Unable to get your location.';
         
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. Please enable location permissions for this website in your browser settings.';
+            errorMessage = 'Location access denied. Please check your browser settings and allow location access for this website.';
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information is unavailable.';
+            errorMessage = 'Location information is unavailable. Please check if location services are enabled on your device.';
             break;
           case error.TIMEOUT:
-            errorMessage = 'Location request timed out.';
+            errorMessage = 'Location request timed out. Please try again.';
             break;
           default:
             errorMessage = 'An error occurred while retrieving your location.';
