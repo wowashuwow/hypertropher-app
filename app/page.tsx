@@ -57,6 +57,7 @@ export default function HomePage() {
   const [bookmarkedDishes, setBookmarkedDishes] = useState<Set<string>>(new Set())
   const [selectedProteinFilter, setSelectedProteinFilter] = useState<ProteinSource>("All")
   const [sortBy, setSortBy] = useState("default")
+  const [distanceRange, setDistanceRange] = useState("whole-city")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userCity, setUserCity] = useState("Pune, India") // Default to Pune
@@ -401,9 +402,8 @@ export default function HomePage() {
   const handleSortChange = (value: string) => {
     setSortBy(value)
     
-    // If user selects any option that requires distance, request location permission
-    if ((value === 'nearest' || value === 'nearest-cheapest' || value === 'nearest-expensive') && 
-        !locationPermissionGranted && !locationLoading) {
+    // If user selects nearest and location is not available, request permission
+    if (value === 'nearest' && !locationPermissionGranted && !locationLoading) {
       requestLocationPermission()
     }
   }
@@ -418,7 +418,7 @@ export default function HomePage() {
       return cityMatch && proteinMatch
     })
 
-    // Always calculate distances when location is available (for display purposes)
+    // Calculate distances when location is available
     if (userLocation && userLocation.lat && userLocation.lng) {
       filtered = filtered.map((dish) => {
         if (dish.restaurant?.latitude && dish.restaurant?.longitude && !dish.restaurant?.is_cloud_kitchen) {
@@ -434,53 +434,31 @@ export default function HomePage() {
       })
     }
 
+    // Filter by distance range if location is available and range is not "whole-city"
+    if (distanceRange !== "whole-city" && userLocation) {
+      const maxDistance = parseInt(distanceRange)
+      filtered = filtered.filter(dish => 
+        dish.distance !== undefined && dish.distance <= maxDistance
+      )
+    }
+
     // Sort the filtered dishes based on selected sort option
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'nearest':
-          // Only show and sort by distance - filter out restaurants without coordinates
-          if (a.distance !== undefined && b.distance !== undefined) {
-            return a.distance - b.distance
-          }
-          // If one has distance and other doesn't, prioritize the one with distance
-          if (a.distance !== undefined && b.distance === undefined) return -1
-          if (a.distance === undefined && b.distance !== undefined) return 1
-          return 0
+          return (a.distance || Infinity) - (b.distance || Infinity)
           
         case 'cheapest':
-          return comparePrices(a, b, "low-to-high")
+          return parsePrice(a.price) - parsePrice(b.price)
           
-        case 'nearest-cheapest':
-          // Sort by nearest first, then cheapest for equal distances
-          if (a.distance !== undefined && b.distance !== undefined) {
-            const distanceDiff = a.distance - b.distance
-            if (distanceDiff !== 0) return distanceDiff
-            return comparePrices(a, b, "low-to-high")
-          }
-          // If one has distance and other doesn't, prioritize distance
-          if (a.distance !== undefined && b.distance === undefined) return -1
-          if (a.distance === undefined && b.distance !== undefined) return 1
-          // If neither has distance, fall back to cheapest
-          return comparePrices(a, b, "low-to-high")
-          
-        case 'nearest-expensive':
-          // Sort by nearest first, then most expensive for equal distances
-          if (a.distance !== undefined && b.distance !== undefined) {
-            const distanceDiff = a.distance - b.distance
-            if (distanceDiff !== 0) return distanceDiff
-            return comparePrices(a, b, "high-to-low")
-          }
-          // If one has distance and other doesn't, prioritize distance
-          if (a.distance !== undefined && b.distance === undefined) return -1
-          if (a.distance === undefined && b.distance !== undefined) return 1
-          // If neither has distance, fall back to most expensive
-          return comparePrices(a, b, "high-to-low")
+        case 'most-expensive':
+          return parsePrice(b.price) - parsePrice(a.price)
           
         default:
           return 0
       }
     })
-  }, [dishes, user, userCity, selectedCity, selectedProteinFilter, sortBy, userLocation])
+  }, [dishes, user, userCity, selectedCity, selectedProteinFilter, sortBy, distanceRange, userLocation])
 
   const proteinCategories: { label: string; value: ProteinSource }[] = [
     { label: "All", value: "All" },
@@ -492,6 +470,20 @@ export default function HomePage() {
     { label: "🐑 Mutton/Lamb", value: "Mutton" },
     { label: "🥩 Beef", value: "Beef" },
     { label: "🍽️ Other", value: "Other" },
+  ]
+
+  const distanceRanges = [
+    { value: "5", label: "Within 5 km" },
+    { value: "10", label: "Within 10 km" },
+    { value: "25", label: "Within 25 km" },
+    { value: "50", label: "Within 50 km" },
+    { value: "whole-city", label: "Whole City" }
+  ]
+
+  const sortOptions = [
+    { value: "nearest", label: "Nearest" },
+    { value: "cheapest", label: "Cheapest" },
+    { value: "most-expensive", label: "Most Expensive" }
   ]
 
   return (
@@ -535,38 +527,78 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-64">
+        <div className="flex flex-row items-center gap-3 mb-8">
+          {/* Distance Range Selector */}
+          <div className="flex-1">
+            <Select 
+              value={distanceRange} 
+              onValueChange={(value) => {
+                if (value !== "whole-city" && !userLocation) {
+                  requestLocationPermission()
+                } else {
+                  setDistanceRange(value)
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={userLocation ? "Search within" : "Enable location to search by distance"} />
+              </SelectTrigger>
+              <SelectContent>
+                {distanceRanges.map((range) => (
+                  <SelectItem key={range.value} value={range.value}>
+                    {range.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Sort Selector */}
+          <div className="flex-1">
             <Select 
               value={sortBy} 
               onValueChange={handleSortChange}
-              disabled={locationLoading && (sortBy === 'nearest' || sortBy === 'nearest-cheapest' || sortBy === 'nearest-expensive')}
+              disabled={locationLoading && sortBy === 'nearest'}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort dishes by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">Sort by</SelectItem>
-                <SelectItem value="nearest">
-                  {locationLoading ? "Getting Location..." : 
-                   locationPermissionGranted ? "Nearest" : 
-                   "Nearest (Enable Location)"}
+                <SelectItem value="default">Sort dishes by</SelectItem>
+                {sortOptions.map((option) => (
+                  <SelectItem 
+                    key={option.value} 
+                    value={option.value}
+                    disabled={option.value === 'nearest' && !locationPermissionGranted && !locationLoading}
+                  >
+                    {option.value === 'nearest' && locationLoading ? "Getting Location..." : 
+                     option.value === 'nearest' && !locationPermissionGranted ? "Nearest (Enable Location)" : 
+                     option.label}
                 </SelectItem>
-                <SelectItem value="cheapest">Cheapest</SelectItem>
-                <SelectItem value="nearest-cheapest">
-                  {locationLoading ? "Getting Location..." : 
-                   locationPermissionGranted ? "Nearest & Cheapest" : 
-                   "Nearest & Cheapest (Enable Location)"}
-                </SelectItem>
-                <SelectItem value="nearest-expensive">
-                  {locationLoading ? "Getting Location..." : 
-                   locationPermissionGranted ? "Nearest & Most Expensive" : 
-                   "Nearest & Most Expensive (Enable Location)"}
-                </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
+
+        {/* Location Permission Denied Message */}
+        {!userLocation && locationPermissionRequested && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0">
+                ⚠️
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-900">
+                  Location access was denied
+                </p>
+                <p className="text-xs text-red-700 mt-1">
+                  To enable location access: Go to your browser settings → Site Settings → Location → Allow for this website
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-16">
@@ -579,6 +611,24 @@ export default function HomePage() {
             <p className="text-muted-foreground">Using sample data for now.</p>
           </div>
         ) : filteredDishes.length > 0 ? (
+          <>
+            {/* Results Count Display */}
+            <div className="mb-6">
+              <p className="text-muted-foreground">
+                {userLocation && distanceRange !== "whole-city" ? (
+                  <>
+                    {filteredDishes.length} dishes found within {distanceRange} km
+                    {sortBy !== "default" && `, sorted by ${sortOptions.find(opt => opt.value === sortBy)?.label.toLowerCase()}`}
+                  </>
+                ) : (
+                  <>
+                    {filteredDishes.length} dishes found
+                    {sortBy !== "default" && `, sorted by ${sortOptions.find(opt => opt.value === sortBy)?.label.toLowerCase()}`}
+                  </>
+                )}
+              </p>
+            </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
             {filteredDishes.map((dish) => (
               <DishCard
@@ -610,14 +660,23 @@ export default function HomePage() {
               />
             ))}
           </div>
+          </>
         ) : (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg mb-4">
-              {user 
-                ? `No dishes found in ${userCity}.`
-                : `No dishes found.`
-              }
+              {userLocation && distanceRange !== "whole-city" ? (
+                `No dishes found within ${distanceRange} km.`
+              ) : user ? (
+                `No dishes found in ${userCity}.`
+              ) : (
+                `No dishes found.`
+              )}
             </p>
+            {userLocation && distanceRange !== "whole-city" && (
+              <p className="text-muted-foreground mb-4">
+                Try expanding your search to "Whole City" to see more dishes.
+              </p>
+            )}
             <p className="text-muted-foreground mb-4">
               {user 
                 ? "Try adjusting your filters or be the first to add a dish!"
