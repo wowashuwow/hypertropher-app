@@ -108,7 +108,7 @@ export function RestaurantInput({
       {!isManualEntry ? (
         <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/30">
           {/* Location Permission Request */}
-          {!locationPermissionGranted && !locationPermissionRequested && (
+          {!locationPermissionGranted && (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
