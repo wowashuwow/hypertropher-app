@@ -77,7 +77,7 @@ export default function HomePage() {
   useEffect(() => {
     if (userProfile) {
       setUserCity(userProfile.city || "Pune, India")
-      setUserName(userProfile.name || "User")
+      setUserName(userProfile.name?.split(' ')[0] || "User")
       setLoadingProfile(false)
     } else if (user === null) {
       // For unauthenticated users, set default values and stop loading

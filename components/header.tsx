@@ -46,7 +46,7 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
               {userProfile?.profile_picture_url ? (
                 <img
                   src={userProfile.profile_picture_url}
-                  alt={`${userProfile.name}'s profile`}
+                  alt={`${userProfile.name?.split(' ')[0] || 'User'}'s profile`}
                   className="w-10 h-10 rounded-full object-cover border-2 border-border hover:border-primary/50 transition-colors"
                   onError={(e) => {
                     // Fallback to initials if image fails to load
