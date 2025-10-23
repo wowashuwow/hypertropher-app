@@ -588,6 +588,9 @@
 - **Files Modified**: `lib/image-compression.ts` (new), `app/add-dish/page.tsx`, `app/edit-dish/[id]/page.tsx`
 - **Impact**: Dramatically improved upload performance and page loading speeds while maintaining image quality
 
+### ✅ Completed (BUG-024 - Distance-Based Sorting Implementation)
+- Complete overhaul of sorting system with distance range selection (5km, 10km, 25km, 50km, Whole City) and simplified sorting options (Nearest, Cheapest, Most Expensive)
+
 ### ✅ Completed (BUG-023 - Sorting UI/UX Improvements and Location Permission Handling)
 - Simplified sorting interface with single clear dropdown, fixed mutual exclusivity issues, enhanced location permission handling for "Always Allow" users
 

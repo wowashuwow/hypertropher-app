@@ -241,6 +241,12 @@ export default function HomePage() {
   }, [sortBy, locationPermissionGranted, userLocation, locationLoading, locationPermissionRequested, requestLocationPermission])
 
   const handleBookmarkToggle = async (dishId: string) => {
+    // Redirect non-logged-in users to signup
+    if (!user) {
+      window.location.href = '/signup'
+      return
+    }
+
     const isCurrentlyBookmarked = bookmarkedDishes.has(dishId)
     
     try {

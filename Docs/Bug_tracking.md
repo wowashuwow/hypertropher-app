@@ -6540,9 +6540,12 @@ Made navigation button text more specific:
 
 ### Issue Summary
 **Date**: January 30, 2025
-**Status**: Resolved
+**Status**: Superseded by BUG-024
 **Priority**: High
 **Category**: UI/UX Enhancement + Location Services
+
+### Note
+**This bug was completely superseded by BUG-024 (Distance-Based Sorting Implementation) which implemented a much better solution. The old combined sorting approach ("Nearest & Cheapest") was replaced with a cleaner two-step process: Distance Range Selection → Sorting Within Range.**
 
 ### Problem Description
 **Multiple Issues with Sorting Interface and Location Handling:**
@@ -6702,6 +6705,81 @@ if (userLocation && userLocation.lat && userLocation.lng) {
 - ✅ Distance-based sorting works with "Always Allow" permission users
 - ✅ Secondary price sorting respects user preference (low-to-high OR high-to-low)
 - ✅ Distance data always displayed when location available, even for price-only sorting
+
+---
+
+## BUG-024: Distance-Based Sorting Implementation
+
+### Problem Description
+The existing sorting system was confusing and limited:
+- Complex combined sorting options ("Nearest & Cheapest") were hard to understand
+- No way to set distance ranges for search (users couldn't limit search to 5km, 10km, etc.)
+- Location permission handling was inconsistent
+- Mobile layout issues with dropdowns
+
+### Root Cause
+- Single dropdown with complex combined sorting logic
+- No distance range filtering capability
+- Poor location permission UX flow
+- Responsive layout problems
+
+### Solution Implemented
+**Complete overhaul of sorting system with distance-based filtering:**
+
+1. **Two-Step Process**: Distance Range Selection → Sorting Within Range
+2. **Distance Range Options**: 5km, 10km, 25km, 50km, Whole City
+3. **Simplified Sorting**: Nearest, Cheapest, Most Expensive (no more combined options)
+4. **Smart Location Handling**: Distance options trigger location request when needed
+5. **Proper Permission Workflow**: Handles "Never Allow" cases with manual instructions
+
+### Technical Details
+```typescript
+// New state management
+const [distanceRange, setDistanceRange] = useState("whole-city")
+
+// Two-step filtering logic
+const filteredDishes = useMemo(() => {
+  // Step 1: Filter by distance range
+  if (distanceRange !== "whole-city" && userLocation) {
+    const maxDistance = parseInt(distanceRange)
+    filtered = filtered.filter(dish => 
+      dish.distance !== undefined && dish.distance <= maxDistance
+    )
+  }
+  
+  // Step 2: Sort within filtered results
+  return filtered.sort((a, b) => {
+    switch (sortBy) {
+      case 'nearest': return (a.distance || Infinity) - (b.distance || Infinity)
+      case 'cheapest': return parsePrice(a.price) - parsePrice(b.price)
+      case 'most-expensive': return parsePrice(b.price) - parsePrice(a.price)
+    }
+  })
+}, [dishes, userCity, selectedCity, selectedProteinFilter, sortBy, distanceRange, userLocation])
+```
+
+### Expected Results
+- ✅ Users can set specific distance ranges (5km, 10km, etc.)
+- ✅ Clear two-step process: filter by distance, then sort
+- ✅ Simplified sorting options that are easy to understand
+- ✅ Proper location permission handling with manual instructions for "Never Allow"
+- ✅ Responsive mobile layout with side-by-side dropdowns
+- ✅ Enhanced UX with count display ("X dishes found within Y km")
+- ✅ Better empty states with helpful suggestions
+
+### Files Modified
+- `hypertropher-app/app/page.tsx` - Complete sorting system overhaul
+- Added distance range state and filtering logic
+- Replaced complex combined sorting with simple options
+- Added responsive layout and enhanced UX
+
+### Testing Results
+- ✅ Distance range selection works correctly
+- ✅ Sorting within ranges functions properly
+- ✅ Location permission requests trigger on distance selection
+- ✅ "Never Allow" cases show proper manual instructions
+- ✅ Mobile layout displays dropdowns side-by-side
+- ✅ Count display shows accurate results with context
 
 ---
 
