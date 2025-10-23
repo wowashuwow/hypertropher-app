@@ -35,6 +35,27 @@ export const useGeolocation = () => {
       return;
     }
 
+    // Check if permission is already denied
+    if (navigator.permissions) {
+      try {
+        const permission = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        console.log('🔍 Current permission state:', permission.state);
+        
+        if (permission.state === 'denied') {
+          console.log('❌ Permission already denied');
+          setState(prev => ({
+            ...prev,
+            locationError: 'Location access was previously denied. Please reset permissions in your browser settings.',
+            locationPermissionRequested: true,
+            loading: false,
+          }));
+          return;
+        }
+      } catch (e) {
+        console.log('⚠️ Could not check permission state:', e);
+      }
+    }
+
     console.log('📍 Starting location request...');
     setState(prev => ({
       ...prev,
@@ -71,7 +92,7 @@ export const useGeolocation = () => {
         
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. Please check your browser settings and allow location access for this website.';
+            errorMessage = 'Location access denied. Please reset permissions: Settings > Safari > Clear History and Website Data, then try again.';
             break;
           case error.POSITION_UNAVAILABLE:
             errorMessage = 'Location information is unavailable. Please check if location services are enabled on your device.';
