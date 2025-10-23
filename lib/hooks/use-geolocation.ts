@@ -69,6 +69,9 @@ export const useGeolocation = () => {
         console.log('❌ Location error:', error);
         let errorMessage = 'Unable to get your location.';
         
+        // Show alert with error details for debugging
+        alert(`Location Error: ${error.code}\nMessage: ${error.message}\nCode: ${error.code}`);
+        
         switch (error.code) {
           case error.PERMISSION_DENIED:
             errorMessage = 'Location access denied. Please check your browser settings and allow location access for this website.';
