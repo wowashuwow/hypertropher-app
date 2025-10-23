@@ -619,7 +619,7 @@ export default function HomePage() {
         ) : filteredDishes.length > 0 ? (
           <>
             {/* Results Count Display */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <p className="text-muted-foreground">
                 {userLocation && distanceRange !== "whole-city" ? (
                   <>
@@ -633,7 +633,7 @@ export default function HomePage() {
                   </>
                 )}
               </p>
-            </div>
+            </div> */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
             {filteredDishes.map((dish) => (
@@ -680,13 +680,13 @@ export default function HomePage() {
             </p>
             {userLocation && distanceRange !== "whole-city" && (
               <p className="text-muted-foreground mb-4">
-                Try expanding your search to "Whole City" to see more dishes.
+                Try expanding your search to see more dishes.
               </p>
             )}
             <p className="text-muted-foreground mb-4">
               {user 
                 ? "Try adjusting your filters or be the first to add a dish!"
-                : "Be the first to contribute!"
+                : "Contribute to Hypertropher."
               }
             </p>
             {!user && (

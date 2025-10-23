@@ -63,7 +63,8 @@ export function BottomNavigation() {
 
           if ('href' in item && 'icon' in item && 'label' in item) {
             const Icon = item.icon as React.ComponentType<{ className?: string }>
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href || 
+              (item.href === "/signup" && pathname === "/signup")
 
             return (
               <Link

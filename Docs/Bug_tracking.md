@@ -6783,6 +6783,93 @@ const filteredDishes = useMemo(() => {
 
 ---
 
+## BUG-025: Signup/Login Page UI Integration
+
+**Status**: Resolved  
+**Priority**: Medium  
+**Date**: 2024-12-19  
+**Reporter**: Development Team  
+
+### Problem Description
+The signup/login page felt disconnected from the main app, appearing as a standalone page rather than part of the application. This created inconsistent user experience and broke the single-page application feel.
+
+### Root Cause
+- Signup page used custom layout instead of MainLayout component
+- Redundant branding elements (HYPERTROPHER title and tagline)
+- Titles were inside card components instead of following app-wide patterns
+- Header login button was redundant on mobile (already in bottom nav)
+- Bottom navigation didn't highlight login/signup when on auth pages
+
+### Solution Implemented
+
+#### 1. Layout Integration
+```typescript
+// Before: Custom layout
+<div className="flex min-h-screen flex-col items-center justify-center p-6">
+
+// After: MainLayout integration
+<MainLayout>
+  <div className="max-w-7xl mx-auto py-8 px-6">
+```
+
+#### 2. Title Structure Consistency
+```typescript
+// Before: Titles inside card
+<Card>
+  <CardHeader>
+    <CardTitle>Welcome Back</CardTitle>
+    <CardDescription>Enter your phone number...</CardDescription>
+  </CardHeader>
+
+// After: Titles outside card (like other pages)
+<div className="mb-8">
+  <h1 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h1>
+  <p className="text-lg text-muted-foreground">Enter your phone number...</p>
+</div>
+<Card>
+  <CardContent>
+```
+
+#### 3. Mobile Header Optimization
+```typescript
+// Hide redundant login button on mobile
+<Button size="sm" className="hidden lg:block">Login</Button>
+```
+
+#### 4. Bottom Navigation Highlighting
+```typescript
+// Enhanced active state detection
+const isActive = pathname === item.href || 
+  (item.href === "/signup" && pathname === "/signup")
+```
+
+### Technical Details
+- **Layout Pattern**: Follows app-wide `max-w-7xl mx-auto py-8 px-6` structure
+- **Typography**: Consistent `text-3xl font-bold` for titles, `text-lg` for descriptions
+- **Card Styling**: Subtle shadow and border for seamless integration
+- **Responsive Design**: Maintains mobile-first approach with proper spacing
+
+### Expected Results
+- ✅ Signup/login pages feel part of the main app
+- ✅ Consistent navigation with bottom nav highlighting
+- ✅ Clean, uncluttered design without redundant elements
+- ✅ Left-aligned titles matching other pages
+- ✅ Mobile-optimized with no redundant header buttons
+
+### Files Modified
+- `hypertropher-app/app/signup/page.tsx` - Complete layout restructure
+- `hypertropher-app/components/header.tsx` - Mobile login button optimization
+- `hypertropher-app/components/bottom-navigation.tsx` - Enhanced active state detection
+
+### Testing Results
+- ✅ Signup page integrates seamlessly with app layout
+- ✅ Bottom navigation highlights login/signup correctly
+- ✅ Mobile header shows no redundant login button
+- ✅ Typography and spacing consistent with other pages
+- ✅ All authentication flows work unchanged
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)

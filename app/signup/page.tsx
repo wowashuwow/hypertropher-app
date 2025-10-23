@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
+import { MainLayout } from "@/components/main-layout"
 
 export default function SignUpPage() {
   const [isSignUp, setIsSignUp] = useState(true) // true for signup, false for login
@@ -92,28 +93,25 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-foreground">HYPERTROPHER</h1>
-        <p className="mt-2 text-muted-foreground">
-          Find high protein meals near you. Vetted and verified by bodybuilders just like you.
-        </p>
-      </div>
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">
+    <MainLayout>
+      <div className="max-w-7xl mx-auto py-8 px-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {otpSent ? "Verify Your Phone" : (isSignUp ? "Join Your Friends" : "Welcome Back")}
-          </CardTitle>
-          <CardDescription>
+          </h1>
+          <p className="text-lg text-muted-foreground">
             {otpSent 
               ? `We've sent an OTP to ${countryCode}${phoneNumber}` 
               : (isSignUp 
                 ? "Enter your invite code and phone number to get started."
                 : "Enter your phone number to log in.")
             }
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
+        </div>
+        
+        <div className="flex justify-center">
+          <Card className="w-full max-w-md shadow-sm border-border/50">
+            <CardContent className="pt-6">
           {!otpSent ? (
             <div className="space-y-4">
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -209,8 +207,10 @@ export default function SignUpPage() {
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </MainLayout>
   )
 }

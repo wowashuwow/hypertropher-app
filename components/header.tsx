@@ -67,7 +67,7 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
           ) : (
             <>
               <Link href="/signup">
-                <Button size="sm">Login</Button>
+                <Button size="sm" className="hidden lg:block">Login</Button>
               </Link>
             </>
           )}

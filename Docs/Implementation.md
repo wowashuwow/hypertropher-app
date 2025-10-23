@@ -588,6 +588,9 @@
 - **Files Modified**: `lib/image-compression.ts` (new), `app/add-dish/page.tsx`, `app/edit-dish/[id]/page.tsx`
 - **Impact**: Dramatically improved upload performance and page loading speeds while maintaining image quality
 
+### ✅ Completed (BUG-025 - Signup/Login Page UI Integration)
+- Integrated signup/login pages with MainLayout for seamless app experience, removed redundant branding, moved titles outside cards, optimized mobile header, and enhanced bottom navigation highlighting
+
 ### ✅ Completed (BUG-024 - Distance-Based Sorting Implementation)
 - Complete overhaul of sorting system with distance range selection (5km, 10km, 25km, 50km, Whole City) and simplified sorting options (Nearest, Cheapest, Most Expensive)
 
