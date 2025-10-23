@@ -22,6 +22,8 @@ interface RestaurantInputProps {
   locationPermissionGranted?: boolean
   locationPermissionRequested?: boolean
   locationError?: string | null
+  locationErrorType?: string | null
+  locationErrorBrowser?: string | null
   onRequestLocationPermission?: () => void
 }
 
@@ -35,6 +37,8 @@ export function RestaurantInput({
   locationPermissionGranted = false,
   locationPermissionRequested = false,
   locationError = null,
+  locationErrorType = null,
+  locationErrorBrowser = null,
   onRequestLocationPermission,
 }: RestaurantInputProps) {
   const [isManualEntry, setIsManualEntry] = useState(value?.type === 'manual')
@@ -133,16 +137,55 @@ export function RestaurantInput({
             </div>
           )}
 
-          {/* Location Status Messages */}
-          {locationPermissionRequested && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          {/* Location Error Messages */}
+          {locationError && (
+            <div className={`p-3 border rounded-lg ${
+              locationErrorType === 'BROWSER_LEVEL_DENIED' 
+                ? 'bg-red-50 border-red-200' 
+                : 'bg-yellow-50 border-yellow-200'
+            }`}>
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-yellow-800">
-                  <p className="font-medium">Location Access Denied</p>
-                  <p className="text-xs mt-1">
-                    No problem! We'll search restaurants in {userCity} instead.
+                <AlertCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                  locationErrorType === 'BROWSER_LEVEL_DENIED' 
+                    ? 'text-red-600' 
+                    : 'text-yellow-600'
+                }`} />
+                <div className={`text-sm ${
+                  locationErrorType === 'BROWSER_LEVEL_DENIED' 
+                    ? 'text-red-800' 
+                    : 'text-yellow-800'
+                }`}>
+                  <p className="font-medium">
+                    {locationErrorType === 'BROWSER_LEVEL_DENIED' 
+                      ? 'Location Access Blocked' 
+                      : 'Location Access Denied'
+                    }
                   </p>
+                  <p className="text-xs mt-1">
+                    {locationError}
+                  </p>
+                  {locationErrorType === 'BROWSER_LEVEL_DENIED' && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={onRequestLocationPermission}
+                      className="mt-2 bg-red-600 hover:bg-red-700 text-white"
+                      disabled={disabled}
+                    >
+                      Try Again After Fixing Settings
+                    </Button>
+                  )}
+                  {locationErrorType === 'USER_DENIED' && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={onRequestLocationPermission}
+                      className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white"
+                      disabled={disabled}
+                    >
+                      Allow Location Access
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

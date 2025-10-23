@@ -47,6 +47,8 @@ export default function AddDishPage() {
     locationPermissionGranted,
     locationPermissionRequested,
     locationError,
+    locationErrorType,
+    locationErrorBrowser,
     loading: locationLoading,
     requestLocationPermission,
     checkGeolocationSupport,
@@ -340,6 +342,8 @@ export default function AddDishPage() {
                 locationPermissionGranted={locationPermissionGranted}
                 locationPermissionRequested={locationPermissionRequested}
                 locationError={locationError}
+                locationErrorType={locationErrorType}
+                locationErrorBrowser={locationErrorBrowser}
                 onRequestLocationPermission={requestLocationPermission}
               />
 

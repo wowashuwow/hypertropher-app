@@ -5,8 +5,34 @@ interface GeolocationState {
   locationPermissionGranted: boolean;
   locationPermissionRequested: boolean;
   locationError: string | null;
+  locationErrorType: string | null;
+  locationErrorBrowser: string | null;
   loading: boolean;
 }
+
+// Browser detection function
+const detectBrowser = (): string => {
+  const userAgent = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(userAgent)) return 'ios_safari';
+  if (/Android/.test(userAgent)) {
+    if (/Chrome/.test(userAgent)) return 'android_chrome';
+    if (/Firefox/.test(userAgent)) return 'android_firefox';
+    return 'android_other';
+  }
+  return 'desktop_other';
+};
+
+// Browser-specific instructions
+const getBrowserInstructions = (browser: string): string => {
+  const instructions = {
+    ios_safari: "Settings > Safari > Location Services > Allow",
+    android_chrome: "Chrome Settings > Site Settings > Location > Allow", 
+    android_firefox: "Firefox Settings > Privacy & Security > Location Services > Allow",
+    android_other: "Browser Settings > Location > Allow",
+    desktop_other: "Browser Settings > Privacy & Security > Location > Allow"
+  };
+  return instructions[browser as keyof typeof instructions] || instructions.desktop_other;
+};
 
 export const useGeolocation = () => {
   const [state, setState] = useState<GeolocationState>({
@@ -14,6 +40,8 @@ export const useGeolocation = () => {
     locationPermissionGranted: false,
     locationPermissionRequested: false,
     locationError: null,
+    locationErrorType: null,
+    locationErrorBrowser: null,
     loading: false,
   });
 
@@ -86,32 +114,64 @@ export const useGeolocation = () => {
           locationError: null,
         }));
       },
-      (error) => {
+      async (error) => {
         console.log('❌ Location error:', error);
         let errorMessage = 'Unable to get your location.';
+        let errorType = 'UNKNOWN_ERROR';
+        let errorBrowser = null;
         
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied. Please reset permissions: Settings > Safari > Clear History and Website Data, then try again.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information is unavailable. Please check if location services are enabled on your device.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Location request timed out. Please try again.';
-            break;
-          default:
-            errorMessage = 'An error occurred while retrieving your location.';
-            break;
+        if (error.code === error.PERMISSION_DENIED) {
+          // Check if it's browser-level denial
+          if (navigator.permissions) {
+            try {
+              const permission = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+              console.log('🔍 Permission state:', permission.state);
+              
+              if (permission.state === 'denied') {
+                // Browser-level denial
+                errorType = 'BROWSER_LEVEL_DENIED';
+                errorBrowser = detectBrowser();
+                errorMessage = `Location blocked in browser settings. To enable: ${getBrowserInstructions(errorBrowser)}`;
+              } else {
+                // User-level denial
+                errorType = 'USER_DENIED';
+                errorMessage = 'Location access denied. Click "Allow Location Access" to try again.';
+              }
+            } catch (e) {
+              console.log('⚠️ Could not check permission state:', e);
+              errorType = 'USER_DENIED';
+              errorMessage = 'Location access denied. Click "Allow Location Access" to try again.';
+            }
+          } else {
+            errorType = 'USER_DENIED';
+            errorMessage = 'Location access denied. Click "Allow Location Access" to try again.';
+          }
+        } else {
+          switch (error.code) {
+            case error.POSITION_UNAVAILABLE:
+              errorType = 'SERVICES_DISABLED';
+              errorMessage = 'Location information is unavailable. Please check if location services are enabled on your device.';
+              break;
+            case error.TIMEOUT:
+              errorType = 'TIMEOUT';
+              errorMessage = 'Location request timed out. Please try again.';
+              break;
+            default:
+              errorType = 'UNKNOWN_ERROR';
+              errorMessage = 'An error occurred while retrieving your location.';
+              break;
+          }
         }
 
         setState(prev => ({
           ...prev,
           userLocation: null,
           locationPermissionGranted: false,
-          locationPermissionRequested: error.code === error.PERMISSION_DENIED, // Only set to true if explicitly denied
+          locationPermissionRequested: errorType === 'USER_DENIED',
           loading: false,
           locationError: errorMessage,
+          locationErrorType: errorType,
+          locationErrorBrowser: errorBrowser,
         }));
       },
       geolocationOptions
