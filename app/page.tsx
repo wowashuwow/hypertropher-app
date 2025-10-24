@@ -547,6 +547,7 @@ export default function HomePage() {
   ]
 
   const distanceRanges = [
+    { value: "2", label: "Within 2 km" },
     { value: "5", label: "Within 5 km" },
     { value: "10", label: "Within 10 km" },
     { value: "25", label: "Within 25 km" },
