@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { SessionProvider } from "@/lib/auth/session-provider"
+import { DishesCacheProvider } from "@/lib/cache/dishes-cache-provider"
 import { Toaster } from "sonner"
 import "./globals.css"
 
@@ -52,7 +53,9 @@ export default function RootLayout({
       </head>
       <body className={`font-sans ${rethinkSans.variable} ${GeistMono.variable}`}>
         <SessionProvider>
-          <Suspense fallback={null}>{children}</Suspense>
+          <DishesCacheProvider>
+            <Suspense fallback={null}>{children}</Suspense>
+          </DishesCacheProvider>
         </SessionProvider>
         <Toaster 
           position="top-center"

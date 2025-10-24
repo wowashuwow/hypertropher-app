@@ -18,6 +18,7 @@ import { ArrowLeft, Save, X, AlertCircle, Camera } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { compressImageWithTimeout, formatFileSize, getCompressionRatio } from "@/lib/image-compression"
+import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 
 interface Dish {
   id: string
@@ -55,6 +56,7 @@ export default function EditDishPage() {
   const params = useParams()
   const router = useRouter()
   const { user } = useSession()
+  const { invalidateCache: invalidateDishesCache } = useDishesCache()
   const dishId = params.id as string
 
   const [dish, setDish] = useState<Dish | null>(null)
@@ -528,6 +530,8 @@ export default function EditDishPage() {
         }
       }
 
+      // Invalidate dishes cache so discover page shows updated dish
+      invalidateDishesCache()
       alert("Dish updated successfully!")
       router.push('/my-dishes')
     } catch (err) {

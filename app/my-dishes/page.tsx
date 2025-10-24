@@ -6,6 +6,7 @@ import { MainLayout } from "@/components/main-layout"
 import { DishCard } from "@/components/dish-card"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { useSession } from "@/lib/auth/session-provider"
+import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 
 
 interface Dish {
@@ -55,6 +56,7 @@ export default function MyDishesPage() {
   const [loadingProfile, setLoadingProfile] = useState(true)
   
   const { user, userProfile } = useSession()
+  const { invalidateCache: invalidateDishesCache } = useDishesCache()
   const currentUserId = user?.id
   const router = useRouter()
 
@@ -153,6 +155,8 @@ export default function MyDishesPage() {
 
       // Remove the dish from local state
       setDishes((prev) => prev.filter((dish) => dish.id !== dishId))
+      // Invalidate dishes cache so discover page reflects deletion
+      invalidateDishesCache()
     } catch (error) {
       console.error('Error deleting dish:', error)
       alert(error instanceof Error ? error.message : 'Failed to delete dish')

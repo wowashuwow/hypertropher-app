@@ -17,9 +17,11 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { compressImageWithTimeout, formatFileSize, getCompressionRatio } from "@/lib/image-compression"
+import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 
 export default function AddDishPage() {
   const router = useRouter()
+  const { invalidateCache: invalidateDishesCache } = useDishesCache()
   
   // Form state
   const [restaurant, setRestaurant] = useState<RestaurantInputType | null>(null)
@@ -286,6 +288,8 @@ export default function AddDishPage() {
         }
       }
 
+      // Invalidate dishes cache so discover page shows new dish
+      invalidateDishesCache()
       alert("Dish submitted successfully!")
       router.push('/')
     } catch (error) {

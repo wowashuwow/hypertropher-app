@@ -8,6 +8,7 @@ import { CitySearchInput } from "@/components/ui/city-search-input"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
 import { useSession } from "@/lib/auth/session-provider"
 import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
+import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 import { toast } from "sonner"
 
 
@@ -25,6 +26,7 @@ export default function AccountPage() {
   const [loadingProfile, setLoadingProfile] = useState(true)
   const [updatingCity, setUpdatingCity] = useState(false)
   const { user, signOut, invalidateUserCache, updateUserCity, updateUserProfilePicture } = useSession()
+  const { invalidateCache: invalidateDishesCache } = useDishesCache()
 
   // Fetch user's profile data
   useEffect(() => {
@@ -93,6 +95,8 @@ export default function AccountPage() {
       if (response.ok) {
         // Update city in session context immediately (no loading flicker)
         updateUserCity(newCity)
+        // Invalidate dishes cache so discover page fetches dishes for new city
+        invalidateDishesCache()
         toast.success("City updated successfully!", {
           duration: 4000,
         })

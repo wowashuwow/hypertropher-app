@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { MainLayout } from "@/components/main-layout"
 import { DishCard } from "@/components/dish-card"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { useSession } from "@/lib/auth/session-provider"
 import { InlineCitySelector } from "@/components/ui/inline-city-selector"
 import { BeFirstModal } from "@/components/ui/be-first-modal"
 import { useGeolocation } from "@/lib/hooks/use-geolocation"
+import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 
 
 type ProteinSource = "All" | "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other"
@@ -72,6 +73,8 @@ export default function HomePage() {
   
   const { user, userProfile } = useSession()
   const { userLocation, locationPermissionGranted, locationPermissionRequested, locationError, requestLocationPermission, loading: locationLoading } = useGeolocation()
+  const { getCachedDishes, setCachedDishes, getFilters, setFilters, getScrollPosition, setScrollPosition } = useDishesCache()
+  const hasRestoredScroll = useRef(false)
 
   // Use SessionProvider data instead of fetching separately
   useEffect(() => {
@@ -87,10 +90,73 @@ export default function HomePage() {
     }
   }, [userProfile, user])
 
+  // Restore cached filters on mount
+  useEffect(() => {
+    const cachedFilters = getFilters()
+    if (cachedFilters) {
+      console.log('📦 Restoring cached filters:', cachedFilters)
+      setSelectedProteinFilter(cachedFilters.proteinSource)
+      setSortBy(cachedFilters.sortBy)
+      setDistanceRange(cachedFilters.distanceRange)
+    }
+  }, [getFilters])
+
+  // Save filters to cache whenever they change
+  useEffect(() => {
+    setFilters({
+      proteinSource: selectedProteinFilter,
+      sortBy,
+      distanceRange
+    })
+  }, [selectedProteinFilter, sortBy, distanceRange, setFilters])
+
+  // Save scroll position before unmount
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      // Save final scroll position on unmount
+      setScrollPosition(window.scrollY)
+    }
+  }, [setScrollPosition])
+
+  // Restore scroll position after dishes are loaded
+  useEffect(() => {
+    if (dishes.length > 0 && !loading && !hasRestoredScroll.current) {
+      const cachedScrollPosition = getScrollPosition()
+      if (cachedScrollPosition > 0) {
+        console.log('📜 Restoring scroll position:', cachedScrollPosition)
+        // Small delay to ensure DOM is fully rendered
+        setTimeout(() => {
+          window.scrollTo(0, cachedScrollPosition)
+          hasRestoredScroll.current = true
+        }, 100)
+      }
+    }
+  }, [dishes, loading, getScrollPosition])
+
   // NEW: Load data with parallel API calls for non-authenticated users
   useEffect(() => {
     const loadData = async () => {
       try {
+        const currentCity = user ? userCity : selectedCity
+        
+        // Check cache first
+        const cachedDishes = getCachedDishes(currentCity)
+        if (cachedDishes) {
+          console.log('✅ Using cached dishes for', currentCity, '- Count:', cachedDishes.length)
+          setDishes(cachedDishes)
+          setLoading(false)
+          setLoadingCities(false)
+          return
+        }
+
+        console.log('🔄 Cache miss - fetching fresh dishes for', currentCity)
         setLoading(true)
         setError(null)
 
@@ -126,6 +192,7 @@ export default function HomePage() {
         }))
         
         setDishes(transformedDishes)
+        setCachedDishes(userCity, transformedDishes)
         } else {
           // Non-authenticated users: parallel loading
           const [dishesResponse, citiesResponse] = await Promise.all([
@@ -159,6 +226,7 @@ export default function HomePage() {
               deliveryApps: dish.deliveryApps || dish.delivery_apps || []
             }))
             setDishes(transformedDishes)
+            setCachedDishes(selectedCity, transformedDishes)
           } else {
             throw new Error('Failed to fetch dishes')
           }
@@ -193,7 +261,7 @@ export default function HomePage() {
     }
 
     loadData()
-  }, [user]) // Only depend on user, not selectedCity
+  }, [user, userCity, selectedCity, getCachedDishes, setCachedDishes]) // Cache-aware dependencies
 
   // Fetch user's wishlist to populate bookmarked dishes
   useEffect(() => {
