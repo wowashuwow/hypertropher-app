@@ -643,7 +643,6 @@ export default function HomePage() {
                   <SelectItem 
                     key={option.value} 
                     value={option.value}
-                    disabled={option.value === 'nearest' && !locationPermissionGranted && !locationLoading}
                   >
                     {option.value === 'nearest' && locationLoading ? "Getting Location..." : 
                      option.value === 'nearest' && !locationPermissionGranted ? "Nearest (Enable Location)" : 
