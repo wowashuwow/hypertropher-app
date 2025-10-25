@@ -68,6 +68,7 @@ export default function HomePage() {
   // New state for non-authenticated users
   const [citiesWithDishes, setCitiesWithDishes] = useState<Array<{city: string, dishCount: number}>>([])
   const [selectedCity, setSelectedCity] = useState("Pune, India") // Default to Pune
+  const [hasUserSelectedCity, setHasUserSelectedCity] = useState(false) // Track if user has explicitly selected a city
   const [isBeFirstModalOpen, setIsBeFirstModalOpen] = useState(false)
   const [loadingCities, setLoadingCities] = useState(false)
   
@@ -196,7 +197,7 @@ export default function HomePage() {
         } else {
           // Non-authenticated users: parallel loading
           const [dishesResponse, citiesResponse] = await Promise.all([
-            fetch('/api/dishes?city=Pune, India'), // Start with Pune
+            fetch(`/api/dishes?city=${encodeURIComponent(selectedCity)}`),
             fetch('/api/cities-with-dishes')
           ])
 
@@ -237,11 +238,14 @@ export default function HomePage() {
             setCitiesWithDishes(citiesData)
             
             // Set default city to Pune if available, otherwise first city
-            const puneCity = citiesData.find((c: {city: string, dishCount: number}) => c.city === "Pune, India")
-            if (puneCity) {
-              setSelectedCity("Pune, India")
-            } else if (citiesData.length > 0) {
-              setSelectedCity(citiesData[0].city)
+            // Only do this on initial load (when user hasn't explicitly selected a city)
+            if (!hasUserSelectedCity) {
+              const puneCity = citiesData.find((c: {city: string, dishCount: number}) => c.city === "Pune, India")
+              if (puneCity) {
+                setSelectedCity("Pune, India")
+              } else if (citiesData.length > 0) {
+                setSelectedCity(citiesData[0].city)
+              }
             }
           } else {
             console.error('Failed to fetch cities, using fallback')
@@ -261,7 +265,7 @@ export default function HomePage() {
     }
 
     loadData()
-  }, [user, userCity, selectedCity, getCachedDishes, setCachedDishes]) // Cache-aware dependencies
+  }, [user, userCity, getCachedDishes, setCachedDishes]) // Cache-aware dependencies (removed selectedCity to prevent re-triggers)
 
   // Fetch user's wishlist to populate bookmarked dishes
   useEffect(() => {
@@ -371,6 +375,7 @@ export default function HomePage() {
 
     if (user) return // Authenticated users don't use this
 
+    setHasUserSelectedCity(true) // Mark that user has explicitly selected a city
     setSelectedCity(newCity)
     setLoading(true)
 
@@ -402,6 +407,7 @@ export default function HomePage() {
           deliveryApps: dish.deliveryApps || dish.delivery_apps || []
         }))
         setDishes(transformedDishes)
+        setCachedDishes(newCity, transformedDishes) // Cache the fetched dishes
       } else {
         throw new Error('Failed to fetch dishes for selected city')
       }
