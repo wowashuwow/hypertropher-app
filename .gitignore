@@ -37,3 +37,15 @@ next-env.d.ts
 
 # private/internal files
 .private/
+
+# migration files (contains sensitive data)
+*-credentials.txt
+google-oauth-credentials.txt
+*-config.txt
+*-backup*.txt
+database-backup-data.txt
+database-backup-complete.json
+MIGRATION-*.md
+PHASE-*.md
+migration-backup.sql
+auth-migration-screenshots/

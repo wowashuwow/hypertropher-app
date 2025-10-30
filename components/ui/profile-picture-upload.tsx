@@ -188,7 +188,9 @@ export function ProfilePictureUpload({
     }
   }
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setPreviewUrl(null)
     onImageChange(null)
     if (fileInputRef.current) {
@@ -282,20 +284,6 @@ export function ProfilePictureUpload({
             )}
           </div>
         </div>
-
-        {/* Upload Button Alternative */}
-        {!disabled && !isUploading && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleClick}
-            className="w-full max-w-sm"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {previewUrl ? "Change Picture" : "Upload Picture"}
-          </Button>
-        )}
       </div>
     </div>
   )

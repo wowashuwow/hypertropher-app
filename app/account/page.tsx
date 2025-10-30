@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { MainLayout } from "@/components/main-layout"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CitySearchInput } from "@/components/ui/city-search-input"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
@@ -25,6 +26,9 @@ export default function AccountPage() {
   const [loadingCodes, setLoadingCodes] = useState(true)
   const [loadingProfile, setLoadingProfile] = useState(true)
   const [updatingCity, setUpdatingCity] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [currentName, setCurrentName] = useState("")
+  const [updatingName, setUpdatingName] = useState(false)
   const { user, signOut, invalidateUserCache, updateUserCity, updateUserProfilePicture } = useSession()
   const { invalidateCache: invalidateDishesCache } = useDishesCache()
 
@@ -38,6 +42,8 @@ export default function AccountPage() {
           const data = await response.json()
           setSelectedCity(data.city || "Mumbai")
           setProfilePictureUrl(data.profile_picture_url || null)
+          setUserName(data.name || "")
+          setCurrentName(data.name || "")
         }
       } catch (error) {
         console.error('Error fetching user profile:', error)
@@ -120,6 +126,43 @@ export default function AccountPage() {
     }
   }
 
+  const handleNameUpdate = async () => {
+    if (userName === currentName || !userName.trim()) return
+    
+    try {
+      setUpdatingName(true)
+      
+      const response = await fetch('/api/users', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: userName.trim() }),
+      })
+
+      if (response.ok) {
+        setCurrentName(userName)
+        toast.success("Name updated successfully!", {
+          duration: 4000,
+        })
+        // Invalidate cache to refresh name everywhere
+        invalidateUserCache()
+      } else {
+        const errorData = await response.json()
+        toast.error(`Failed to update name: ${errorData.error}`, {
+          duration: 5000,
+        })
+      }
+    } catch (error) {
+      console.error('Error updating name:', error)
+      toast.error("Failed to update name. Please try again.", {
+        duration: 5000,
+      })
+    } finally {
+      setUpdatingName(false)
+    }
+  }
+
   const handleLogout = async () => {
     await signOut()
   }
@@ -193,6 +236,40 @@ export default function AccountPage() {
               ) : (
                 <p className="text-muted-foreground">No invite codes available.</p>
               )}
+            </div>
+
+            {/* Name Editing Section */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-base font-medium">
+                Your Name
+              </Label>
+              {loadingProfile ? (
+                <div className="p-3 border rounded-lg bg-muted animate-pulse">
+                  <p className="text-muted-foreground">Loading name...</p>
+                </div>
+              ) : (
+                <div className="flex gap-3 items-start">
+                  <Input
+                    id="name"
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Enter your name"
+                    disabled={updatingName}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={handleNameUpdate}
+                    disabled={updatingName || userName === currentName}
+                    size="sm"
+                  >
+                    {updatingName ? "Saving..." : "Update"}
+                  </Button>
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">
+                This name will be shown when you add dishes
+              </p>
             </div>
 
             {/* Profile Picture */}

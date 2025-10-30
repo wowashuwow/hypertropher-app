@@ -5,91 +5,188 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { Card, CardContent } from "@/components/ui/card"
 import { MainLayout } from "@/components/main-layout"
+import { createClient } from "@/lib/supabase/client"
+
+type AuthMode = 'signup' | 'login'
+type SignupMethod = 'email_password' | 'email_magic_link' | 'google'
+type LoginMethod = 'email_password' | 'email_magic_link'
 
 export default function SignUpPage() {
-  const [isSignUp, setIsSignUp] = useState(true) // true for signup, false for login
+  const [authMode, setAuthMode] = useState<AuthMode>('signup')
+  const [signupMethod, setSignupMethod] = useState<SignupMethod>('email_password')
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email_password')
+  
+  // Form fields
   const [inviteCode, setInviteCode] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [countryCode, setCountryCode] = useState("+91")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  
+  // UI states
   const [isLoading, setIsLoading] = useState(false)
-  const [otpSent, setOtpSent] = useState(false)
-  const [otp, setOtp] = useState("")
-
+  const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
+  
   const supabase = createClient()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setMessage(null)
 
     try {
-      const fullPhoneNumber = `${countryCode}${phoneNumber}`
-      
-      // Choose API endpoint based on signup/login mode
-      const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/login'
-      const body = isSignUp 
-        ? { phone: fullPhoneNumber, inviteCode: inviteCode }
-        : { phone: fullPhoneNumber }
+      if (signupMethod === 'google') {
+        // Google OAuth signup
+        if (!inviteCode) {
+          setMessage({type: 'error', text: 'Invite code is required'})
+          setIsLoading(false)
+          return
+        }
 
-      const response = await fetch(endpoint, {
+        const response = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inviteCode }),
+        })
+
+        const data = await response.json()
+
+        if (response.ok && data.url) {
+          // Store invite code in sessionStorage for callback handler
+          sessionStorage.setItem('invite_code', inviteCode)
+          // Redirect to Google OAuth
+          window.location.href = data.url
+        } else {
+          setMessage({type: 'error', text: data.error || 'Failed to initiate Google sign-in'})
+        }
+      } else {
+        // Email signup (password or magic link)
+        if (!email || !inviteCode) {
+          setMessage({type: 'error', text: 'Email and invite code are required'})
+          setIsLoading(false)
+          return
+        }
+
+        if (signupMethod === 'email_password') {
+          if (!password || password.length < 6) {
+            setMessage({type: 'error', text: 'Password must be at least 6 characters'})
+            setIsLoading(false)
+            return
+          }
+
+          if (password !== confirmPassword) {
+            setMessage({type: 'error', text: 'Passwords do not match'})
+            setIsLoading(false)
+            return
+          }
+        }
+
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password: signupMethod === 'email_password' ? password : undefined,
+            inviteCode,
+            provider: signupMethod,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (response.ok) {
+          setMessage({type: 'success', text: data.message})
+          
+          // For magic link, clear form
+          if (signupMethod === 'email_magic_link') {
+            setEmail('')
+            setInviteCode('')
+          }
+        } else {
+          setMessage({type: 'error', text: data.error || 'Signup failed'})
+        }
+      }
+    } catch (error) {
+      console.error('Signup error:', error)
+      setMessage({type: 'error', text: 'Network error. Please check your connection.'})
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setMessage(null)
+
+    try {
+      if (!email) {
+        setMessage({type: 'error', text: 'Email is required'})
+        setIsLoading(false)
+        return
+      }
+
+      if (loginMethod === 'email_password' && !password) {
+        setMessage({type: 'error', text: 'Password is required'})
+        setIsLoading(false)
+        return
+      }
+
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password: loginMethod === 'email_password' ? password : undefined,
+          useMagicLink: loginMethod === 'email_magic_link',
+        }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        setOtpSent(true)
+        if (loginMethod === 'email_magic_link') {
+          setMessage({type: 'success', text: data.message})
+          setEmail('')
+        } else {
+          // Password login successful - redirect
+          window.location.href = '/'
+        }
       } else {
-        alert(data.error || 'An error occurred. Please try again.')
+        setMessage({type: 'error', text: data.error || 'Login failed'})
       }
     } catch (error) {
-      console.error('Auth error:', error)
-      alert('Network error. Please check your connection and try again.')
+      console.error('Login error:', error)
+      setMessage({type: 'error', text: 'Network error. Please check your connection.'})
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleGoogleLogin = async () => {
     setIsLoading(true)
+    setMessage(null)
 
     try {
-      const fullPhoneNumber = `${countryCode}${phoneNumber}`
-      const { error } = await supabase.auth.verifyOtp({
-        phone: fullPhoneNumber,
-        token: otp,
-        type: 'sms',
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        }
       })
 
       if (error) {
-        alert('Invalid OTP. Please try again.')
-      } else {
-        // Redirect based on signup/login mode
-        if (isSignUp) {
-          window.location.href = `/complete-profile?inviteCode=${inviteCode}`
-        } else {
-          // For login, redirect to homepage
-          window.location.href = '/'
-        }
+        setMessage({type: 'error', text: error.message})
+        setIsLoading(false)
+      } else if (data.url) {
+        window.location.href = data.url
       }
     } catch (error) {
-      console.error('OTP verification error:', error)
-      alert('An error occurred during verification. Please try again.')
-    } finally {
+      console.error('Google login error:', error)
+      setMessage({type: 'error', text: 'Failed to initiate Google sign-in'})
       setIsLoading(false)
     }
-  }
-
-  const handleGoBack = () => {
-    setOtpSent(false)
-    setOtp('')
   }
 
   return (
@@ -97,25 +194,53 @@ export default function SignUpPage() {
       <div className="max-w-7xl mx-auto py-8 px-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            {otpSent ? "Verify Your Phone" : (isSignUp ? "Join Your Friends" : "Welcome Back")}
+            {authMode === 'signup' ? "Join Your Friends" : "Welcome Back"}
           </h1>
           <p className="text-lg text-muted-foreground">
-            {otpSent 
-              ? `We've sent an OTP to ${countryCode}${phoneNumber}` 
-              : (isSignUp 
-                ? "Enter your invite code and phone number to get started."
-                : "Enter your phone number to log in.")
-            }
+            {authMode === 'signup'
+              ? "Enter your invite code and email to get started."
+              : "Sign in to continue to Hypertropher."}
           </p>
         </div>
-        
+
         <div className="flex justify-center">
           <Card className="w-full max-w-md shadow-sm border-border/50">
             <CardContent className="pt-6">
-          {!otpSent ? (
-            <div className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {isSignUp && (
+              {/* Mode Toggle */}
+              <div className="flex gap-2 mb-6">
+                <Button
+                  type="button"
+                  variant={authMode === 'signup' ? 'default' : 'outline'}
+                  className="flex-1"
+                  onClick={() => setAuthMode('signup')}
+                >
+                  Sign Up
+                </Button>
+                <Button
+                  type="button"
+                  variant={authMode === 'login' ? 'default' : 'outline'}
+                  className="flex-1"
+                  onClick={() => setAuthMode('login')}
+                >
+                  Log In
+                </Button>
+              </div>
+
+              {/* Message Display */}
+              {message && (
+                <div className={`mb-4 p-3 rounded-md text-sm ${
+                  message.type === 'success' 
+                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  {message.text}
+                </div>
+              )}
+
+              {authMode === 'signup' ? (
+                /* SIGNUP FORM */
+                <form onSubmit={handleSignup} className="space-y-4">
+                  {/* Invite Code (only for signup) */}
                   <div className="space-y-2">
                     <Label htmlFor="inviteCode">Invite Code</Label>
                     <Input
@@ -123,90 +248,208 @@ export default function SignUpPage() {
                       type="text"
                       placeholder="Enter your invite code"
                       value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value)}
+                      onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                       required
+                      disabled={isLoading}
                     />
                   </div>
-                )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
-                  <div className="flex">
-                    <select 
-                      className="px-3 py-2 border border-input rounded-l-md bg-background text-sm"
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
-                    >
-                      <option value="+91">+91</option>
-                      <option value="+1">+1</option>
-                      <option value="+44">+44</option>
-                    </select>
+                  {/* Signup Method Selection */}
+                  <div className="space-y-2">
+                    <Label>Sign up with</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button
+                        type="button"
+                        variant={signupMethod === 'email_password' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSignupMethod('email_password')}
+                        disabled={isLoading}
+                      >
+                        Email
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={signupMethod === 'email_magic_link' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSignupMethod('email_magic_link')}
+                        disabled={isLoading}
+                      >
+                        Magic Link
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={signupMethod === 'google' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSignupMethod('google')}
+                        disabled={isLoading}
+                      >
+                        Google
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Email field (for all methods except pure Google) */}
+                  {signupMethod !== 'google' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  )}
+
+                  {/* Password fields (only for email_password) */}
+                  {signupMethod === 'email_password' && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="At least 6 characters"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm Password</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="Re-enter password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Submit Button */}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Processing..." : "Sign Up"}
+                  </Button>
+                </form>
+              ) : (
+                /* LOGIN FORM */
+                <form onSubmit={handleLogin} className="space-y-4">
+                  {/* Login Method Selection */}
+                  <div className="space-y-2">
+                    <Label>Log in with</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        type="button"
+                        variant={loginMethod === 'email_password' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setLoginMethod('email_password')}
+                        disabled={isLoading}
+                      >
+                        Email
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={loginMethod === 'email_magic_link' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setLoginMethod('email_magic_link')}
+                        disabled={isLoading}
+                      >
+                        Magic Link
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Email field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="loginEmail">Email</Label>
                     <Input
-                      id="phoneNumber"
-                      type="tel"
-                      placeholder="Enter your phone number"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="rounded-l-none"
+                      id="loginEmail"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
-                </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send OTP"}
-                </Button>
-              </form>
-              
-              {/* Toggle between signup and login */}
-              <div className="text-center mt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp)
-                    setInviteCode("")
-                    setPhoneNumber("")
-                  }}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {isSignUp 
-                    ? "Already have an account? Log in" 
-                    : "Don't have an account? Sign up"
-                  }
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <form onSubmit={handleOtpSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="otp">Enter OTP</Label>
-                  <Input
-                    id="otp"
-                    type="text"
-                    placeholder="Enter the 6-digit code"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    maxLength={6}
-                    required
-                  />
-                </div>
+                  {/* Password field (only for email_password) */}
+                  {loginMethod === 'email_password' && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="loginPassword">Password</Label>
+                        <a
+                          href="/reset-password"
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Forgot password?
+                        </a>
+                      </div>
+                      <Input
+                        id="loginPassword"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                  )}
 
-                <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
-                  {isLoading ? "Verifying..." : "Verify OTP"}
-                </Button>
-              </form>
+                  {/* Submit Button */}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Processing..." : "Log In"}
+                  </Button>
 
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={handleGoBack}
-                disabled={isLoading}
-              >
-                Edit Phone Number
-              </Button>
-            </div>
-          )}
+                  {/* Divider */}
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">Or</span>
+                    </div>
+                  </div>
+
+                  {/* Google Login Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                  >
+                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                      <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    Continue with Google
+                  </Button>
+                </form>
+              )}
             </CardContent>
           </Card>
         </div>

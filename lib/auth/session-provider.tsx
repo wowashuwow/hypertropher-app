@@ -7,6 +7,7 @@ import type { User } from "@supabase/supabase-js"
 interface UserProfile {
   id: string
   name: string
+  email?: string
   city: string
   profile_picture_url?: string | null
   profile_picture_updated_at?: string | null

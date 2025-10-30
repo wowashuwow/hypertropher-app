@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { MapPin, BicepsFlexed, BookHeart, Handshake, HandHelping } from "lucide-react"
+import { MapPin, BicepsFlexed, BookHeart, Handshake, HandHelping, Forward,  } from "lucide-react"
 
 interface BeFirstModalProps {
   isOpen: boolean
@@ -22,32 +22,36 @@ export function BeFirstModal({ isOpen, onClose, selectedCity }: BeFirstModalProp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
-            It starts with you!
+            It starts with you.
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           <p className="text-muted-foreground">
-            Help us build <em>the ultimate</em> list of high-protein dishes available in your city.
+            Help us build the ultimate list of high-protein dishes available in your city.
           </p>
           
           <div className="bg-muted/50 p-4 rounded-lg space-y-3">
             <h4 className="font-semibold text-sm flex items-center gap-2">
               <BicepsFlexed className="h-4 w-4 text-primary" />
-              Be a hero!
+              Be a hero:
             </h4>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <BookHeart className="h-4 w-4 text-muted-foreground" />
-                Build your own "High-Protein Diary"
+                Save your high-protein finds
+              </li>
+              <li className="flex items-center gap-2">
+                <Forward className="h-4 w-4 text-muted-foreground" />
+                Share them with your friends and the world
               </li>
               <li className="flex items-center gap-2">
                 <Handshake className="h-4 w-4 text-muted-foreground" />
-                Share it with your friends and the world
+                Save people like you from protein-bait disappointments
               </li>
               <li className="flex items-center gap-2">
                 <HandHelping className="h-4 w-4 text-muted-foreground" />
-                Help people like you save time and money
+                Help others and yourself save time and money
               </li>
             </ul>
           </div>

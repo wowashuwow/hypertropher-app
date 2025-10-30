@@ -20,25 +20,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "You are not authorized." }, { status: 401 });
   }
 
-  const phone = user.phone;
+  // Get user metadata from Supabase Auth
+  const email = user.email;
+  const provider = user.app_metadata.provider; // 'google', 'email', etc.
 
   // Get the name, city, inviteCode, and profilePictureUrl from the request body
   const { name, city, inviteCode, profilePictureUrl } = await request.json();
 
-  if (!name || !city || !inviteCode) {
-    return NextResponse.json({ error: "Name, city, and invite code are required." }, { status: 400 });
+  if (!city || !inviteCode) {
+    return NextResponse.json({ error: "City and invite code are required." }, { status: 400 });
+  }
+
+  // For Google OAuth, name comes from user metadata
+  // For email signup, name is required from form
+  let userName = name;
+  if (!userName && provider === 'google') {
+    // Extract name from Google user metadata
+    userName = user.user_metadata?.full_name || user.user_metadata?.name || 'User';
+  }
+
+  if (!userName) {
+    return NextResponse.json({ error: "Name is required." }, { status: 400 });
   }
 
   // Create the user's record in our public 'users' table
   const { data, error } = await supabase
     .from("users")
     .insert({ 
-      id: user.id, 
-      phone: `+${user.phone}`, 
-      name, 
+      id: user.id,
+      email: email,
+      phone: null, // No phone for new email/Google users
+      name: userName, 
       city,
-      profile_picture_url: profilePictureUrl || null,
-      profile_picture_updated_at: profilePictureUrl ? new Date().toISOString() : null
+      profile_picture_url: profilePictureUrl || user.user_metadata?.avatar_url || null,
+      profile_picture_updated_at: profilePictureUrl || user.user_metadata?.avatar_url ? new Date().toISOString() : null
     })
     .select()
     .single();
@@ -93,9 +108,9 @@ export async function GET() {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from("users")
-      .select("id, name, city, created_at, profile_picture_url, profile_picture_updated_at")
+      .select("id, name, email, city, created_at, profile_picture_url, profile_picture_updated_at")
       .eq("id", user.id)
       .single();
 

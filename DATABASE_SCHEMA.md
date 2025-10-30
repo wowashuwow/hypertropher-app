@@ -73,12 +73,19 @@ Stores user profile information. Linked to Supabase Auth via the `id` field.
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | **Primary Key**, Foreign Key to `auth.users.id` | References the user in Supabase's authentication schema. |
-| `phone` | `TEXT` | Unique, Not Null | The user's phone number. |
+| `email` | `TEXT` | Unique, Nullable | The user's email address (for email/Google OAuth authentication). |
+| `phone` | `TEXT` | Unique, Nullable | The user's phone number (for phone authentication - deprecated). |
 | `name` | `TEXT` | | The user's full name. |
 | `city` | `TEXT` | Not Null | The user's selected primary city. |
 | `profile_picture_url` | `TEXT` | | The URL of the user's profile picture stored in Supabase Storage. |
 | `profile_picture_updated_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the profile picture was last updated. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the user account was created. |
+
+**Authentication Methods:**
+- **Email + Password**: Users can sign up and log in with email and password
+- **Email Magic Link**: Passwordless authentication via email link
+- **Google OAuth**: One-click sign-in with Google account
+- **Phone (Deprecated)**: Legacy phone-based OTP authentication (disabled for new users)
 
 #### Row Level Security (RLS) Policies
 The `users` table has RLS enabled with the following policies:
