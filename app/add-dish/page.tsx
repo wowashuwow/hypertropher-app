@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DeliveryAppPills } from "@/components/ui/delivery-app-pills"
 import { RestaurantInput } from "@/components/ui/restaurant-input"
 import { RestaurantInput as RestaurantInputType } from "@/types/restaurant"
 import { useGeolocation } from "@/lib/hooks/use-geolocation"
@@ -27,7 +26,6 @@ export default function AddDishPage() {
   const [restaurant, setRestaurant] = useState<RestaurantInputType | null>(null)
   const [dishName, setDishName] = useState("")
   const [proteinSource, setProteinSource] = useState<"Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other" | "">("")
-  const [deliveryApps, setDeliveryApps] = useState<string[]>([])
   const [price, setPrice] = useState<string>("")
   const [taste, setTaste] = useState<"Mouthgasm" | "Pretty Good" | "">("")
   const [protein, setProtein] = useState<"Overloaded" | "Pretty Good" | "">("")
@@ -80,7 +78,7 @@ export default function AddDishPage() {
   const isGoogleMapsRestaurant = restaurant?.type === 'google_maps'
   const isCloudKitchen = restaurant?.type === 'manual'
   const hasInStore = isGoogleMapsRestaurant // Google Maps restaurants automatically have In-Store
-  const hasOnlineAvailability = deliveryApps.length > 0 // Delivery apps automatically mean Online
+  const hasOnlineAvailability = availableApps.length > 0 && hasApps // Auto-apply all available apps for online availability
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -186,7 +184,7 @@ export default function AddDishPage() {
       alert("Protein source is required.")
       return
     }
-    if (!hasInStore && deliveryApps.length === 0) {
+    if (!hasInStore && !hasOnlineAvailability) {
       alert("Please select at least one availability option (In-Store or delivery apps).")
       return
     }
@@ -269,8 +267,8 @@ export default function AddDishPage() {
         const { availabilityChannel } = await channelResponse.json()
         const availabilityChannelId = availabilityChannel.id
 
-        // 5. Add delivery apps
-        for (const app of deliveryApps) {
+        // 5. Add delivery apps (auto-apply all available apps for the region)
+        for (const app of availableApps) {
           const deliveryAppResponse = await fetch('/api/dishes/delivery-apps', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -390,20 +388,6 @@ export default function AddDishPage() {
                 </div>
               </div>
 
-              {/* Delivery Apps Selection - Always visible */}
-              <div className="space-y-2">
-                <Label>Delivery Apps (Optional)</Label>
-                <p className="text-sm text-muted-foreground">
-                  Select delivery apps if this dish is available online
-                </p>
-                <DeliveryAppPills
-                  availableApps={hasApps ? availableApps : []}
-                  selectedApps={deliveryApps}
-                  onSelectionChange={setDeliveryApps}
-                  disabled={!hasApps}
-                />
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="photo">Photo</Label>
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
@@ -474,7 +458,7 @@ export default function AddDishPage() {
                 type="submit" 
                 className="w-full" 
                 size="lg" 
-                disabled={isLoading || !restaurant || !dishName || !proteinSource || (!hasInStore && deliveryApps.length === 0) || !price}
+                disabled={isLoading || !restaurant || !dishName || !proteinSource || (!hasInStore && !hasOnlineAvailability) || !price}
               >
                 {isLoading ? (
                   uploadStatus === 'uploading' ? (

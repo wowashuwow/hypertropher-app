@@ -4,6 +4,9 @@ import { useState } from "react"
 import { Bookmark, Link, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { copyToClipboard } from "@/lib/clipboard"
 import { getDeepLinkUrl, getWebFallbackUrl } from "@/lib/deep-links"
@@ -81,6 +84,9 @@ export function DishCard({
   const [bookmarked, setBookmarked] = useState(isBookmarked)
   const [isExpanded, setIsExpanded] = useState(false)
   const [copyingStates, setCopyingStates] = useState<Record<string, boolean>>({})
+  const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [selectedAppsToReport, setSelectedAppsToReport] = useState<string[]>([])
+  const [isReporting, setIsReporting] = useState(false)
 
   const handleBookmarkClick = () => {
     setBookmarked(!bookmarked)
@@ -170,6 +176,62 @@ export function DishCard({
     } finally {
       // Clear copying state for this app
       setCopyingStates(prev => ({ ...prev, [appName]: false }))
+    }
+  }
+
+  const handleReportClick = () => {
+    if (!deliveryApps || deliveryApps.length === 0) return
+    // Initialize with all apps selected
+    setSelectedAppsToReport([...deliveryApps])
+    setReportModalOpen(true)
+  }
+
+  const handleReportSubmit = async () => {
+    if (!restaurant?.id || selectedAppsToReport.length === 0) {
+      toast.error("Please select at least one app to report.")
+      return
+    }
+
+    setIsReporting(true)
+
+    try {
+      const response = await fetch('/api/dishes/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantId: restaurant.id,
+          deliveryApps: selectedAppsToReport,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to submit report')
+      }
+
+      const data = await response.json()
+      
+      if (data.removedApps && data.removedApps.length > 0) {
+        toast.success(
+          `${data.removedApps.join(', ')} ${data.removedApps.length === 1 ? 'has been' : 'have been'} removed based on community reports.`,
+          { duration: 5000 }
+        )
+      } else {
+        toast.success("Report submitted. Thank you for keeping the app accurate!")
+      }
+
+      setReportModalOpen(false)
+      setSelectedAppsToReport([])
+      
+      // Reload page to reflect removed apps (if any were removed)
+      if (data.removedApps && data.removedApps.length > 0) {
+        setTimeout(() => window.location.reload(), 1000)
+      }
+    } catch (error) {
+      console.error('Error submitting report:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to submit report')
+    } finally {
+      setIsReporting(false)
     }
   }
 
@@ -287,60 +349,78 @@ export function DishCard({
               <span>Open in Google Maps</span>
             </Button>
             
-            {/* Delivery apps buttons */}
+            {/* Delivery apps - horizontal layout */}
             {deliveryApps && deliveryApps.length > 0 && (
-              <div className="space-y-1">
-                {deliveryApps.map((app) => (
-                  <Button 
-                    key={app}
-                    onClick={() => handleDeliveryAppClick(app)}
-                    disabled={copyingStates[app]}
-                    className={cn(
-                      "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm flex items-center justify-center gap-2",
-                      copyingStates[app] && "opacity-75 cursor-not-allowed"
-                    )}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-muted-foreground">Check on:</span>
+                  {deliveryApps.map((app) => (
+                    <button
+                      key={app}
+                      onClick={() => handleDeliveryAppClick(app)}
+                      disabled={copyingStates[app]}
+                      className={cn(
+                        "flex items-center justify-center transition-opacity",
+                        copyingStates[app] && "opacity-50 cursor-not-allowed"
+                      )}
+                      title={`Check on ${app}`}
+                    >
+                      <img 
+                        src={getDeliveryAppLogo(app)} 
+                        alt={`${app} logo`}
+                        className="h-[2.5rem] w-[2.5rem] flex-shrink-0 rounded-[0.5rem]"
+                        onError={(e) => {
+                          e.currentTarget.src = "/logos/placeholder.svg"
+                        }}
+                      />
+                    </button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReportClick}
+                    className="text-xs h-6 px-2 ml-auto"
                   >
-                    <img 
-                      src={getDeliveryAppLogo(app)} 
-                      alt={`${app} logo`}
-                      className="h-4 w-4 flex-shrink-0 rounded-[3px]"
-                      onError={(e) => {
-                        e.currentTarget.src = "/logos/placeholder.svg"
-                      }}
-                    />
-                    <span className="truncate">
-                      {copyingStates[app] ? "Copying..." : `Check on ${app}`}
-                    </span>
+                    Report
                   </Button>
-                ))}
+                </div>
               </div>
             )}
           </div>
         ) : availabilityInfo.type === 'online' && deliveryApps && deliveryApps.length > 0 ? (
-          <div className="space-y-2">
-            {deliveryApps.map((app) => (
-              <Button 
-                key={app}
-                onClick={() => handleDeliveryAppClick(app)}
-                disabled={copyingStates[app]}
-                className={cn(
-                  "w-full bg-green-600 hover:bg-green-700 text-white border-0 text-sm flex items-center justify-center gap-2",
-                  copyingStates[app] && "opacity-75 cursor-not-allowed"
-                )}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground">Check on:</span>
+              {deliveryApps.map((app) => (
+                <button
+                  key={app}
+                  onClick={() => handleDeliveryAppClick(app)}
+                  disabled={copyingStates[app]}
+                  className={cn(
+                    "flex items-center justify-center transition-opacity",
+                    copyingStates[app] && "opacity-50 cursor-not-allowed"
+                  )}
+                  title={`Check on ${app}`}
+                >
+                  <img 
+                    src={getDeliveryAppLogo(app)} 
+                    alt={`${app} logo`}
+                    className="h-[2.5rem] w-[2.5rem] flex-shrink-0 rounded-[0.5rem]"
+                    onError={(e) => {
+                      e.currentTarget.src = "/logos/placeholder.svg"
+                    }}
+                  />
+                </button>
+              ))}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReportClick}
+                className="text-xs h-6 px-2 ml-auto"
               >
-                <img 
-                  src={getDeliveryAppLogo(app)} 
-                  alt={`${app} logo`}
-                  className="h-4 w-4 flex-shrink-0 rounded-[3px]"
-                  onError={(e) => {
-                    e.currentTarget.src = "/logos/placeholder.svg"
-                  }}
-                />
-                <span className="truncate">
-                  {copyingStates[app] ? "Copying..." : `Check on ${app}`}
-                </span>
+                Report
               </Button>
-            ))}
+            </div>
           </div>
         ) : availabilityInfo.type === 'online' ? (
           <Button 
@@ -462,6 +542,71 @@ export function DishCard({
           </div>
         </div>
       )}
+
+      {/* Report Modal */}
+      <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Report Incorrect Availability</DialogTitle>
+            <DialogDescription>
+              Select the delivery apps that are not available at this restaurant.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {deliveryApps && deliveryApps.length > 0 && (
+              <div className="space-y-3">
+                {deliveryApps.map((app) => (
+                  <div key={app} className="flex items-center space-x-3">
+                    <Checkbox
+                      id={`report-${app}`}
+                      checked={selectedAppsToReport.includes(app)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedAppsToReport([...selectedAppsToReport, app])
+                        } else {
+                          setSelectedAppsToReport(selectedAppsToReport.filter(a => a !== app))
+                        }
+                      }}
+                    />
+                    <Label
+                      htmlFor={`report-${app}`}
+                      className="flex items-center gap-2 cursor-pointer flex-1"
+                    >
+                      <img 
+                        src={getDeliveryAppLogo(app)} 
+                        alt={`${app} logo`}
+                        className="h-5 w-5 rounded-[3px]"
+                        onError={(e) => {
+                          e.currentTarget.src = "/logos/placeholder.svg"
+                        }}
+                      />
+                      <span>{app}</span>
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setReportModalOpen(false)
+                setSelectedAppsToReport([])
+              }}
+              disabled={isReporting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleReportSubmit}
+              disabled={isReporting || selectedAppsToReport.length === 0}
+            >
+              {isReporting ? "Submitting..." : "Submit Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

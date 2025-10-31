@@ -597,6 +597,30 @@
 ### ✅ Completed (BUG-023 - Sorting UI/UX Improvements and Location Permission Handling)
 - Simplified sorting interface with single clear dropdown, fixed mutual exclusivity issues, enhanced location permission handling for "Always Allow" users
 
+### ✅ Completed (FEATURE-023 - Auto-Apply Delivery Apps & Reporting System)
+**Streamlined Delivery App Management:**
+
+- **Auto-Apply Delivery Apps**: Removed manual delivery app selection from add-dish form
+  - All available delivery apps for user's city are now automatically applied to dishes
+  - Reduced form friction and simplified user experience
+  - Delivery apps automatically create "Online" availability channel
+  
+- **Delivery App Reporting System**: Community-driven accuracy improvements
+  - New `restaurant_delivery_app_reports` table for tracking user reports
+  - `/api/dishes/report` endpoint for submitting reports
+  - Auto-removal when 2+ unique users report an app as unavailable
+  - Restaurant-level removal (affects all dishes from that restaurant)
+  - Cloud kitchen edge case: Auto-deletes "Online" channel if all apps are removed
+  - Reporting modal with multi-select checkboxes for selecting unavailable apps
+  - New horizontal layout for delivery app icons on dish cards: "Check on:" + icons + "Report" button
+
+- **Files Modified**:
+  - `app/add-dish/page.tsx` - Removed delivery app selection UI, auto-applies available apps
+  - `components/dish-card.tsx` - New horizontal delivery app layout with reporting
+  - `app/api/dishes/report/route.ts` - New reporting API endpoint
+  - `lib/services/reporting.ts` - Auto-removal service logic
+  - `components/ui/checkbox.tsx` - New checkbox component for reporting modal
+
 ### ✅ Completed (FEATURE-022 - Authentication Migration to Email/Google OAuth)
 **Complete Authentication System Overhaul (October 2025):**
 
@@ -645,6 +669,65 @@ The core functionality is working and secure with a new restaurant-centric archi
   - Allow non-logged-in users to select a city if at least one dish exists for that city
   - This will help convey the real value of the app by showing users dishes in their specific city
   - Brainstorm implementation approach (dropdown, location detection, etc.)
+
+## Future Feature Enhancements
+
+### Recommendation System (High Priority)
+**Status:** Planned  
+**Documentation:** See [FEATURE-Recommendation-System.md](./FEATURE-Recommendation-System.md)
+
+**Overview:**
+Separate dish validation from personal wishlist functionality by introducing a recommendation system. This allows users to explicitly recommend dishes they've tried, creating permanent community validation signals while keeping wishlists as temporary personal planning tools.
+
+**Key Benefits:**
+- Protects valuable dishes based on recommendations (not wishlists)
+- Enables friend-based filtering and social proof features
+- Allows dish deletion when not recommended (simplifies spam cleanup)
+- Aligns with long-term vision of friend-based discovery
+
+**Core Concept:**
+- **Wishlist:** "I want to try this" (temporary, personal, can be removed)
+- **Recommendation:** "I tried this and it's good" (permanent, community validation, protects dish)
+
+**Implementation Scope:**
+- New `dish_recommendations` table
+- New recommendation API endpoints
+- Updated dish deletion protection logic (check recommendations, not wishlists)
+- New "My Recommendations" page
+- Independent Save and Recommend buttons on dish cards
+- Social proof display ("Recommended by 3 friends")
+
+See full feature plan for detailed database schema, API endpoints, UI/UX flows, and implementation strategy.
+
+### Interim Fix: Allow Dish Deletion with Wishlist Items (Medium Priority)
+**Status:** Ready for Implementation  
+**Documentation:** See [PLAN-Allow-Dish-Deletion-Interim.md](./PLAN-Allow-Dish-Deletion-Interim.md)
+
+**Problem:**
+Currently, users cannot delete dishes if anyone has wishlisted them due to foreign key constraint blocking deletion. This prevents legitimate use cases like spam cleanup and test dish removal.
+
+**Solution:**
+Add `ON DELETE CASCADE` to the `wishlist_items.dish_id` foreign key constraint. When a dish is deleted, associated wishlist items are automatically removed.
+
+**Implementation:**
+Simple one-line SQL migration in Supabase:
+```sql
+ALTER TABLE wishlist_items DROP CONSTRAINT wishlist_items_dish_id_fkey;
+ALTER TABLE wishlist_items ADD CONSTRAINT wishlist_items_dish_id_fkey 
+  FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE;
+```
+
+**Benefits:**
+- Immediate unblocking of dish deletion
+- No code changes needed
+- Consistent with existing pattern (availability_channels, delivery_apps)
+- Works alongside future recommendation system
+
+**Timeline:** 1-2 hours (migration + testing + documentation)
+
+See full plan for testing strategy, rollback procedures, and risk assessment.
+
+---
 
 ## Future Performance Optimization Tasks
 
