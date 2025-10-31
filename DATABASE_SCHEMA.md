@@ -19,6 +19,8 @@ This document outlines the database schema for the Hypertropher application, bui
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-2)
     - [7. `wishlist_items` table](#7-wishlist_items-table)
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-3)
+    - [8. `restaurant_delivery_app_reports` table](#8-restaurant_delivery_app_reports-table)
+      - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-4)
   - [Storage Buckets](#storage-buckets)
     - [`dish-photos` Bucket](#dish-photos-bucket)
     - [`profile-pictures` Bucket](#profile-pictures-bucket)
@@ -34,6 +36,8 @@ This document outlines the database schema for the Hypertropher application, bui
       - [1. Restaurant-Centric Refactor (January 2025)](#1-restaurant-centric-refactor-january-2025)
       - [2. Foreign Key Constraints (January 2025)](#2-foreign-key-constraints-january-2025)
       - [3. Storage Security Enhancement (January 2025)](#3-storage-security-enhancement-january-2025)
+    - [4. Delivery App Reporting System (October 2025)](#4-delivery-app-reporting-system-october-2025)
+    - [5. Wishlist Items CASCADE Update (October 2025)](#5-wishlist-items-cascade-update-october-2025)
     - [Database Constraint Issues Resolved](#database-constraint-issues-resolved)
     - [Data Migration Strategy](#data-migration-strategy)
   - [Administrative Operations](#administrative-operations)
@@ -199,7 +203,7 @@ A junction table to manage the many-to-many relationship between users and their
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `user_id` | `UUID` | **Primary Key**, Foreign Key to `users.id` | The ID of the user. |
-| `dish_id` | `UUID` | **Primary Key**, Foreign Key to `dishes.id` | The ID of the wishlisted dish. |
+| `dish_id` | `UUID` | **Primary Key**, Foreign Key to `dishes.id`, ON DELETE CASCADE | The ID of the wishlisted dish. When a dish is deleted, associated wishlist items are automatically removed. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the dish was wishlisted. |
 
 #### Row Level Security (RLS) Policies
@@ -207,6 +211,36 @@ The `wishlist_items` table has RLS enabled with the following policies:
 - **SELECT**: "Users can view their own wishlist items" (`auth.uid() = user_id`)
 - **INSERT**: "Users can add to their own wishlist" (`auth.uid() = user_id`)
 - **DELETE**: "Users can remove from their own wishlist" (`auth.uid() = user_id`)
+
+**Foreign Key Behavior:**
+- **`dish_id`**: Uses `ON DELETE CASCADE` - When a dish is deleted, all associated wishlist items are automatically removed. This allows dish owners to delete their dishes even if other users have wishlisted them.
+
+### 8. `restaurant_delivery_app_reports` table
+Tracks user reports about incorrect delivery app availability at restaurants. Used by the reporting system to automatically remove delivery apps when a threshold is met.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | **Primary Key**, Default: `gen_random_uuid()` | The unique identifier for a report. |
+| `restaurant_id` | `UUID` | Foreign Key to `restaurants.id`, ON DELETE CASCADE, Nullable | The ID of the restaurant where the delivery app is reported as unavailable. |
+| `delivery_app` | `TEXT` | Not Null | The name of the delivery app reported as unavailable (e.g., "Swiggy", "Zomato"). |
+| `reported_by_user_id` | `UUID` | Foreign Key to `users.id`, ON DELETE CASCADE, Nullable | The ID of the user who submitted the report. |
+| `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the report was submitted. |
+
+**Reporting System Logic:**
+- When 2+ unique users report the same delivery app as unavailable for a restaurant, the app is automatically removed from all dishes at that restaurant.
+- For cloud kitchens, if all delivery apps are removed, the "Online" availability channel is automatically deleted.
+- Reports are stored at the restaurant level, affecting all dishes from that restaurant.
+
+#### Row Level Security (RLS) Policies
+The `restaurant_delivery_app_reports` table has RLS enabled with the following policies:
+- **SELECT**: "Authenticated users can view reports" (`auth.role() = 'authenticated'`)
+- **INSERT**: "Authenticated users can submit reports" (`auth.role() = 'authenticated'`)
+- **UPDATE**: "Users cannot update reports" (no policy - prevents updates)
+- **DELETE**: "Users cannot delete reports" (no policy - prevents deletions)
+
+**Foreign Key Behavior:**
+- **`restaurant_id`**: Uses `ON DELETE CASCADE` - When a restaurant is deleted, all associated reports are automatically removed.
+- **`reported_by_user_id`**: Uses `ON DELETE CASCADE` - When a user is deleted, all reports they submitted are automatically removed.
 
 ---
 
@@ -462,6 +496,69 @@ USING (
 
 **Key Lesson:**
 🚨 **Supabase Storage requires BOTH SELECT and DELETE policies for deletion to work.** Missing SELECT policy causes silent failures where API returns "success" but files remain in storage. See `/Docs/Supabase_Workflow.md` for complete troubleshooting workflow.
+
+#### 4. Delivery App Reporting System (October 2025)
+
+**Problem Solved:**
+- Delivery app availability data could become stale or incorrect over time
+- No mechanism for users to report incorrect app availability
+- Manual removal of apps required admin intervention
+
+**Solution Implemented:**
+- Created `restaurant_delivery_app_reports` table to track user reports
+- Automated removal system when 2+ unique users report an app as unavailable
+- Restaurant-level removal (affects all dishes from that restaurant)
+- Cloud kitchen edge case handling (removes Online channel if all apps removed)
+
+**Table Created:**
+```sql
+CREATE TABLE restaurant_delivery_app_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  restaurant_id UUID REFERENCES restaurants(id) ON DELETE CASCADE,
+  delivery_app TEXT NOT NULL,
+  reported_by_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+```
+
+**Foreign Keys Added:**
+- `restaurant_id` → `restaurants.id` with `ON DELETE CASCADE`
+- `reported_by_user_id` → `users.id` with `ON DELETE CASCADE`
+
+**Impact:**
+- Community-driven data accuracy improvements
+- Automatic cleanup of stale delivery app associations
+- Reduced admin overhead for data maintenance
+
+#### 5. Wishlist Items CASCADE Update (October 2025)
+
+**Problem Solved:**
+- Dish owners could not delete dishes if anyone had wishlisted them
+- Foreign key constraint blocked deletion without explicit handling
+- Prevented legitimate use cases (spam cleanup, test dish removal)
+
+**Solution Implemented:**
+Updated `wishlist_items.dish_id` foreign key constraint to use `ON DELETE CASCADE`.
+
+**Migration:**
+```sql
+-- Drop existing constraint
+ALTER TABLE wishlist_items 
+DROP CONSTRAINT wishlist_items_dish_id_fkey;
+
+-- Re-add with CASCADE
+ALTER TABLE wishlist_items
+ADD CONSTRAINT wishlist_items_dish_id_fkey 
+FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE;
+```
+
+**Impact:**
+- Dish owners can now delete their dishes regardless of wishlist status
+- Automatic cleanup of wishlist items when dishes are deleted
+- Consistent with other foreign key patterns (`dish_availability_channels`, `dish_delivery_apps`)
+- Interim solution until recommendation system provides permanent validation signals
+
+**Note:** This is an interim fix. The future recommendation system will use `dish_recommendations` to protect valuable dishes from deletion, while wishlists remain temporary personal planning tools.
 
 ### Database Constraint Issues Resolved
 

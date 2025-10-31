@@ -598,62 +598,16 @@
 - Simplified sorting interface with single clear dropdown, fixed mutual exclusivity issues, enhanced location permission handling for "Always Allow" users
 
 ### ✅ Completed (FEATURE-023 - Auto-Apply Delivery Apps & Reporting System)
-**Streamlined Delivery App Management:**
+- Auto-apply all available delivery apps for user's city to dishes (removed manual selection from add/edit forms)
+- Delivery app reporting system: users report unavailable apps, auto-removal when 2+ unique users report (restaurant-level)
+- New `restaurant_delivery_app_reports` table (see `DATABASE_SCHEMA.md`)
 
-- **Auto-Apply Delivery Apps**: Removed manual delivery app selection from add-dish form
-  - All available delivery apps for user's city are now automatically applied to dishes
-  - Reduced form friction and simplified user experience
-  - Delivery apps automatically create "Online" availability channel
-  
-- **Delivery App Reporting System**: Community-driven accuracy improvements
-  - New `restaurant_delivery_app_reports` table for tracking user reports
-  - `/api/dishes/report` endpoint for submitting reports
-  - Auto-removal when 2+ unique users report an app as unavailable
-  - Restaurant-level removal (affects all dishes from that restaurant)
-  - Cloud kitchen edge case: Auto-deletes "Online" channel if all apps are removed
-  - Reporting modal with multi-select checkboxes for selecting unavailable apps
-  - New horizontal layout for delivery app icons on dish cards: "Check on:" + icons + "Report" button
-
-- **Files Modified**:
-  - `app/add-dish/page.tsx` - Removed delivery app selection UI, auto-applies available apps
-  - `components/dish-card.tsx` - New horizontal delivery app layout with reporting
-  - `app/api/dishes/report/route.ts` - New reporting API endpoint
-  - `lib/services/reporting.ts` - Auto-removal service logic
-  - `components/ui/checkbox.tsx` - New checkbox component for reporting modal
+### ✅ Completed (FEATURE-024 - App Logo Integration)
+- Added logo as favicon (`app/icon.svg`) and general asset (`public/hypertropher-logo.svg`), updated `app/layout.tsx` metadata
 
 ### ✅ Completed (FEATURE-022 - Authentication Migration to Email/Google OAuth)
-**Complete Authentication System Overhaul (October 2025):**
-
-- **Migrated from phone-based to email-based authentication** with support for multiple auth methods
-- **New Authentication Methods**:
-  - Email + Password authentication with signup and login
-  - Email Magic Link for passwordless authentication
-  - Google OAuth integration for one-click sign-in
-  - Password reset functionality with email verification
-- **New API Endpoints**:
-  - `/api/auth/signup` - Email/password and magic link signup with invite code validation
-  - `/api/auth/login` - Email/password and magic link login
-  - `/api/auth/google` - Google OAuth initiation with invite code pre-validation
-  - `/api/auth/reset-password` - Password reset email sender
-  - `/auth/callback` - OAuth and magic link callback handler
-- **New Pages**:
-  - `/reset-password` - Request password reset page
-  - `/update-password` - Set new password page after reset
-  - Updated `/signup` - Combined signup/login page with method selection
-  - Updated `/complete-profile` - Enhanced for Google OAuth with pre-filled data
-- **Database Schema Updates**:
-  - Added `email` column to `users` table (nullable, unique)
-  - Made `phone` column nullable (deprecated but kept for existing users)
-  - Auth users now support email authentication in `auth.users` table
-- **User Experience Improvements**:
-  - Google OAuth users get name and profile picture pre-filled
-  - Name editing functionality added to account settings
-  - "Forgot password?" link on login page
-  - Seamless auth callback handling with profile completion flow
-- **Migration Strategy**:
-  - Existing phone users migrated to email authentication
-  - Auth user IDs synchronized with profile user IDs
-  - Phone authentication disabled for new users (legacy support maintained)
+- Migrated from phone to email/Google OAuth authentication (email+password, magic link, Google OAuth, password reset)
+- Added `email` column to `users` table, made `phone` nullable (see `DATABASE_SCHEMA.md`)
 
 ### 🎯 MVP Status: ~99% Complete - Restaurant-Centric Architecture + Middle East Expansion + UX Polish + Performance Optimization + Email Auth
 The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
@@ -699,33 +653,8 @@ Separate dish validation from personal wishlist functionality by introducing a r
 
 See full feature plan for detailed database schema, API endpoints, UI/UX flows, and implementation strategy.
 
-### Interim Fix: Allow Dish Deletion with Wishlist Items (Medium Priority)
-**Status:** Ready for Implementation  
-**Documentation:** See [PLAN-Allow-Dish-Deletion-Interim.md](./PLAN-Allow-Dish-Deletion-Interim.md)
-
-**Problem:**
-Currently, users cannot delete dishes if anyone has wishlisted them due to foreign key constraint blocking deletion. This prevents legitimate use cases like spam cleanup and test dish removal.
-
-**Solution:**
-Add `ON DELETE CASCADE` to the `wishlist_items.dish_id` foreign key constraint. When a dish is deleted, associated wishlist items are automatically removed.
-
-**Implementation:**
-Simple one-line SQL migration in Supabase:
-```sql
-ALTER TABLE wishlist_items DROP CONSTRAINT wishlist_items_dish_id_fkey;
-ALTER TABLE wishlist_items ADD CONSTRAINT wishlist_items_dish_id_fkey 
-  FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE;
-```
-
-**Benefits:**
-- Immediate unblocking of dish deletion
-- No code changes needed
-- Consistent with existing pattern (availability_channels, delivery_apps)
-- Works alongside future recommendation system
-
-**Timeline:** 1-2 hours (migration + testing + documentation)
-
-See full plan for testing strategy, rollback procedures, and risk assessment.
+### ✅ Completed (Interim Fix - Allow Dish Deletion with Wishlist Items)
+- Updated `wishlist_items.dish_id` foreign key to `ON DELETE CASCADE` - dish owners can now delete dishes even if wishlisted
 
 ---
 

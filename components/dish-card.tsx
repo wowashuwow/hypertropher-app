@@ -308,30 +308,6 @@ export function DishCard({
             <span className="font-medium">{getSatisfactionEmojis(satisfaction)}</span>
           </div>
         </div>
-
-        <div className="flex items-center gap-2 pt-3 border-t border-border">
-          {addedByProfilePicture ? (
-            <img
-              src={addedByProfilePicture}
-              alt={`${addedBy}'s profile`}
-              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-              onError={(e) => {
-                // Fallback to initials if image fails to load
-                e.currentTarget.style.display = 'none'
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                if (fallback) fallback.style.display = 'flex'
-              }}
-            />
-          ) : null}
-          <div 
-            className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 ${
-              addedByProfilePicture ? 'hidden' : ''
-            }`}
-          >
-            <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
-          </div>
-          <p className="text-xs text-muted-foreground truncate">Added by {addedBy}</p>
-        </div>
       </div>
 
       {/* Action Section - Fixed Bottom */}
@@ -368,7 +344,7 @@ export function DishCard({
                       <img 
                         src={getDeliveryAppLogo(app)} 
                         alt={`${app} logo`}
-                        className="h-[2.5rem] w-[2.5rem] flex-shrink-0 rounded-[0.5rem]"
+                        className="h-[1.75rem] w-[1.75rem] flex-shrink-0 rounded-[0.5rem]"
                         onError={(e) => {
                           e.currentTarget.src = "/logos/placeholder.svg"
                         }}
@@ -405,7 +381,7 @@ export function DishCard({
                   <img 
                     src={getDeliveryAppLogo(app)} 
                     alt={`${app} logo`}
-                    className="h-[2.5rem] w-[2.5rem] flex-shrink-0 rounded-[0.5rem]"
+                    className="h-[1.75rem] w-[1.75rem] flex-shrink-0 rounded-[0.5rem]"
                     onError={(e) => {
                       e.currentTarget.src = "/logos/placeholder.svg"
                     }}
@@ -468,6 +444,31 @@ export function DishCard({
             </Button>
           </div>
         )}
+
+        {/* Added by section */}
+        <div className="flex items-center gap-2 pt-3 border-t border-border">
+          {addedByProfilePicture ? (
+            <img
+              src={addedByProfilePicture}
+              alt={`${addedBy}'s profile`}
+              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+              onError={(e) => {
+                // Fallback to initials if image fails to load
+                e.currentTarget.style.display = 'none'
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                if (fallback) fallback.style.display = 'flex'
+              }}
+            />
+          ) : null}
+          <div 
+            className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 ${
+              addedByProfilePicture ? 'hidden' : ''
+            }`}
+          >
+            <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
+          </div>
+          <p className="text-xs text-muted-foreground truncate">Added by {addedBy}</p>
+        </div>
         
         {/* Modern expand button for comments */}
         {comment && comment.trim().length > 0 && (
@@ -610,3 +611,4 @@ export function DishCard({
     </div>
   )
 }
+

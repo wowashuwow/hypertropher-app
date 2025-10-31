@@ -17,9 +17,14 @@ const rethinkSans = Rethink_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "Hypertropher", // Updated app name in metadata
+  title: "Hypertropher",
   description: "Discover high-protein, affordable meals from restaurants",
   generator: "v0.app",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 }
 
 export default function RootLayout({

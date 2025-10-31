@@ -16,7 +16,8 @@ hypertropher-app/
 │   │   │   └── signup/           # User registration
 │   │   ├── dishes/               # Dish CRUD operations
 │   │   │   ├── availability-channels/ # Dish availability channel management
-│   │   │   └── delivery-apps/    # Dish delivery app associations
+│   │   │   ├── delivery-apps/    # Dish delivery app associations
+│   │   │   └── report/            # Delivery app reporting endpoint
 │   │   ├── restaurants/          # Restaurant management
 │   │   ├── invite-codes/         # Invite code management
 │   │   ├── upload-profile-picture/ # Profile picture upload endpoint
@@ -33,7 +34,7 @@ hypertropher-app/
 │   ├── fonts/                    # Custom fonts
 │   │   ├── GeistMonoVF.woff      # Geist Mono font
 │   │   └── GeistVF.woff          # Geist font
-│   ├── favicon.ico               # App favicon
+│   ├── icon.svg                  # App favicon (Next.js automatic)
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout component
 │   ├── loading.tsx               # Global loading states
@@ -43,6 +44,7 @@ hypertropher-app/
 │   │   ├── badge.tsx             # Status and category badges
 │   │   ├── button.tsx            # Button variants and states
 │   │   ├── card.tsx              # Card container components
+│   │   ├── checkbox.tsx          # Checkbox input component
 │   │   ├── command.tsx           # Command palette component
 │   │   ├── dialog.tsx            # Modal dialog components
 │   │   ├── input.tsx             # Form input components
@@ -73,6 +75,8 @@ hypertropher-app/
 │   │   ├── client.ts             # Browser-side Supabase client
 │   │   ├── server.ts             # Server-side Supabase client
 │   │   └── service.ts            # Service role client for admin operations
+│   ├── services/                 # Service layer utilities
+│   │   └── reporting.ts          # Delivery app reporting service logic
 │   ├── clipboard.ts              # Clipboard API utility with fallback support
 │   ├── deep-links.ts             # Deep link configuration for all delivery apps
 │   ├── delivery-apps.ts          # Delivery apps by country mapping and utilities
@@ -84,6 +88,7 @@ hypertropher-app/
 │   │   ├── swiggy.svg            # Swiggy logo
 │   │   ├── ubereats.svg          # Uber Eats logo
 │   │   └── zomato.svg            # Zomato logo
+│   ├── hypertropher-logo.svg     # App logo (general use)
 │   ├── delicious-high-protein-meal.jpg
 │   ├── fish-curry-with-rice-indian-cuisine.jpg
 │   ├── grilled-chicken-vegetable-bowl.png
@@ -148,6 +153,7 @@ The main application directory using Next.js 14 App Router conventions:
 - **`/dishes`**: CRUD operations for dishes (GET, POST, PUT, DELETE) with optional city filtering
 - **`/dishes/availability-channels`**: Dish availability channel management (GET, POST, DELETE)
 - **`/dishes/delivery-apps`**: Dish delivery app associations (POST, DELETE)
+- **`/dishes/report`**: Delivery app reporting endpoint (POST)
 - **`/restaurants`**: Restaurant management (POST for creation/retrieval)
 - **`/invite-codes`**: Invite code management and retrieval
 - **`/users`**: User profile management (GET, POST, PUT)
@@ -167,6 +173,7 @@ Shadcn UI components for consistent design:
 - **`badge.tsx`**: Status and category badges
 - **`button.tsx`**: Button variants and states
 - **`card.tsx`**: Card container components
+- **`checkbox.tsx`**: Checkbox input component (used in reporting modal)
 - **`command.tsx`**: Command palette component
 - **`dialog.tsx`**: Modal dialog components
 - **`input.tsx`**: Form input components
@@ -198,6 +205,9 @@ Shared libraries and configurations:
 - **`server.ts`**: Server-side Supabase client configuration
 - **`service.ts`**: Service role client for admin operations (bypasses RLS)
 
+#### Services (`/lib/services`)
+- **`reporting.ts`**: Delivery app reporting service with automatic removal logic (threshold-based)
+
 #### Utilities
 - **`clipboard.ts`**: Clipboard API utility with modern API support and fallback for older browsers
 - **`deep-links.ts`**: Centralized deep link configuration for all 16 delivery apps with web fallbacks
@@ -222,7 +232,8 @@ Static files served directly:
 - **App Logos**: Application branding assets
 
 #### Icons
-- **Favicon**: App icon for browser tabs
+- **Favicon**: `app/icon.svg` - App icon for browser tabs (Next.js automatic favicon generation)
+- **App Logo**: `public/hypertropher-logo.svg` - General-purpose logo asset
 - **App Icons**: Various sizes for different platforms
 
 ### `/Docs` - Documentation

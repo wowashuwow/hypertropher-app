@@ -8,7 +8,6 @@ import { useSession } from "@/lib/auth/session-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DeliveryAppPills } from "@/components/ui/delivery-app-pills"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RestaurantInput } from "@/components/ui/restaurant-input"
 import { RestaurantInput as RestaurantInputType } from "@/types/restaurant"
@@ -68,8 +67,8 @@ export default function EditDishPage() {
   const [restaurant, setRestaurant] = useState<RestaurantInputType | null>(null)
   const [dishName, setDishName] = useState("")
   const [proteinSource, setProteinSource] = useState("")
-  // Automatic availability logic - no need for hasInStore state
-  const [deliveryApps, setDeliveryApps] = useState<string[]>([])
+  // Current delivery apps on the dish (preserved to maintain reporting system removals)
+  const [currentDeliveryApps, setCurrentDeliveryApps] = useState<string[]>([])
   
   // Photo state
   const [photo, setPhoto] = useState<File | null>(null)
@@ -85,7 +84,7 @@ export default function EditDishPage() {
   const isGoogleMapsRestaurant = restaurant?.type === 'google_maps'
   const isCloudKitchen = restaurant?.type === 'manual'
   const hasInStore = isGoogleMapsRestaurant // Google Maps restaurants automatically have In-Store
-  const hasOnlineAvailability = deliveryApps.length > 0 // Delivery apps automatically mean Online
+  const hasOnlineAvailability = currentDeliveryApps.length > 0 // Current delivery apps mean Online
   const [price, setPrice] = useState("")
   const [protein, setProtein] = useState<"Overloaded" | "Pretty Good">("Pretty Good")
   const [taste, setTaste] = useState<"Mouthgasm" | "Pretty Good">("Pretty Good")
@@ -189,7 +188,8 @@ export default function EditDishPage() {
         
         // Set availability based on new structure
         // hasInStore is now automatically determined by restaurant type
-        setDeliveryApps(dish.deliveryApps || dish.delivery_apps || [])
+        // Preserve current delivery apps (maintains reporting system removals)
+        setCurrentDeliveryApps(dish.deliveryApps || dish.delivery_apps || [])
       } catch (err) {
         console.error('Error fetching dish:', err)
         setError(err instanceof Error ? err.message : 'Failed to load dish')
@@ -375,8 +375,8 @@ export default function EditDishPage() {
         alert("Protein source is required.")
         return
       }
-      if (!hasInStore && deliveryApps.length === 0) {
-        alert("Please select at least one availability option (In-Store or delivery apps).")
+      if (!hasInStore && currentDeliveryApps.length === 0) {
+        alert("Please ensure at least one availability option (In-Store or delivery apps).")
         return
       }
       if (!price) {
@@ -498,7 +498,9 @@ export default function EditDishPage() {
         })
       }
 
-      if (deliveryApps.length > 0) {
+      // Preserve current delivery apps that are still valid (in availableApps)
+      // This ensures reported/removed apps stay removed and aren't re-added
+      if (currentDeliveryApps.length > 0) {
         const channelResponse = await fetch('/api/dishes/availability-channels', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -511,8 +513,14 @@ export default function EditDishPage() {
         const { availabilityChannel } = await channelResponse.json()
         const availabilityChannelId = availabilityChannel.id
 
-        // Add delivery apps
-        for (const app of deliveryApps) {
+        // Only add apps that are:
+        // 1. Currently on the dish (preserve state)
+        // 2. Still in availableApps (valid for current city/region)
+        const appsToAdd = currentDeliveryApps.filter(app => 
+          availableApps.includes(app)
+        )
+
+        for (const app of appsToAdd) {
           const deliveryAppResponse = await fetch('/api/dishes/delivery-apps', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -697,20 +705,6 @@ export default function EditDishPage() {
                   </p>
                 </div>
 
-                {/* Delivery Apps Selection - Always visible */}
-                <div className="space-y-2">
-                  <Label>Delivery Apps (Optional)</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Select delivery apps if this dish is available online
-                  </p>
-                  <DeliveryAppPills
-                    availableApps={hasApps ? availableApps : []}
-                    selectedApps={deliveryApps}
-                    onSelectionChange={setDeliveryApps}
-                    disabled={!hasApps}
-                  />
-                </div>
-
                 {/* Dish Name */}
                 <div className="space-y-2">
                   <Label htmlFor="dishName">Dish Name *</Label>
@@ -833,7 +827,7 @@ export default function EditDishPage() {
                   <Button
                     type="submit"
                     className="flex-1"
-                    disabled={saving || uploadStatus === 'uploading' || !restaurant || !dishName || !proteinSource || (!hasInStore && deliveryApps.length === 0) || !price}
+                    disabled={saving || uploadStatus === 'uploading' || !restaurant || !dishName || !proteinSource || (!hasInStore && currentDeliveryApps.length === 0) || !price}
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {uploadStatus === 'uploading' 
