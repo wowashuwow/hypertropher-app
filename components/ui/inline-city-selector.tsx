@@ -24,7 +24,7 @@ export function InlineCitySelector({
 
   return (
     <div className={cn("flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2", className)}>
-      <span className="text-xl text-muted-foreground">Discover high-protein meals in </span>
+      <span className="text-xl text-muted-foreground">Find trusted high-protein meals in </span>
       <Select value={selectedCity} onValueChange={onCityChange}>
         <SelectTrigger className="inline-flex h-auto px-3 py-2 sm:py-1.5 text-lg sm:text-xl font-medium text-foreground bg-card border border-border rounded-lg shadow-sm hover:bg-muted/50 hover:border-primary/50 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary min-w-0 w-full sm:w-80 md:w-96">
           <SelectValue>
