@@ -424,10 +424,13 @@ export default function AddDishPage() {
                   <Label htmlFor="price">Price</Label>
                   <Input
                     id="price"
-                    type="text"
-                    placeholder="Enter exact price"
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="Enter price"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
+                    min="0"
+                    step="0.01"
                     required
                   />
                 </div>
