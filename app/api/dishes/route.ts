@@ -1,6 +1,41 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// Helper to extract file path from Supabase storage URL for dish images
+function extractDishImagePathFromUrl(url: string): string | null {
+  if (!url) return null;
+  
+  // Supabase URL format: https://{project}.supabase.co/storage/v1/object/public/{bucket}/{filepath}
+  const match = url.match(/\/storage\/v1\/object\/public\/dish-photos\/(.+)$/);
+  if (match && match[1]) {
+    return match[1]; // Returns: "user-id/filename.jpg" or "old-filename.jpg" (legacy)
+  }
+  
+  return null;
+}
+
+// Delete dish image from storage
+async function deleteDishImage(imageUrl: string, supabase: SupabaseClient): Promise<void> {
+  if (!imageUrl) return;
+  
+  const filePath = extractDishImagePathFromUrl(imageUrl);
+  
+  if (!filePath) {
+    console.warn('Could not extract file path from URL:', imageUrl);
+    return;
+  }
+  
+  const { data, error } = await supabase.storage
+    .from('dish-photos')
+    .remove([filePath]);
+  
+  if (error) {
+    console.error('Failed to delete dish image:', error);
+    // Don't throw - dish deletion should still succeed
+  }
+}
 
 // POST handler for creating a new dish
 export async function POST(request: NextRequest) {
@@ -303,7 +338,7 @@ export async function DELETE(request: NextRequest) {
     // First, verify the dish exists and belongs to the user
     const { data: existingDish, error: fetchError } = await supabase
       .from("dishes")
-      .select("user_id")
+      .select("user_id, image_url")
       .eq("id", id)
       .single();
 
@@ -314,6 +349,16 @@ export async function DELETE(request: NextRequest) {
 
     if (existingDish.user_id !== user.id) {
       return NextResponse.json({ error: "You can only delete your own dishes." }, { status: 403 });
+    }
+
+    // Delete image from storage if it exists (non-blocking)
+    if (existingDish.image_url) {
+      try {
+        await deleteDishImage(existingDish.image_url, supabase);
+      } catch (error) {
+        console.error('Error deleting dish image (non-blocking):', error);
+        // Continue with dish deletion even if image deletion fails
+      }
     }
 
     // Delete the dish

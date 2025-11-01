@@ -36,8 +36,8 @@ This document outlines the database schema for the Hypertropher application, bui
       - [1. Restaurant-Centric Refactor (January 2025)](#1-restaurant-centric-refactor-january-2025)
       - [2. Foreign Key Constraints (January 2025)](#2-foreign-key-constraints-january-2025)
       - [3. Storage Security Enhancement (January 2025)](#3-storage-security-enhancement-january-2025)
-    - [4. Delivery App Reporting System (October 2025)](#4-delivery-app-reporting-system-october-2025)
-    - [5. Wishlist Items CASCADE Update (October 2025)](#5-wishlist-items-cascade-update-october-2025)
+      - [4. Delivery App Reporting System (October 2025)](#4-delivery-app-reporting-system-october-2025)
+      - [5. Wishlist Items CASCADE Update (October 2025)](#5-wishlist-items-cascade-update-october-2025)
     - [Database Constraint Issues Resolved](#database-constraint-issues-resolved)
     - [Data Migration Strategy](#data-migration-strategy)
   - [Administrative Operations](#administrative-operations)
@@ -264,13 +264,13 @@ Stores user profile pictures.
 
 **Configuration:**
 - **Public Access**: Yes (for displaying profile pictures)
-- **RLS Policies**: 
-  - Users can upload their own profile pictures
-  - Users can update their own profile pictures
-  - Users can delete their own profile pictures
-  - Profile pictures are publicly accessible for display
-- **File Organization**: Files stored with user ID prefix for security
+- **File Organization**: Filenames use format `{user-id}-{timestamp}.{ext}` (e.g., `917787bb-9348-4fab-8cbc-67e96365ecd8-1761984488002.jpg`)
 - **Image Processing**: Automatic resizing to 400x400px with JPEG compression
+
+**RLS Policies**: 
+- **SELECT**: Public read access for displaying images (required for DELETE to work)
+- **DELETE**: Users can delete their own profile pictures - `starts_with(name, (auth.uid())::text || '-')` matches filename prefix
+- **INSERT**: Authenticated users can upload profile pictures
 
 ---
 

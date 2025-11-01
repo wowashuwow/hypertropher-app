@@ -286,9 +286,34 @@ export function DishCard({
             ) : null}
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">
+        <p className="text-xs text-muted-foreground mb-2">
           {restaurantName} · {city}
         </p>
+
+        {/* Added by section */}
+        <div className="flex items-center gap-2 mb-3">
+          {addedByProfilePicture ? (
+            <img
+              src={addedByProfilePicture}
+              alt={`${addedBy.split(' ')[0]}'s profile`}
+              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+              onError={(e) => {
+                // Fallback to initials if image fails to load
+                e.currentTarget.style.display = 'none'
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                if (fallback) fallback.style.display = 'flex'
+              }}
+            />
+          ) : null}
+          <div 
+            className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 ${
+              addedByProfilePicture ? 'hidden' : ''
+            }`}
+          >
+            <span className="text-white text-xs font-semibold">{addedBy.split(' ')[0].charAt(0)}</span>
+          </div>
+          <p className="text-xs text-muted-foreground truncate">Added by {addedBy.split(' ')[0]}</p>
+        </div>
 
         <div className="space-y-1.5 mb-3 flex-grow">
           <div className="flex items-center justify-between text-sm">
@@ -344,7 +369,7 @@ export function DishCard({
                       <img 
                         src={getDeliveryAppLogo(app)} 
                         alt={`${app} logo`}
-                        className="h-[1.75rem] w-[1.75rem] flex-shrink-0 rounded-[0.5rem]"
+                        className="h-9 w-9 flex-shrink-0 rounded-[0.5rem]"
                         onError={(e) => {
                           e.currentTarget.src = "/logos/placeholder.svg"
                         }}
@@ -381,7 +406,7 @@ export function DishCard({
                   <img 
                     src={getDeliveryAppLogo(app)} 
                     alt={`${app} logo`}
-                    className="h-[1.75rem] w-[1.75rem] flex-shrink-0 rounded-[0.5rem]"
+                    className="h-9 w-9 flex-shrink-0 rounded-[0.5rem]"
                     onError={(e) => {
                       e.currentTarget.src = "/logos/placeholder.svg"
                     }}
@@ -444,31 +469,6 @@ export function DishCard({
             </Button>
           </div>
         )}
-
-        {/* Added by section */}
-        <div className="flex items-center gap-2 pt-3 border-t border-border">
-          {addedByProfilePicture ? (
-            <img
-              src={addedByProfilePicture}
-              alt={`${addedBy}'s profile`}
-              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-              onError={(e) => {
-                // Fallback to initials if image fails to load
-                e.currentTarget.style.display = 'none'
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement
-                if (fallback) fallback.style.display = 'flex'
-              }}
-            />
-          ) : null}
-          <div 
-            className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 ${
-              addedByProfilePicture ? 'hidden' : ''
-            }`}
-          >
-            <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
-          </div>
-          <p className="text-xs text-muted-foreground truncate">Added by {addedBy}</p>
-        </div>
         
         {/* Modern expand button for comments */}
         {comment && comment.trim().length > 0 && (
@@ -514,7 +514,7 @@ export function DishCard({
                 {addedByProfilePicture ? (
                   <img 
                     src={addedByProfilePicture} 
-                    alt={`${addedBy}'s profile`}
+                    alt={`${addedBy.split(' ')[0]}'s profile`}
                     className="w-6 h-6 rounded-full object-cover border-2 border-background shadow-sm"
                     onError={(e) => {
                       // Fallback to initials if image fails to load
@@ -529,7 +529,7 @@ export function DishCard({
                     addedByProfilePicture ? 'hidden' : ''
                   }`}
                 >
-                  <span className="text-white text-xs font-semibold">{addedBy.charAt(0)}</span>
+                  <span className="text-white text-xs font-semibold">{addedBy.split(' ')[0].charAt(0)}</span>
                 </div>
               </div>
               

@@ -1,6 +1,42 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
+import type { SupabaseClient } from "@supabase/supabase-js"
+
+// Helper to extract file path from Supabase storage URL for profile pictures
+function extractProfilePicturePathFromUrl(url: string): string | null {
+  if (!url) return null;
+  
+  // Use same regex approach as dish photos extraction (which works)
+  // Supabase URL format: https://{project}.supabase.co/storage/v1/object/public/{bucket}/{filename}
+  const match = url.match(/\/storage\/v1\/object\/public\/profile-pictures\/(.+)$/);
+  if (match && match[1]) {
+    return match[1]; // Returns: "user-id-1234567890.jpg"
+  }
+  
+  return null;
+}
+
+// Delete profile picture from storage
+async function deleteProfilePicture(imageUrl: string, supabase: SupabaseClient): Promise<void> {
+  if (!imageUrl) return;
+  
+  const filePath = extractProfilePicturePathFromUrl(imageUrl);
+  
+  if (!filePath) {
+    console.warn('⚠️ Could not extract file path from URL:', imageUrl);
+    return;
+  }
+  
+  const { data, error } = await supabase.storage
+    .from('profile-pictures')
+    .remove([filePath]);
+  
+  if (error) {
+    console.error('Failed to delete old profile picture:', error);
+    // Don't throw - upload should still succeed
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get the uploaded file
+    // Get the uploaded file first (required before other async operations)
     const formData = await request.formData()
     const file = formData.get('file') as File
 
@@ -29,6 +65,23 @@ export async function POST(request: NextRequest) {
     const maxSize = 5 * 1024 * 1024 // 5MB
     if (file.size > maxSize) {
       return NextResponse.json({ error: "File size must be less than 5MB" }, { status: 400 })
+    }
+
+    // Fetch current profile picture URL before uploading new one
+    const { data: userProfile, error: profileError } = await supabase
+      .from('users')
+      .select('profile_picture_url')
+      .eq('id', user.id)
+      .single()
+
+    // Delete old profile picture if it exists (non-blocking)
+    if (userProfile?.profile_picture_url) {
+      try {
+        await deleteProfilePicture(userProfile.profile_picture_url, supabase);
+      } catch (error) {
+        console.error('Error deleting old profile picture (non-blocking):', error);
+        // Continue with upload even if deletion fails
+      }
     }
 
     // Generate unique filename

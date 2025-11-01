@@ -2827,8 +2827,8 @@ Also updated greeting message logic:
 {loadingProfile 
   ? "Loading..." 
   : user 
-    ? `Discover high-protein meals in ${userCity}` 
-    : "Discover high-protein meals from restaurants everywhere"
+    ? `Find trusted high-protein meals in ${userCity}` 
+    : "Find trusted high-protein meals from restaurants everywhere"
 }
 ```
 
@@ -2914,7 +2914,7 @@ Non-logged-in users were not seeing dishes from all cities as intended. The filt
 ### Expected Behavior
 - Non-logged-in users should see dishes from all cities
 - Only logged-in users should have city filtering applied
-- Non-logged-in users should see the greeting "Discover high-protein meals from restaurants everywhere"
+- Non-logged-in users should see the greeting "Find trusted high-protein meals from restaurants everywhere"
 
 ### Actual Behavior
 - Non-logged-in users only saw dishes from Mumbai
@@ -6867,6 +6867,65 @@ const isActive = pathname === item.href ||
 - ✅ Mobile header shows no redundant login button
 - ✅ Typography and spacing consistent with other pages
 - ✅ All authentication flows work unchanged
+
+---
+
+### [BUG-038] - Dish Images Not Deleted from Storage on Dish Deletion
+**Date:** October 2025
+**Severity:** High
+**Status:** ✅ Resolved
+
+**Description:**
+When users deleted dishes from "My Dishes" page, the associated dish images remained in Supabase Storage bucket, causing storage waste and unnecessary costs.
+
+**Root Cause:**
+- DELETE handler in `/app/api/dishes/route.ts` only deleted dish record from database
+- No logic existed to delete associated image from `dish-photos` storage bucket
+- Images accumulated in storage as orphaned files
+
+**Resolution:**
+- Added `extractDishImagePathFromUrl()` helper function to parse file path from Supabase URL
+- Added `deleteDishImage()` helper function to delete images from storage
+- Updated DELETE handler to fetch `image_url` before deletion and call `deleteDishImage()`
+- Handles both legacy format (`{filename}`) and new format (`{user_id}/{filename}`)
+- Error handling is non-blocking (dish deletion succeeds even if image deletion fails)
+
+**Files Modified:**
+- `app/api/dishes/route.ts` - Added image deletion logic to DELETE handler
+
+**Testing Results:**
+✅ Dish images are deleted from storage when dishes are deleted
+✅ Works for both legacy and new file path formats
+✅ Deletion is non-blocking (dish deletion succeeds even if storage deletion fails)
+
+---
+
+### [BUG-037] - Profile Picture Not Deleted from Storage on Update
+**Date:** October 2025
+**Severity:** High
+**Status:** ✅ Resolved
+
+**Description:**
+When users updated their profile picture, the old picture remained in Supabase Storage bucket, causing storage waste.
+
+**Root Cause:**
+1. DELETE RLS policy for `profile-pictures` bucket used incorrect condition: `split_part(name, '-', 1) = (auth.uid())::text`
+2. This only matched first UUID segment (e.g., `917787bb`) instead of full UUID (`917787bb-9348-4fab-8cbc-67e96365ecd8`)
+3. Policy condition never matched, so deletions returned "success" but files remained in storage
+
+**Resolution:**
+- Updated DELETE policy to use `starts_with(name, (auth.uid())::text || '-')` to match full UUID prefix
+- Policy now correctly matches filename format: `{full-uuid}-{timestamp}.{ext}`
+- Deletion now works correctly for all users
+
+**Files Modified:**
+- RLS policy in Supabase: `profile-pictures` bucket DELETE policy
+- `app/api/upload-profile-picture/route.ts` - Added image deletion logic to POST handler
+
+**Testing Results:**
+✅ Profile picture deletion works on update
+✅ Old pictures are removed from storage bucket
+✅ Policy matches correct filename format
 
 ---
 

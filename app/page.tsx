@@ -574,7 +574,7 @@ export default function HomePage() {
           <h1 className="text-4xl font-bold text-foreground mb-4">Hey {userName}! 👋</h1>
           {user ? (
             <p className="text-xl text-muted-foreground">
-              Discover high-protein meals in {userCity}
+              Find trusted high-protein meals in {userCity}
             </p>
           ) : (
             <div className="text-xl text-muted-foreground">

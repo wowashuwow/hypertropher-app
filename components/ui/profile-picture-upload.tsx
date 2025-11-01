@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { Upload, X, User, AlertCircle } from "lucide-react"
+import { Upload, User, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -188,16 +188,6 @@ export function ProfilePictureUpload({
     }
   }
 
-  const handleRemoveImage = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setPreviewUrl(null)
-    onImageChange(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-    toast.success("Profile picture removed")
-  }
 
   const handleClick = () => {
     if (!disabled && !isUploading) {
@@ -211,23 +201,11 @@ export function ProfilePictureUpload({
         {/* Profile Picture Display */}
         <div className="relative">
           {previewUrl ? (
-            <div className="relative">
-              <img
-                src={previewUrl}
-                alt="Profile preview"
-                className="w-24 h-24 rounded-full object-cover border-4 border-border"
-              />
-              {!disabled && (
-                <button
-                  onClick={handleRemoveImage}
-                  disabled={isUploading}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:bg-destructive/90 transition-colors"
-                  aria-label="Remove profile picture"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
+            <img
+              src={previewUrl}
+              alt="Profile preview"
+              className="w-24 h-24 rounded-full object-cover border-4 border-border"
+            />
           ) : (
             <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center border-4 border-border">
               <User className="w-8 h-8 text-white" />

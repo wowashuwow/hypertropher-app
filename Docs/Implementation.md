@@ -605,6 +605,12 @@
 ### ✅ Completed (FEATURE-024 - App Logo Integration)
 - Added logo as favicon (`app/icon.svg`) and general asset (`public/hypertropher-logo.svg`), updated `app/layout.tsx` metadata
 
+### ✅ Completed (FEATURE-025 - Image Deletion on Delete/Update)
+- Dish images automatically deleted from storage when dishes are deleted (`app/api/dishes/route.ts`)
+- Profile pictures automatically deleted from storage when updated (`app/api/upload-profile-picture/route.ts`)
+- Fixed RLS policy for `profile-pictures` bucket DELETE operation (UUID prefix matching)
+- Removed redundant cross icon from profile picture upload component
+
 ### ✅ Completed (FEATURE-022 - Authentication Migration to Email/Google OAuth)
 - Migrated from phone to email/Google OAuth authentication (email+password, magic link, Google OAuth, password reset)
 - Added `email` column to `users` table, made `phone` nullable (see `DATABASE_SCHEMA.md`)
