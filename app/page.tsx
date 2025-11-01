@@ -76,6 +76,8 @@ export default function HomePage() {
   const { userLocation, locationPermissionGranted, locationPermissionRequested, locationError, requestLocationPermission, loading: locationLoading } = useGeolocation()
   const { getCachedDishes, setCachedDishes, getFilters, setFilters, getScrollPosition, setScrollPosition } = useDishesCache()
   const hasRestoredScroll = useRef(false)
+  // Track scroll position during active scrolling without triggering re-renders
+  const scrollPositionRef = useRef(0)
 
   // Use SessionProvider data instead of fetching separately
   useEffect(() => {
@@ -111,18 +113,28 @@ export default function HomePage() {
     })
   }, [selectedProteinFilter, sortBy, distanceRange, setFilters])
 
-  // Save scroll position before unmount
+  // Save scroll position - use ref to avoid re-renders during scroll
   useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout
+    
     const handleScroll = () => {
-      setScrollPosition(window.scrollY)
+      // Update ref immediately (no re-render)
+      scrollPositionRef.current = window.scrollY
+      
+      // Debounce: Save to cache when user stops scrolling (300ms of inactivity)
+      clearTimeout(scrollTimeout)
+      scrollTimeout = setTimeout(() => {
+        setScrollPosition(scrollPositionRef.current)
+      }, 300)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     
     return () => {
+      clearTimeout(scrollTimeout)
       window.removeEventListener('scroll', handleScroll)
-      // Save final scroll position on unmount
-      setScrollPosition(window.scrollY)
+      // CRITICAL: Always save final position on unmount (this ensures restoration works even if user tabs out mid-scroll)
+      setScrollPosition(scrollPositionRef.current)
     }
   }, [setScrollPosition])
 

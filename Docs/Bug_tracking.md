@@ -6929,6 +6929,72 @@ When users updated their profile picture, the old picture remained in Supabase S
 
 ---
 
+### [BUG-040] - Layout Shift and Stuttering on Discover Page Scroll
+**Date:** January 2025
+**Severity:** Medium
+**Status:** ✅ Resolved
+
+**Description:**
+Users experienced layout shift and stuttering when scrolling on the discover page, even after scrolling to the top and navigating away. The scrolling felt janky and not smooth.
+
+**Root Cause:**
+The scroll event handler in `app/page.tsx` was calling `setScrollPosition(window.scrollY)` on every scroll event. This triggered React state updates (re-renders) on every scroll pixel, causing performance issues and layout shifts. The frequent state updates were causing the browser to recalculate layout repeatedly during scrolling.
+
+**Resolution:**
+- Added `scrollPositionRef` using `useRef` to track scroll position during active scrolling without triggering re-renders
+- Debounced `setScrollPosition` calls - only saves to cache after 300ms of scroll inactivity
+- Critical unmount handler ensures final scroll position is always saved (even if user tabs out mid-scroll)
+- Ref updates immediately on scroll events (no re-renders), cache updates only when scrolling stops
+
+**Implementation:**
+```typescript
+// Track scroll position during active scrolling without triggering re-renders
+const scrollPositionRef = useRef(0)
+
+useEffect(() => {
+  let scrollTimeout: NodeJS.Timeout
+  
+  const handleScroll = () => {
+    // Update ref immediately (no re-render)
+    scrollPositionRef.current = window.scrollY
+    
+    // Debounce: Save to cache when user stops scrolling (300ms of inactivity)
+    clearTimeout(scrollTimeout)
+    scrollTimeout = setTimeout(() => {
+      setScrollPosition(scrollPositionRef.current)
+    }, 300)
+  }
+
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  
+  return () => {
+    clearTimeout(scrollTimeout)
+    window.removeEventListener('scroll', handleScroll)
+    // CRITICAL: Always save final position on unmount
+    setScrollPosition(scrollPositionRef.current)
+  }
+}, [setScrollPosition])
+```
+
+**Files Modified:**
+- `app/page.tsx` - Optimized scroll position saving logic with ref and debouncing
+
+**Technical Details:**
+- **Performance**: Ref updates are synchronous and don't trigger React re-renders
+- **Debouncing**: 300ms delay prevents excessive cache updates while still capturing accurate scroll position
+- **Unmount Safety**: Final scroll position always saved even if user navigates away during active scroll
+- **Caching Preserved**: All existing caching functionality remains intact (dishes, filters, scroll position)
+- **Restoration Preserved**: Scroll position restoration on page return still works correctly
+
+**Testing Results:**
+✅ Smooth scrolling without stuttering or layout shifts
+✅ Scroll position still correctly restored when navigating back to discover page
+✅ Caching functionality preserved (dishes, filters, scroll position all work)
+✅ Final scroll position saved even when tabbing out mid-scroll
+✅ No performance degradation or breaking changes
+
+---
+
 ## Resource Links
 - [Sonner Toast Library](https://sonner.emilkowal.ski/)
 - [WCAG Color Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
