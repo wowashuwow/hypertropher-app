@@ -16,47 +16,25 @@ export default function CompleteProfilePage() {
   const [city, setCity] = useState("");
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showNameField, setShowNameField] = useState(true);
-  const [userEmail, setUserEmail] = useState("");
-  const [authProvider, setAuthProvider] = useState("");
   
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    // Get invite code from URL or sessionStorage (Google OAuth flow)
-    const urlInviteCode = searchParams.get("inviteCode");
-    const storedInviteCode = sessionStorage.getItem("invite_code");
-    
-    if (!urlInviteCode && !storedInviteCode) {
-      console.error("Invite code is missing");
-    }
-
-    // Get user info from Supabase Auth
+    // Get user info from Supabase Auth first to access user_metadata
     const getUserInfo = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        setUserEmail(user.email || "");
-        setAuthProvider(user.app_metadata.provider || "");
+        // Get invite code from multiple sources (priority order):
+        // 1. URL parameter (for backward compatibility)
+        // 2. User metadata (for email signup)
+        const urlInviteCode = searchParams.get("inviteCode");
+        const metadataInviteCode = user.user_metadata?.invite_code;
         
-        // For Google users, pre-fill name and profile picture
-        if (user.app_metadata.provider === 'google') {
-          const googleName = user.user_metadata?.full_name || user.user_metadata?.name || "";
-          const googleAvatar = user.user_metadata?.avatar_url || null;
-          
-          if (googleName) {
-            setName(googleName);
-            setShowNameField(true); // Still show field but editable
-          }
-          
-          if (googleAvatar) {
-            setProfilePictureUrl(googleAvatar);
-          }
-        } else {
-          // For email users, name field is required
-          setShowNameField(true);
+        if (!urlInviteCode && !metadataInviteCode) {
+          console.error("Invite code is missing from all sources");
         }
       }
     };
@@ -67,16 +45,26 @@ export default function CompleteProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Get invite code from URL or sessionStorage
-    const inviteCode = searchParams.get("inviteCode") || sessionStorage.getItem("invite_code");
+    // Get invite code from multiple sources (priority order):
+    // 1. URL parameter (for backward compatibility)
+    // 2. User metadata (for email signup)
+    let inviteCode = searchParams.get("inviteCode");
+    
+    // If invite code not found in URL, try to get from user metadata
+    if (!inviteCode) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.user_metadata?.invite_code) {
+        inviteCode = user.user_metadata.invite_code;
+      }
+    }
     
     if (!city || !inviteCode) {
       alert("Please fill out your city and ensure you have a valid invite code.");
       return;
     }
     
-    // Name is optional for Google users (will use Google name), required for email users
-    if (authProvider !== 'google' && !name) {
+    // Name is required for all users
+    if (!name) {
       alert("Please enter your name.");
       return;
     }
@@ -93,8 +81,6 @@ export default function CompleteProfilePage() {
       });
 
       if (response.ok) {
-        // Clear invite code from sessionStorage
-        sessionStorage.removeItem("invite_code");
         // Redirect to homepage
         router.push('/');
       } else {
@@ -121,31 +107,22 @@ export default function CompleteProfilePage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">One Last Step</CardTitle>
           <CardDescription>
-            {authProvider === 'google' 
-              ? "Select your city to complete your profile" 
-              : "Complete your profile to start contributing"}
+            Complete your profile to start contributing
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {showNameField && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Your Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required={authProvider !== 'google'}
-                />
-                {authProvider === 'google' && (
-                  <p className="text-xs text-muted-foreground">
-                    You can edit this name from your account settings later
-                  </p>
-                )}
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="name">Your Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="city-select">Your Primary City</Label>
@@ -166,9 +143,7 @@ export default function CompleteProfilePage() {
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
-                {authProvider === 'google' 
-                  ? "Using your Google profile picture. You can change this later."
-                  : "You can always change this later in your account settings."}
+                You can always change this later in your account settings.
               </p>
             </div>
 

@@ -615,6 +615,9 @@
 - Migrated from phone to email/Google OAuth authentication (email+password, magic link, Google OAuth, password reset)
 - Added `email` column to `users` table, made `phone` nullable (see `DATABASE_SCHEMA.md`)
 
+### ✅ Completed (FEATURE-026 - Authentication Simplification for MVP)
+- Removed Google OAuth (had auth bugs - see BUG-041). Replaced Magic Link with Email OTP. Created OTP verification page and API. Invite code validation/invalidation remains functional.
+
 ### 🎯 MVP Status: ~99% Complete - Restaurant-Centric Architecture + Middle East Expansion + UX Polish + Performance Optimization + Email Auth
 The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
 
@@ -631,6 +634,32 @@ The core functionality is working and secure with a new restaurant-centric archi
   - Brainstorm implementation approach (dropdown, location detection, etc.)
 
 ## Future Feature Enhancements
+
+### Google OAuth Authentication (Medium Priority)
+**Status:** Planned for Future Implementation  
+**Removed from MVP:** January 2025
+
+**Overview:**
+Re-implement Google OAuth authentication with proper invite code validation and authorization checks. Previous implementation had authentication/authorization bugs that allowed unauthorized access.
+
+**Key Requirements:**
+- Invite code validation must occur BEFORE OAuth initiation (server-side)
+- Proper user profile check in auth callback to prevent unauthorized access
+- Invite code storage and retrieval for OAuth signup flow
+- Full integration with existing invite code invalidation system
+- Must prevent users from accessing app without valid invite code and completed profile
+
+**Previous Issues:**
+- Users could log in with Google without invite code, creating Supabase Auth users but no app profile
+- OAuth callback allowed partial access before profile completion
+- Invite code validation was client-side only, allowing bypass
+- Users could see full navigation without completing profile
+
+**Implementation Notes:**
+- Validate invite code server-side in `/api/auth/google` BEFORE initiating OAuth
+- Store invite code in secure session/cookie during OAuth flow
+- Verify user has completed profile in auth callback before allowing access
+- Ensure ProtectedRoute properly enforces full profile completion
 
 ### Recommendation System (High Priority)
 **Status:** Planned  

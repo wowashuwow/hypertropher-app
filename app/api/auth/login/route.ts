@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { checkRateLimit, getResetTimeString } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
-  const { email, password, useMagicLink } = await request.json();
+  const { email, password, useOtp } = await request.json();
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
 
@@ -39,25 +39,25 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    if (useMagicLink) {
-      // Magic link login (passwordless)
-      const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+    if (useOtp) {
+      // OTP login (passwordless)
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${request.nextUrl.origin}/auth/callback`,
+          shouldCreateUser: false, // Don't allow signup via login
         }
       });
 
-      if (magicLinkError) {
-        console.error("Supabase Magic Link Error:", magicLinkError);
+      if (otpError) {
+        console.error("Supabase OTP Error:", otpError);
         return NextResponse.json(
-          { error: magicLinkError.message || "Failed to send magic link. Please try again." },
-          { status: magicLinkError.status || 500 }
+          { error: otpError.message || "Failed to send OTP code. Please try again." },
+          { status: otpError.status || 500 }
         );
       }
 
       return NextResponse.json({
-        message: "Magic link sent! Please check your email.",
+        message: "OTP code sent! Please check your email.",
       });
     } else {
       // Email + Password login

@@ -290,3 +290,28 @@
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
 }
+
+/* Auth form transition animation */
+@keyframes authFormFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-form-enter {
+  animation: authFormFadeIn 300ms ease-out forwards;
+}
+
+/* Reduced motion support for auth form transitions */
+@media (prefers-reduced-motion: reduce) {
+  .auth-form-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

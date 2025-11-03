@@ -21,6 +21,7 @@ interface SessionContextType {
   invalidateUserCache: () => void
   updateUserCity: (newCity: string) => void
   updateUserProfilePicture: (newUrl: string | null) => void
+  refreshSession: () => Promise<void>
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
@@ -131,8 +132,29 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Refresh session state (cache-safe: respects existing cache)
+  const refreshSession = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) {
+        console.error('Error refreshing session:', error)
+        return
+      }
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        // Use forceRefresh = false to respect cache if available
+        await fetchUserProfile(session.user.id, false)
+      } else {
+        setUserProfile(null)
+        setUserProfileCache(null)
+      }
+    } catch (error) {
+      console.error('Error in refreshSession:', error)
+    }
+  }
+
   return (
-    <SessionContext.Provider value={{ user, userProfile, loading, signOut, invalidateUserCache, updateUserCity, updateUserProfilePicture }}>
+    <SessionContext.Provider value={{ user, userProfile, loading, signOut, invalidateUserCache, updateUserCity, updateUserProfilePicture, refreshSession }}>
       {children}
     </SessionContext.Provider>
   )

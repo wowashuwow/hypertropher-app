@@ -47,7 +47,7 @@ export function BottomNavigation() {
         {
           href: "/signup",
           icon: LogIn,
-          label: "Login",
+          label: "Signup / Login",
         },
       ]
 

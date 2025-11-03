@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Determine signup method: password or magic link
+    // 2. Determine signup method: password or OTP
     if (password && provider === 'email_password') {
       // Email + Password signup
       if (password.length < 6) {
@@ -96,27 +96,27 @@ export async function POST(request: NextRequest) {
         userId: data.user?.id,
       });
     } else {
-      // Magic link signup (passwordless)
-      const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+      // OTP signup (passwordless)
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${request.nextUrl.origin}/auth/callback?next=/complete-profile`,
+          shouldCreateUser: true, // Allow signup
           data: {
             invite_code: inviteCode,
           }
         }
       });
 
-      if (magicLinkError) {
-        console.error("Supabase Magic Link Error:", magicLinkError);
+      if (otpError) {
+        console.error("Supabase OTP Error:", otpError);
         return NextResponse.json(
-          { error: magicLinkError.message || "Failed to send magic link. Please try again." },
-          { status: magicLinkError.status || 500 }
+          { error: otpError.message || "Failed to send OTP code. Please try again." },
+          { status: otpError.status || 500 }
         );
       }
 
       return NextResponse.json({
-        message: "Magic link sent! Please check your email.",
+        message: "OTP code sent! Please check your email.",
       });
     }
   } catch (error) {

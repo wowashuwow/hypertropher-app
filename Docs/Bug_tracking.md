@@ -5,6 +5,98 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [FEATURE-027] - Signup/Login UI Improvements
+**Date:** 2025-01-19
+**Severity:** Enhancement
+**Status:** ✅ Resolved
+
+**Description:**
+Improved signup/login page UX with standard toggle pattern and smooth transitions:
+- Changed bottom nav "Login" to "Signup / Login"
+- Removed top toggle buttons
+- Added bottom toggle text ("Already have an account? Log in" / "Don't have an account? Sign up")
+- Added smooth fade-in animation (300ms) when switching between forms
+- Form fields preserved when switching modes
+
+**Files Modified:**
+- `components/bottom-navigation.tsx` - Updated label text
+- `app/signup/page.tsx` - Removed top toggles, added bottom toggles, added animation classes
+- `app/globals.css` - Added `authFormFadeIn` animation with reduced motion support
+
+**Testing Results:**
+✅ Standard UX pattern implemented
+✅ Smooth transitions between forms
+✅ Form fields preserved on mode switch
+✅ Accessible (respects prefers-reduced-motion)
+
+---
+
+### [BUG-042] - Discover Page Shows Non-Logged-In UI After Login
+**Date:** 2025-01-19
+**Severity:** Medium
+**Status:** ✅ Resolved
+
+**Description:**
+After successful login (especially password-based), Discover page initially showed non-logged-in UI (inline city selector) until user tabbed out and back. Session state wasn't immediately synchronized after authentication actions.
+
+**Root Cause:**
+- `SessionProvider` didn't refresh session state after login actions that set cookies
+- Discover page rendered before session state updated, showing incorrect UI version
+
+**Resolution:**
+- Added `refreshSession()` function to `SessionProvider` that explicitly fetches and updates session/profile
+- Called `refreshSession()` after password login and OTP verification
+- Added `sessionLoading` check to Discover page to prevent incorrect UI flash
+
+**Files Modified:**
+- `lib/auth/session-provider.tsx` - Added `refreshSession()` function
+- `app/signup/page.tsx` - Call `refreshSession()` after password login
+- `app/verify-otp/page.tsx` - Call `refreshSession()` after OTP verification
+- `app/page.tsx` - Added `sessionLoading` check for conditional UI
+
+**Testing Results:**
+✅ Discover page immediately shows correct UI after login
+✅ No UI flash or incorrect state display
+✅ Session state synchronized immediately after authentication
+
+---
+
+### [BUG-041] - Google OAuth Authentication and Authorization Issues
+**Date:** 2025-01-18
+**Severity:** Critical
+**Status:** ✅ Resolved (Google OAuth removed)
+
+**Description:**
+Google OAuth login/signup had multiple critical bugs:
+1. Users could log in with Google without an invite code, creating Supabase Auth users but no entry in `users` table
+2. Partial access granted (bottom nav visible) without proper authorization
+3. Files uploaded to Supabase Storage even when database operations failed due to unauthorized users
+4. Inconsistent account linking - sometimes created new users with random emails instead of linking to existing accounts
+
+**Root Cause:**
+- Google OAuth callback didn't validate invite codes before creating users
+- Authentication callback allowed users to bypass invite code requirement
+- RLS policies and authorization checks didn't prevent partial access
+
+**Resolution:**
+- Removed Google OAuth entirely from MVP (see FEATURE-026)
+- Replaced with Email OTP for more controlled passwordless authentication
+- Will be re-implemented properly in future with correct invite code validation flow
+
+**Files Removed:**
+- `app/api/auth/google/route.ts`
+
+**Files Modified:**
+- `app/signup/page.tsx` - Removed Google OAuth buttons and handlers
+- `app/auth/callback/route.ts` - Removed Google OAuth handling
+- `app/complete-profile/page.tsx` - Removed Google-specific logic
+
+**Prevention:**
+- Future OAuth implementations must validate invite codes server-side before user creation
+- Ensure both Supabase Auth and application `users` table entries exist before granting any access
+
+---
+
 ### [BUG-039] - City and Profile Picture Changes Not Propagating to Other Pages
 **Date:** 2025-01-17
 **Severity:** High
@@ -6870,8 +6962,8 @@ const isActive = pathname === item.href ||
 
 ---
 
-### [BUG-038] - Dish Images Not Deleted from Storage on Dish Deletion
-**Date:** October 2025
+### [BUG-043] - Dish Images Not Deleted from Storage on Dish Deletion
+**Date:** 2025-01-10
 **Severity:** High
 **Status:** ✅ Resolved
 
@@ -6900,8 +6992,8 @@ When users deleted dishes from "My Dishes" page, the associated dish images rema
 
 ---
 
-### [BUG-037] - Profile Picture Not Deleted from Storage on Update
-**Date:** October 2025
+### [BUG-044] - Profile Picture Not Deleted from Storage on Update
+**Date:** 2025-01-10
 **Severity:** High
 **Status:** ✅ Resolved
 
@@ -6930,7 +7022,7 @@ When users updated their profile picture, the old picture remained in Supabase S
 ---
 
 ### [BUG-040] - Layout Shift and Stuttering on Discover Page Scroll
-**Date:** January 2025
+**Date:** 2025-01-10
 **Severity:** Medium
 **Status:** ✅ Resolved
 
@@ -6945,36 +7037,6 @@ The scroll event handler in `app/page.tsx` was calling `setScrollPosition(window
 - Debounced `setScrollPosition` calls - only saves to cache after 300ms of scroll inactivity
 - Critical unmount handler ensures final scroll position is always saved (even if user tabs out mid-scroll)
 - Ref updates immediately on scroll events (no re-renders), cache updates only when scrolling stops
-
-**Implementation:**
-```typescript
-// Track scroll position during active scrolling without triggering re-renders
-const scrollPositionRef = useRef(0)
-
-useEffect(() => {
-  let scrollTimeout: NodeJS.Timeout
-  
-  const handleScroll = () => {
-    // Update ref immediately (no re-render)
-    scrollPositionRef.current = window.scrollY
-    
-    // Debounce: Save to cache when user stops scrolling (300ms of inactivity)
-    clearTimeout(scrollTimeout)
-    scrollTimeout = setTimeout(() => {
-      setScrollPosition(scrollPositionRef.current)
-    }, 300)
-  }
-
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  
-  return () => {
-    clearTimeout(scrollTimeout)
-    window.removeEventListener('scroll', handleScroll)
-    // CRITICAL: Always save final position on unmount
-    setScrollPosition(scrollPositionRef.current)
-  }
-}, [setScrollPosition])
-```
 
 **Files Modified:**
 - `app/page.tsx` - Optimized scroll position saving logic with ref and debouncing

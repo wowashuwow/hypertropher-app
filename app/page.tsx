@@ -72,7 +72,7 @@ export default function HomePage() {
   const [isBeFirstModalOpen, setIsBeFirstModalOpen] = useState(false)
   const [loadingCities, setLoadingCities] = useState(false)
   
-  const { user, userProfile } = useSession()
+  const { user, userProfile, loading: sessionLoading } = useSession()
   const { userLocation, locationPermissionGranted, locationPermissionRequested, locationError, requestLocationPermission, loading: locationLoading } = useGeolocation()
   const { getCachedDishes, setCachedDishes, getFilters, setFilters, getScrollPosition, setScrollPosition } = useDishesCache()
   const hasRestoredScroll = useRef(false)
@@ -584,7 +584,9 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto py-8 px-6">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">Hey {userName}! 👋</h1>
-          {user ? (
+          {sessionLoading ? (
+            <p className="text-xl text-muted-foreground">Loading...</p>
+          ) : user ? (
             <p className="text-xl text-muted-foreground">
               Find trusted high-protein meals in {userCity}
             </p>

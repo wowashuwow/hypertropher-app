@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 function generateInviteCode(): string {
   const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -22,7 +23,6 @@ export async function POST(request: NextRequest) {
 
   // Get user metadata from Supabase Auth
   const email = user.email;
-  const provider = user.app_metadata.provider; // 'google', 'email', etc.
 
   // Get the name, city, inviteCode, and profilePictureUrl from the request body
   const { name, city, inviteCode, profilePictureUrl } = await request.json();
@@ -31,15 +31,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "City and invite code are required." }, { status: 400 });
   }
 
-  // For Google OAuth, name comes from user metadata
-  // For email signup, name is required from form
-  let userName = name;
-  if (!userName && provider === 'google') {
-    // Extract name from Google user metadata
-    userName = user.user_metadata?.full_name || user.user_metadata?.name || 'User';
-  }
-
-  if (!userName) {
+  // Name is required from form
+  if (!name) {
     return NextResponse.json({ error: "Name is required." }, { status: 400 });
   }
 
@@ -49,11 +42,11 @@ export async function POST(request: NextRequest) {
     .insert({ 
       id: user.id,
       email: email,
-      phone: null, // No phone for new email/Google users
-      name: userName, 
+      phone: null, // No phone for email users
+      name: name, 
       city,
-      profile_picture_url: profilePictureUrl || user.user_metadata?.avatar_url || null,
-      profile_picture_updated_at: profilePictureUrl || user.user_metadata?.avatar_url ? new Date().toISOString() : null
+      profile_picture_url: profilePictureUrl || null,
+      profile_picture_updated_at: profilePictureUrl ? new Date().toISOString() : null
     })
     .select()
     .single();
@@ -64,13 +57,16 @@ export async function POST(request: NextRequest) {
   }
 
   // Mark the invite code as used
-  const { error: inviteCodeError } = await supabase
+  // Use service client to bypass RLS (user didn't generate the code, but is using it)
+  const serviceSupabase = createServiceClient();
+  const { error: inviteCodeError } = await serviceSupabase
     .from("invite_codes")
     .update({ is_used: true, used_by_user_id: user.id })
     .eq("code", inviteCode);
 
   if (inviteCodeError) {
     console.error("Error updating invite code:", inviteCodeError);
+    // Note: We don't fail the signup if this fails, but it should succeed now
   }
 
   // Generate 5 new invite codes for the new user
