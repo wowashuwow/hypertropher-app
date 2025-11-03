@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { checkRateLimit, getResetTimeString } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
-  const { email, password, useOtp } = await request.json();
+  const { email } = await request.json();
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
 
@@ -39,52 +39,25 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    if (useOtp) {
-      // OTP login (passwordless)
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false, // Don't allow signup via login
-        }
-      });
-
-      if (otpError) {
-        console.error("Supabase OTP Error:", otpError);
-        return NextResponse.json(
-          { error: otpError.message || "Failed to send OTP code. Please try again." },
-          { status: otpError.status || 500 }
-        );
+    // OTP login (passwordless)
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false, // Don't allow signup via login
       }
+    });
 
-      return NextResponse.json({
-        message: "OTP code sent! Please check your email.",
-      });
-    } else {
-      // Email + Password login
-      if (!password) {
-        return NextResponse.json(
-          { error: "Password is required for email login." },
-          { status: 400 }
-        );
-      }
-
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        console.error("Supabase SignIn Error:", signInError);
-        return NextResponse.json(
-          { error: signInError.message || "Invalid email or password." },
-          { status: signInError.status || 401 }
-        );
-      }
-
-      return NextResponse.json({
-        message: "Login successful!",
-      });
+    if (otpError) {
+      console.error("Supabase OTP Error:", otpError);
+      return NextResponse.json(
+        { error: otpError.message || "Failed to send OTP code. Please try again." },
+        { status: otpError.status || 500 }
+      );
     }
+
+    return NextResponse.json({
+      message: "OTP code sent! Please check your email.",
+    });
   } catch (error) {
     console.error("Login Error:", error);
     return NextResponse.json(

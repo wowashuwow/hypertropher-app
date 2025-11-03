@@ -8,29 +8,21 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { MainLayout } from "@/components/main-layout"
 import { useRouter } from "next/navigation"
-import { useSession } from "@/lib/auth/session-provider"
 
 type AuthMode = 'signup' | 'login'
-type SignupMethod = 'email_password' | 'email_otp'
-type LoginMethod = 'email_password' | 'email_otp'
 
 export default function SignUpPage() {
   const [authMode, setAuthMode] = useState<AuthMode>('signup')
-  const [signupMethod, setSignupMethod] = useState<SignupMethod>('email_password')
-  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email_password')
   
   // Form fields
   const [inviteCode, setInviteCode] = useState("")
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   
   // UI states
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
   
   const router = useRouter()
-  const { refreshSession } = useSession()
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,25 +30,11 @@ export default function SignUpPage() {
     setMessage(null)
 
     try {
-      // Email signup (password or OTP)
+      // Email OTP signup
       if (!email || !inviteCode) {
         setMessage({type: 'error', text: 'Email and invite code are required'})
         setIsLoading(false)
         return
-      }
-
-      if (signupMethod === 'email_password') {
-        if (!password || password.length < 6) {
-          setMessage({type: 'error', text: 'Password must be at least 6 characters'})
-          setIsLoading(false)
-          return
-        }
-
-        if (password !== confirmPassword) {
-          setMessage({type: 'error', text: 'Passwords do not match'})
-          setIsLoading(false)
-          return
-        }
       }
 
       const response = await fetch('/api/auth/signup', {
@@ -64,22 +42,16 @@ export default function SignUpPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          password: signupMethod === 'email_password' ? password : undefined,
           inviteCode,
-          provider: signupMethod,
+          provider: 'email_otp',
         }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        // For OTP signup, redirect to verification page
-        if (signupMethod === 'email_otp') {
-          router.push(`/verify-otp?email=${encodeURIComponent(email)}&mode=signup`)
-        } else {
-          // Email + Password signup - show success message
-          setMessage({type: 'success', text: data.message})
-        }
+        // Redirect to OTP verification page
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}&mode=signup`)
       } else {
         setMessage({type: 'error', text: data.error || 'Signup failed'})
       }
@@ -103,33 +75,20 @@ export default function SignUpPage() {
         return
       }
 
-      if (loginMethod === 'email_password' && !password) {
-        setMessage({type: 'error', text: 'Password is required'})
-        setIsLoading(false)
-        return
-      }
-
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          password: loginMethod === 'email_password' ? password : undefined,
-          useOtp: loginMethod === 'email_otp',
+          useOtp: true,
         }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        if (loginMethod === 'email_otp') {
-          // Redirect to OTP verification page
-          router.push(`/verify-otp?email=${encodeURIComponent(email)}&mode=login`)
-        } else {
-          // Password login successful - refresh session state then redirect
-          await refreshSession()
-          router.push('/')
-        }
+        // Redirect to OTP verification page
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}&mode=login`)
       } else {
         setMessage({type: 'error', text: data.error || 'Login failed'})
       }
@@ -187,33 +146,6 @@ export default function SignUpPage() {
                     />
                   </div>
 
-                  {/* Signup Method Selection */}
-                  <div className="space-y-2">
-                    <Label>Sign up with</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        type="button"
-                        variant={signupMethod === 'email_password' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSignupMethod('email_password')}
-                        disabled={isLoading}
-                        className="text-xs"
-                      >
-                        Email + Password
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={signupMethod === 'email_otp' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSignupMethod('email_otp')}
-                        disabled={isLoading}
-                        className="text-xs"
-                      >
-                        Email + OTP
-                      </Button>
-                    </div>
-                  </div>
-
                   {/* Email field */}
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -227,36 +159,6 @@ export default function SignUpPage() {
                       disabled={isLoading}
                     />
                   </div>
-
-                  {/* Password fields (only for email_password) */}
-                  {signupMethod === 'email_password' && (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                          id="password"
-                          type="password"
-                          placeholder="At least 6 characters"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Confirm Password</Label>
-                        <Input
-                          id="confirmPassword"
-                          type="password"
-                          placeholder="Re-enter password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          required
-                          disabled={isLoading}
-                        />
-                      </div>
-                    </>
-                  )}
 
                   {/* Submit Button */}
                   <Button type="submit" className="w-full" disabled={isLoading}>
@@ -279,33 +181,6 @@ export default function SignUpPage() {
               ) : (
                 /* LOGIN FORM */
                 <form key="login-form" onSubmit={handleLogin} className="space-y-4 auth-form-enter">
-                  {/* Login Method Selection */}
-                  <div className="space-y-2">
-                    <Label>Log in with</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        type="button"
-                        variant={loginMethod === 'email_password' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setLoginMethod('email_password')}
-                        disabled={isLoading}
-                        className="text-xs"
-                      >
-                        Email + Password
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={loginMethod === 'email_otp' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setLoginMethod('email_otp')}
-                        disabled={isLoading}
-                        className="text-xs"
-                      >
-                        Email + OTP
-                      </Button>
-                    </div>
-                  </div>
-
                   {/* Email field */}
                   <div className="space-y-2">
                     <Label htmlFor="loginEmail">Email</Label>
@@ -319,30 +194,6 @@ export default function SignUpPage() {
                       disabled={isLoading}
                     />
                   </div>
-
-                  {/* Password field (only for email_password) */}
-                  {loginMethod === 'email_password' && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="loginPassword">Password</Label>
-                        <a
-                          href="/reset-password"
-                          className="text-sm text-primary hover:underline"
-                        >
-                          Forgot password?
-                        </a>
-                      </div>
-                      <Input
-                        id="loginPassword"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                      />
-                    </div>
-                  )}
 
                   {/* Submit Button */}
                   <Button type="submit" className="w-full" disabled={isLoading}>

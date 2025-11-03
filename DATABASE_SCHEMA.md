@@ -86,9 +86,7 @@ Stores user profile information. Linked to Supabase Auth via the `id` field.
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the user account was created. |
 
 **Authentication Methods:**
-- **Email + Password**: Users can sign up and log in with email and password
-- **Email Magic Link**: Passwordless authentication via email link
-- **Google OAuth**: One-click sign-in with Google account
+- **Email + OTP**: Passwordless authentication via email OTP code
 - **Phone (Deprecated)**: Legacy phone-based OTP authentication (disabled for new users)
 
 #### Row Level Security (RLS) Policies

@@ -5,6 +5,35 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [BUG-045] - Non-Authenticated Users Can Access Complete Profile Page
+**Date:** 2025-01-19
+**Severity:** Medium (Security/UX)
+**Status:** ✅ Resolved
+
+**Description:**
+Non-authenticated users could access `/complete-profile` page directly via URL. Form was visible and submittable, though backend correctly rejected unauthorized requests (401 error). Poor UX as users saw form before receiving error.
+
+**Root Cause:**
+- Loading guard condition `if (loading || (!loading && user && userProfile === null))` didn't cover case where `user` is `null`
+- Form rendered for non-authenticated users, showing briefly before redirect or error
+
+**Resolution:**
+- Added `useEffect` to redirect non-authenticated users (`!loading && !user`) to `/signup`
+- Updated loading condition to include `(!loading && !user)` to show loading screen during redirect
+- Prevents form access for non-authenticated users
+- Better UX: no confusing form/error flash
+
+**Files Modified:**
+- `app/complete-profile/page.tsx` - Added authentication check redirect and updated loading condition
+
+**Testing Results:**
+✅ Non-authenticated users redirected to signup immediately
+✅ No form visible for unauthorized access
+✅ Authenticated users with incomplete profiles still see form
+✅ Backend still enforces authentication (defense in depth)
+
+---
+
 ### [FEATURE-027] - Signup/Login UI Improvements
 **Date:** 2025-01-19
 **Severity:** Enhancement
@@ -45,12 +74,12 @@ After successful login (especially password-based), Discover page initially show
 
 **Resolution:**
 - Added `refreshSession()` function to `SessionProvider` that explicitly fetches and updates session/profile
-- Called `refreshSession()` after password login and OTP verification
+- Called `refreshSession()` after OTP verification
 - Added `sessionLoading` check to Discover page to prevent incorrect UI flash
 
 **Files Modified:**
 - `lib/auth/session-provider.tsx` - Added `refreshSession()` function
-- `app/signup/page.tsx` - Call `refreshSession()` after password login
+- `app/signup/page.tsx` - Simplified to only OTP authentication
 - `app/verify-otp/page.tsx` - Call `refreshSession()` after OTP verification
 - `app/page.tsx` - Added `sessionLoading` check for conditional UI
 

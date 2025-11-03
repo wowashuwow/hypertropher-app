@@ -12,27 +12,30 @@ export async function GET(request: Request) {
   const cookieStore = cookies()
   const supabase = createClient(cookieStore)
 
-  // Handle email verification flow (token or token_hash parameter)
-  // This is used for email+password signup email verification links
-  const verifyToken = token || tokenHash
-  if (!verifyToken) {
-    // No token - invalid request (only email verification links use this route)
+  // Handle email verification flow (legacy magic link fallback)
+  // NOTE: With OTP email template update, users now receive codes instead of links.
+  // This route is kept as a fallback for any old PKCE magic links in email inboxes.
+  // OTP codes are handled via /api/auth/verify-otp (called from /verify-otp page).
+  
+  // Only support PKCE flow (token_hash) - implicit flow (token) requires email which we don't have
+  if (!tokenHash) {
+    // No token_hash - invalid request (or old implicit flow link which we don't support)
     return NextResponse.redirect(`${requestUrl.origin}/signup?error=invalid_request`)
   }
   
   const verifyType = type || 'email'
   
-  // Verify the email verification token
-  const { error, data } = await supabase.auth.verifyOtp({
-    token_hash: verifyToken,
+  // Verify the PKCE token hash
+  const { error: verifyError } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
     type: verifyType as 'email' | 'signup' | 'recovery' | 'invite',
   })
     
-    if (error) {
-      console.error('Email verification error:', error)
-      // If token expired or invalid, redirect with error
-      return NextResponse.redirect(`${requestUrl.origin}/signup?error=verification_failed`)
-    }
+  if (verifyError) {
+    console.error('Email verification error:', verifyError)
+    // If token expired or invalid, redirect with error
+    return NextResponse.redirect(`${requestUrl.origin}/signup?error=verification_failed`)
+  }
 
     // Check if user has completed profile
     const { data: { user } } = await supabase.auth.getUser()

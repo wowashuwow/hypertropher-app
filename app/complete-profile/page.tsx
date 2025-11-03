@@ -5,10 +5,12 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { CitySearchInput } from "@/components/ui/city-search-input"
 import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 import { createClient } from "@/lib/supabase/client"
+import { useSession } from "@/lib/auth/session-provider"
+import { MainLayout } from "@/components/main-layout"
 
 
 export default function CompleteProfilePage() {
@@ -16,10 +18,19 @@ export default function CompleteProfilePage() {
   const [city, setCity] = useState("");
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createClient();
+  const { refreshSession, invalidateUserCache, userProfile, loading, user } = useSession();
+
+  // Redirect if profile is already complete
+  useEffect(() => {
+    if (!loading && userProfile && userProfile.city) {
+      router.push('/');
+    }
+  }, [userProfile, loading, router]);
 
   useEffect(() => {
     // Get user info from Supabase Auth first to access user_metadata
@@ -59,17 +70,18 @@ export default function CompleteProfilePage() {
     }
     
     if (!city || !inviteCode) {
-      alert("Please fill out your city and ensure you have a valid invite code.");
+      setMessage({type: 'error', text: "Please fill out your city and ensure you have a valid invite code."});
       return;
     }
     
     // Name is required for all users
     if (!name) {
-      alert("Please enter your name.");
+      setMessage({type: 'error', text: "Please enter your name."});
       return;
     }
     
     setIsLoading(true);
+    setMessage(null);
 
     try {
       const response = await fetch('/api/users', {
@@ -81,36 +93,84 @@ export default function CompleteProfilePage() {
       });
 
       if (response.ok) {
-        // Redirect to homepage
+        // Invalidate cache and refresh session to ensure fresh profile data (including profile picture)
+        invalidateUserCache();
+        await refreshSession();
+        // Redirect to homepage after session is refreshed
         router.push('/');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to update profile. Please try again.');
+        setMessage({type: 'error', text: data.error || 'Failed to update profile. Please try again.'});
       }
     } catch (error) {
       console.error('Profile update error:', error);
-      alert('Network error. Please check your connection and try again.');
+      setMessage({type: 'error', text: 'Network error. Please check your connection and try again.'});
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Redirect non-authenticated users to signup
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/signup');
+    }
+  }, [loading, user, router]);
+
+  // Fast path: If profile is already loaded and complete, prevent form render (redirect will happen)
+  if (!loading && userProfile && userProfile.city) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Redirecting...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Show loading while session is loading OR while waiting for profile data OR during redirect
+  if (loading || (!loading && !user) || (!loading && user && userProfile === null)) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Only render form when we're certain profile is incomplete
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-foreground">HYPERTROPHER</h1>
-        <p className="mt-2 text-muted-foreground">
-          Find high protein meals near you. Vetted and verified by bodybuilders just like you.
-        </p>
-      </div>
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">One Last Step</CardTitle>
-          <CardDescription>
-            Complete your profile to start contributing
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <MainLayout>
+      <div className="max-w-7xl mx-auto py-8 px-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Complete Your Profile
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Just a few more steps to get started!
+          </p>
+        </div>
+
+        <div className="flex justify-center">
+          <Card className="w-full max-w-md shadow-sm border-border/50">
+            <CardContent className="pt-6">
+              {/* Message Display */}
+              {message && (
+                <div className={`mb-4 p-3 rounded-md text-sm ${
+                  message.type === 'success' 
+                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                  {message.text}
+                </div>
+              )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Your Name</Label>
@@ -151,8 +211,10 @@ export default function CompleteProfilePage() {
               {isLoading ? "Saving..." : "Let's Go!"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
-    </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </MainLayout>
   );
 }

@@ -611,12 +611,12 @@
 - Fixed RLS policy for `profile-pictures` bucket DELETE operation (UUID prefix matching)
 - Removed redundant cross icon from profile picture upload component
 
-### ✅ Completed (FEATURE-022 - Authentication Migration to Email/Google OAuth)
-- Migrated from phone to email/Google OAuth authentication (email+password, magic link, Google OAuth, password reset)
+### ✅ Completed (FEATURE-022 - Authentication Migration to Email)
+- Migrated from phone to email authentication (email+OTP)
 - Added `email` column to `users` table, made `phone` nullable (see `DATABASE_SCHEMA.md`)
 
 ### ✅ Completed (FEATURE-026 - Authentication Simplification for MVP)
-- Removed Google OAuth (had auth bugs - see BUG-041). Replaced Magic Link with Email OTP. Created OTP verification page and API. Invite code validation/invalidation remains functional.
+- Removed Google OAuth (had auth bugs - see BUG-041). Removed email+password auth. Only Email OTP authentication remains. Created OTP verification page and API. Invite code validation/invalidation remains functional.
 
 ### 🎯 MVP Status: ~99% Complete - Restaurant-Centric Architecture + Middle East Expansion + UX Polish + Performance Optimization + Email Auth
 The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
