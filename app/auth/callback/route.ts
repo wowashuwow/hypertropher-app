@@ -14,15 +14,19 @@ export async function GET(request: Request) {
 
   // Handle email verification flow (token or token_hash parameter)
   // This is used for email+password signup email verification links
-  if (token || tokenHash) {
-    const verifyToken = token || tokenHash
-    const verifyType = type || 'email'
-    
-    // Verify the email verification token
-    const { error, data } = await supabase.auth.verifyOtp({
-      token_hash: verifyToken,
-      type: verifyType as 'email' | 'signup' | 'recovery' | 'invite',
-    })
+  const verifyToken = token || tokenHash
+  if (!verifyToken) {
+    // No token - invalid request (only email verification links use this route)
+    return NextResponse.redirect(`${requestUrl.origin}/signup?error=invalid_request`)
+  }
+  
+  const verifyType = type || 'email'
+  
+  // Verify the email verification token
+  const { error, data } = await supabase.auth.verifyOtp({
+    token_hash: verifyToken,
+    type: verifyType as 'email' | 'signup' | 'recovery' | 'invite',
+  })
     
     if (error) {
       console.error('Email verification error:', error)
@@ -46,10 +50,6 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${requestUrl.origin}/complete-profile`)
       }
     }
-  } else {
-    // No token - invalid request (only email verification links use this route)
-    return NextResponse.redirect(`${requestUrl.origin}/signup?error=invalid_request`)
-  }
 
   // Redirect to the next URL or home
   return NextResponse.redirect(`${requestUrl.origin}${next}`)
