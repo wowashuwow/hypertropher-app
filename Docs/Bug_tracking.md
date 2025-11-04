@@ -5,6 +5,32 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [BUG-046] - Favicon Not Displaying
+**Date:** 2025-01-19
+**Severity:** Low (Visual)
+**Status:** ✅ Resolved
+
+**Description:**
+Favicon (`icon.svg`) not showing in browser tabs on localhost or production. Metadata was pointing to `/icon.svg` (public folder) but file exists at `app/icon.svg`.
+
+**Root Cause:**
+- Next.js App Router automatically handles `app/icon.svg` for favicons
+- Explicit `icons` metadata in `app/layout.tsx` was pointing to `/icon.svg` which doesn't exist in public folder
+- Metadata override conflicted with Next.js automatic favicon handling
+
+**Resolution:**
+- Removed explicit `icons` metadata from `app/layout.tsx`
+- Next.js App Router now automatically serves `app/icon.svg` as favicon
+
+**Files Modified:**
+- `app/layout.tsx` - Removed explicit icons metadata configuration
+
+**Testing Results:**
+✅ Favicon displays correctly in browser tabs
+✅ Next.js automatic favicon generation working
+
+---
+
 ### [BUG-045] - Non-Authenticated Users Can Access Complete Profile Page
 **Date:** 2025-01-19
 **Severity:** Medium (Security/UX)
