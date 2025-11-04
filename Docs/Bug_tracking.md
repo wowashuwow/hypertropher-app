@@ -86,6 +86,42 @@ Improved signup/login page UX with standard toggle pattern and smooth transition
 
 ---
 
+### [FEATURE-028] - Invite Code UI Cleanup
+**Date:** 2025-01-20
+**Severity:** Enhancement
+**Status:** ✅ Resolved
+
+**Description:**
+Removed redundant "Used" badge from invite codes on account page. Only "Available" badge shows for unused codes. Used codes display "Used by [profile]" below without redundant badge.
+
+**Files Modified:**
+- `app/account/page.tsx` - Removed "Used" badge, kept "Available" badge conditional
+
+**Testing Results:**
+✅ Used codes show only "Used by" section below
+✅ Available codes show "Available" badge
+✅ No redundant information display
+
+---
+
+### [FEATURE-029] - Signup Error Feedback Cleanup
+**Date:** 2025-01-20
+**Severity:** Enhancement
+**Status:** ✅ Resolved
+
+**Description:**
+Removed redundant toast notification for invalid invite code errors on signup page. Inline error message (red X icon and text above input) provides sufficient feedback.
+
+**Files Modified:**
+- `app/signup/page.tsx` - Removed `toast.error()` call for invite code validation errors
+
+**Testing Results:**
+✅ Only inline error displayed for invalid invite codes
+✅ No redundant toast notifications
+✅ Cleaner error feedback
+
+---
+
 ### [BUG-042] - Discover Page Shows Non-Logged-In UI After Login
 **Date:** 2025-01-19
 **Severity:** Medium

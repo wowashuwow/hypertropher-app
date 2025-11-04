@@ -11,12 +11,17 @@ import { useSession } from "@/lib/auth/session-provider"
 import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 import { toast } from "sonner"
+import { Check, Copy } from "lucide-react"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { copyToClipboard } from "@/lib/clipboard"
+import { createClient } from "@/lib/supabase/client"
 
 
 interface InviteCode {
   code: string
   created_at: string
   is_used: boolean
+  used_by_user_id: string | null
 }
 
 export default function AccountPage() {
@@ -29,8 +34,11 @@ export default function AccountPage() {
   const [userName, setUserName] = useState("")
   const [currentName, setCurrentName] = useState("")
   const [updatingName, setUpdatingName] = useState(false)
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  const [usedByProfiles, setUsedByProfiles] = useState<Record<string, { name: string, profile_picture_url: string | null }>>({})
   const { user, signOut, invalidateUserCache, updateUserCity, updateUserProfilePicture } = useSession()
   const { invalidateCache: invalidateDishesCache } = useDishesCache()
+  const supabase = createClient()
 
   // Fetch user's profile data
   useEffect(() => {
@@ -57,7 +65,7 @@ export default function AccountPage() {
     }
   }, [user])
 
-  // Fetch user's invite codes
+  // Fetch user's invite codes and used-by profiles
   useEffect(() => {
     const fetchInviteCodes = async () => {
       try {
@@ -66,6 +74,39 @@ export default function AccountPage() {
         if (response.ok) {
           const data = await response.json()
           setInviteCodes(data)
+          
+          // Fetch profiles for used codes
+          const usedUserIds = data
+            .filter((code: InviteCode) => code.is_used && code.used_by_user_id)
+            .map((code: InviteCode) => code.used_by_user_id)
+            .filter((id: string | null): id is string => id !== null)
+          
+          if (usedUserIds.length > 0) {
+            const profiles: Record<string, { name: string, profile_picture_url: string | null }> = {}
+            
+            // Fetch profiles in parallel using RPC function
+            await Promise.all(
+              usedUserIds.map(async (userId: string) => {
+                try {
+                  const { data: profile, error } = await supabase.rpc(
+                    'get_user_profile_by_id',
+                    { user_id_input: userId }
+                  )
+                  
+                  if (!error && profile) {
+                    profiles[userId] = {
+                      name: profile.name,
+                      profile_picture_url: profile.profile_picture_url
+                    }
+                  }
+                } catch (error) {
+                  console.error(`Error fetching profile for ${userId}:`, error)
+                }
+              })
+            )
+            
+            setUsedByProfiles(profiles)
+          }
         }
       } catch (error) {
         console.error('Error fetching invite codes:', error)
@@ -77,7 +118,7 @@ export default function AccountPage() {
     if (user) {
       fetchInviteCodes()
     }
-  }, [user])
+  }, [user, supabase])
 
   const handleCityChange = async (newCity: string) => {
     if (newCity === selectedCity) return // No change needed
@@ -167,9 +208,16 @@ export default function AccountPage() {
     await signOut()
   }
 
-  const copyInviteCode = (code: string) => {
-    navigator.clipboard.writeText(code)
-    // You could add a toast notification here
+  const copyInviteCode = async (code: string) => {
+    const success = await copyToClipboard(code)
+    if (success) {
+      setCopiedCode(code)
+      setTimeout(() => setCopiedCode(null), 2000)
+    } else {
+      toast.error("Failed to copy invite code", {
+        duration: 2000,
+      })
+    }
   }
 
   return (
@@ -206,32 +254,67 @@ export default function AccountPage() {
                 <p className="text-muted-foreground">Loading invite codes...</p>
               ) : inviteCodes.length > 0 ? (
                 <div className="space-y-2">
-                  {inviteCodes.map((inviteCode) => (
-                    <div key={inviteCode.code} className={`flex items-center justify-between p-3 border rounded-lg ${
-                      inviteCode.is_used ? 'bg-muted/50 opacity-75' : ''
-                    }`}>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-mono text-lg font-semibold">{inviteCode.code}</p>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            inviteCode.is_used 
-                              ? 'bg-gray-100 text-gray-600' 
-                              : 'bg-green-100 text-green-600'
-                          }`}>
-                            {inviteCode.is_used ? 'Used' : 'Available'}
-                          </span>
+                  {inviteCodes.map((inviteCode) => {
+                    const usedByProfile = inviteCode.used_by_user_id ? usedByProfiles[inviteCode.used_by_user_id] : null
+                    const firstName = usedByProfile?.name.split(' ')[0] || 'User'
+                    const firstNameInitial = firstName.charAt(0).toUpperCase()
+                    const isCopied = copiedCode === inviteCode.code
+                    
+                    return (
+                      <div key={inviteCode.code} className={`flex flex-col gap-2 p-3 border rounded-lg ${
+                        inviteCode.is_used ? 'bg-muted/50 opacity-75' : ''
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-mono text-lg font-semibold">{inviteCode.code}</p>
+                              {!inviteCode.is_used && (
+                                <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">
+                                  Available
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => copyInviteCode(inviteCode.code)}
+                            disabled={inviteCode.is_used}
+                            className="flex items-center gap-2"
+                          >
+                            {isCopied ? (
+                              <>
+                                <Check className="w-4 h-4 text-green-600" />
+                                <span className="text-green-600">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-4 h-4" />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </Button>
                         </div>
+                        {inviteCode.is_used && inviteCode.used_by_user_id && usedByProfile && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Used by</span>
+                            <Avatar className="w-6 h-6">
+                              {usedByProfile.profile_picture_url ? (
+                                <AvatarImage 
+                                  src={usedByProfile.profile_picture_url} 
+                                  alt={`${firstName}'s profile`}
+                                />
+                              ) : null}
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
+                                {firstNameInitial}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{firstName}</span>
+                          </div>
+                        )}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => copyInviteCode(inviteCode.code)}
-                        disabled={inviteCode.is_used}
-                      >
-                        Copy
-                      </Button>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               ) : (
                 <p className="text-muted-foreground">No invite codes available.</p>
