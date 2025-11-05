@@ -165,6 +165,20 @@ export default function HomePage() {
           console.log('✅ Using cached dishes for', currentCity, '- Count:', cachedDishes.length)
           setDishes(cachedDishes)
           setLoading(false)
+          
+          // Still fetch cities for non-authenticated users (needed for dropdown and dish count)
+          if (!user) {
+            try {
+              const citiesResponse = await fetch('/api/cities-with-dishes')
+              if (citiesResponse.ok) {
+                const citiesData = await citiesResponse.json()
+                setCitiesWithDishes(citiesData)
+              }
+            } catch (err) {
+              console.error('Error fetching cities:', err)
+            }
+          }
+          
           setLoadingCities(false)
           return
         }

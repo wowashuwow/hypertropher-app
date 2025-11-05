@@ -122,6 +122,30 @@ Removed redundant toast notification for invalid invite code errors on signup pa
 
 ---
 
+### [BUG-047] - Dish Count Shows Zero After Navigation
+**Date:** 2025-01-20
+**Severity:** Medium (UX)
+**Status:** ✅ Resolved
+
+**Description:**
+After navigating to signup page and returning to Discover page, inline city selector showed "0 dishes" instead of correct count (e.g., "1 dishes") for non-authenticated users.
+
+**Root Cause:**
+When cached dishes were found, code returned early without fetching cities data. `citiesWithDishes` state remained empty, causing `InlineCitySelector` to show dishCount as 0.
+
+**Resolution:**
+Modified cache hit logic to still fetch cities for non-authenticated users when cached dishes exist. This populates `citiesWithDishes` without refetching dishes.
+
+**Files Modified:**
+- `app/page.tsx` - Added cities fetch in cache hit block for non-authenticated users
+
+**Testing Results:**
+✅ Dish count displays correctly after navigation
+✅ Cities dropdown shows all cities
+✅ Caching, scroll position, and filters unaffected
+
+---
+
 ### [BUG-042] - Discover Page Shows Non-Logged-In UI After Login
 **Date:** 2025-01-19
 **Severity:** Medium
