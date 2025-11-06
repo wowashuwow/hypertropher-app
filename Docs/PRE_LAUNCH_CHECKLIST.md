@@ -40,32 +40,32 @@
 
 ### 1. Domain Setup (Vercel)
 
-**Steps:**
-1. Go to Vercel Dashboard → Your Project → Settings → Domains
-2. Click "Add Domain"
-3. Enter `hypertropher.com` and `www.hypertropher.com`
-4. Choose one of two options:
+**✅ Completed:**
+- [x] Added `hypertropher.com` to Vercel (without www redirect)
+- [x] Added `www.hypertropher.com` to Vercel separately
 
-**Option A: Use Vercel Nameservers (Recommended)**
-- Vercel will show you nameserver addresses (e.g., `ns1.vercel-dns.com`)
-- Go to your domain registrar
-- Update nameservers to point to Vercel's nameservers
-- Vercel will automatically configure DNS
+**Next Steps - Configure DNS Using Vercel Nameservers:**
 
-**Option B: Manual DNS Records**
-- Add these DNS records at your registrar:
-  ```
-  Type: A
-  Name: @
-  Value: 76.76.21.21
+1. **Get Nameservers from Vercel:**
+   - In Vercel Dashboard → Your Project → Settings → Domains
+   - Click on `hypertropher.com`
+   - Look for "Nameservers" section
+   - Copy the nameserver addresses (usually 2-4 addresses like `ns1.vercel-dns.com`, `ns2.vercel-dns.com`, etc.)
 
-  Type: CNAME
-  Name: www
-  Value: cname.vercel-dns.com
-  ```
+2. **Update Nameservers at Your Domain Registrar:**
+   - Go to your domain registrar (where you bought hypertropher.com)
+   - Find DNS/Nameserver settings
+   - Replace existing nameservers with Vercel's nameservers
+   - Save changes
 
-5. Wait 24-48 hours for DNS propagation
-6. Verify SSL certificates are issued (automatic with Vercel)
+3. **Wait for DNS Propagation:**
+   - Usually takes 24-48 hours (can be faster, sometimes minutes)
+   - Vercel will automatically configure all DNS records
+   - SSL certificates will be issued automatically once DNS propagates
+
+4. **Verify Setup:**
+   - Check Vercel Dashboard → Domains → Status should show "Valid Configuration"
+   - Wait for SSL certificate to be issued (shows in Vercel dashboard)
 
 **Verification:**
 - [ ] `https://hypertropher.com` loads correctly
@@ -169,12 +169,13 @@ USING (true); -- Adjust based on your admin role logic
 - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Set in Vercel
 - [ ] `SUPABASE_SECRET_API_KEY` - Set in Vercel (server-side only)
 - [ ] `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` - Set in Vercel
-- [ ] `NEXT_PUBLIC_SITE_URL` - Optional, set to `https://hypertropher.com` for metadata
+- [ ] `NEXT_PUBLIC_SITE_URL` - Set to `https://hypertropher.com` (important for Open Graph images and metadata)
 
 **Steps:**
 1. Vercel Dashboard → Your Project → Settings → Environment Variables
 2. Add each variable for "Production" environment
-3. Redeploy if variables were added after deployment
+3. **Important:** Set `NEXT_PUBLIC_SITE_URL` to `https://hypertropher.com` after domain is working
+4. Redeploy if variables were added after deployment
 
 **Verification:**
 - [ ] All environment variables are set
