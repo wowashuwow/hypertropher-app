@@ -131,8 +131,9 @@ export default function CompleteProfilePage() {
     );
   }
 
-  // Show loading while session is loading OR while waiting for profile data OR during redirect
-  if (loading || (!loading && !user) || (!loading && user && userProfile === null)) {
+  // Show loading while session is loading OR while redirecting non-authenticated users
+  // Note: userProfile === null is expected for new signups, so show form in that case
+  if (loading || (!loading && !user)) {
     return (
       <MainLayout>
         <div className="min-h-screen bg-background flex items-center justify-center">

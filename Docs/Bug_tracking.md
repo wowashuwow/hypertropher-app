@@ -5,6 +5,45 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [BUG-048] - Complete Profile Page Stuck on Loading for New Signups
+**Date:** 2025-11-06
+**Severity:** High (Blocking Signup Flow)
+**Status:** ✅ Resolved
+
+**Description:**
+After verifying OTP during signup, users were redirected to `/complete-profile` but the page was stuck on "Loading..." indefinitely. UI showed logged-in state (bottom nav, profile icon) but form never appeared. Issue occurred on production domain `hypertropher.com`.
+
+**Root Cause:**
+- New users authenticate successfully but don't have profile in `users` table yet
+- `/api/users` GET endpoint returned 500 error when user doesn't exist (using `.single()`)
+- `session-provider.tsx` treated all non-200 responses as errors, setting `userProfile = null`
+- `complete-profile/page.tsx` line 135 showed loading when `userProfile === null` (expected state for new users)
+- Created infinite loading loop: user exists but `userProfile === null` → shows loading forever
+
+**Resolution:**
+1. **API Route** (`app/api/users/route.ts`): Return 404 (not 500) when user profile doesn't exist (PGRST116 error code)
+2. **Session Provider** (`lib/auth/session-provider.tsx`): Treat 404 as expected state (keep `userProfile = null`), only log other errors
+3. **Complete Profile Page** (`app/complete-profile/page.tsx`): Remove `userProfile === null` from loading condition - this is expected for new signups, show form instead
+
+**Files Modified:**
+- `app/api/users/route.ts` - Return 404 for missing profiles
+- `lib/auth/session-provider.tsx` - Handle 404 as expected state
+- `app/complete-profile/page.tsx` - Show form when user exists but profile doesn't
+
+**Testing Results:**
+✅ New signup flow works - form appears after OTP verification
+✅ ProtectedRoute redirect logic preserved - still redirects incomplete signups
+✅ Non-authenticated users still redirected to signup
+✅ Complete profiles still redirect to homepage
+✅ No breaking changes to existing redirect logic
+
+**Notes:**
+- Distinguishes between "profile doesn't exist yet" (expected, 404) vs actual errors (500)
+- `userProfile === null` is now correctly treated as expected state for new signups
+- All redirect logic preserved and working correctly
+
+---
+
 ### [BUG-047] - Domain Connection Timeout on Mobile with VPN (Cloudflare WARP)
 **Date:** 2025-11-06
 **Severity:** High (Availability)

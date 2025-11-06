@@ -48,7 +48,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setUserProfile(profile)
         // Update cache (no timestamp needed)
         setUserProfileCache(profile)
+      } else if (response.status === 404) {
+        // 404 = user profile doesn't exist yet (expected for new signups)
+        // Keep userProfile as null - this is the expected state
+        setUserProfile(null)
+        setUserProfileCache(null)
       } else {
+        // Other errors (500, etc.) - log but still set to null
+        console.error('Error fetching user profile:', response.status, response.statusText)
         setUserProfile(null)
         setUserProfileCache(null)
       }

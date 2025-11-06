@@ -111,6 +111,10 @@ export async function GET() {
       .single();
 
     if (error) {
+      // PGRST116: No rows returned (user doesn't exist yet - expected for new signups)
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: "Profile not found." }, { status: 404 });
+      }
       console.error("Error fetching user profile:", error);
       return NextResponse.json({ error: "Failed to fetch profile." }, { status: 500 });
     }
