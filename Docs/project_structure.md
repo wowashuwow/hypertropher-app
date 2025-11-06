@@ -227,6 +227,7 @@ Static files served directly:
 - **Dish Images**: High-quality food photography for dish displays
 - **Placeholder Images**: Default images for missing content
 - **User Images**: Placeholder user avatars
+- **Social Media**: `og-image.jpg` - Open Graph image for social media previews (1200x630px)
 
 #### Logos (`/public/logos`)
 - **Delivery App Logos**: Official WebP logos for 16 delivery apps (Swiggy, Zomato, Uber Eats, DoorDash, Grubhub, Postmates, Just Eat Takeaway, Deliveroo, Grab, Foodpanda, iFood, PedidosYa, Rappi, Noon, Careem, Talabat)
