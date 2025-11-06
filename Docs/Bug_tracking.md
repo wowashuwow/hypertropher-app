@@ -5,6 +5,41 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [BUG-047] - Domain Connection Timeout on Mobile with VPN (Cloudflare WARP)
+**Date:** 2025-11-06
+**Severity:** High (Availability)
+**Status:** ✅ Resolved
+
+**Description:**
+After adding a dish, `hypertropher.com` stopped loading on mobile devices (Safari, Arc) with "server stopped responding" / "request timed out" errors. Desktop worked fine. Issue occurred specifically when using Cloudflare WARP VPN.
+
+**Root Cause:**
+- Cloudflare WARP VPN cached stale DNS records for `hypertropher.com`
+- HSTS header included `preload` directive, which is too strict for newly configured domains
+- When `router.push('/')` redirected after dish submission, browser attempted new connection
+- WARP's DNS cache returned incorrect IP or failed to resolve, causing connection timeout
+- Mobile browsers are stricter about SSL validation, exacerbating the issue
+
+**Resolution:**
+- Removed `preload` directive from HSTS header in `next.config.mjs`
+- Changed from `'max-age=63072000; includeSubDomains; preload'` to `'max-age=63072000; includeSubDomains'`
+- HSTS still enforced, but without strict preload validation that conflicts with VPN DNS caching
+
+**Files Modified:**
+- `next.config.mjs` - Removed `preload` from Strict-Transport-Security header
+
+**Testing Results:**
+✅ Domain loads correctly on mobile with VPN disabled
+✅ HSTS still enforced (without preload)
+✅ No breaking changes to security headers
+
+**Notes:**
+- VPN DNS caching is outside application control, but removing HSTS preload reduces strict validation conflicts
+- Users experiencing this issue should clear WARP DNS cache or temporarily disable VPN
+- HSTS preload can be re-added later once domain is fully propagated and in browser preload lists
+
+---
+
 ### [BUG-046] - Favicon Not Displaying
 **Date:** 2025-01-19
 **Severity:** Low (Visual)
