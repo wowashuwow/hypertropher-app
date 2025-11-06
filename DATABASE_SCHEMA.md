@@ -240,6 +240,26 @@ The `restaurant_delivery_app_reports` table has RLS enabled with the following p
 - **`restaurant_id`**: Uses `ON DELETE CASCADE` - When a restaurant is deleted, all associated reports are automatically removed.
 - **`reported_by_user_id`**: Uses `ON DELETE CASCADE` - When a user is deleted, all reports they submitted are automatically removed.
 
+### 9. `feedback` table
+Stores user feedback submissions for bug reports, feature requests, and general feedback.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | **Primary Key**, Default: `gen_random_uuid()` | The unique identifier for a feedback entry. |
+| `user_id` | `UUID` | Foreign Key to `users.id`, ON DELETE CASCADE | The ID of the user who submitted the feedback. |
+| `message` | `TEXT` | Not Null | The feedback message content. |
+| `type` | `TEXT` | Default: `'general'` | Feedback type: 'general', 'bug', 'feature', or 'other'. |
+| `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the feedback was submitted. |
+
+#### Row Level Security (RLS) Policies
+The `feedback` table has RLS enabled with the following policies:
+- **SELECT**: "Users can view their own feedback" (`auth.uid() = user_id`)
+- **INSERT**: "Users can insert their own feedback" (`auth.uid() = user_id`)
+- **Service Role**: Service role can view all feedback for admin review
+
+**Foreign Key Behavior:**
+- **`user_id`**: Uses `ON DELETE CASCADE` - When a user is deleted, all their feedback entries are automatically removed.
+
 ---
 
 ## Storage Buckets

@@ -22,7 +22,8 @@ hypertropher-app/
 │   │   ├── invite-codes/         # Invite code management
 │   │   ├── upload-profile-picture/ # Profile picture upload endpoint
 │   │   ├── users/                # User management
-│   │   └── wishlist/             # Wishlist management
+│   │   ├── wishlist/             # Wishlist management
+│   │   └── feedback/             # User feedback submission endpoint
 │   ├── complete-profile/         # User onboarding
 │   ├── edit-dish/                # Dish editing functionality
 │   │   └── [id]/                 # Dynamic route for dish editing
@@ -37,7 +38,9 @@ hypertropher-app/
 │   ├── icon.svg                  # App favicon (Next.js automatic)
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout component
-│   ├── loading.tsx               # Global loading states
+│   ├── loading.tsx                # Global loading states
+│   ├── not-found.tsx             # 404 error page
+│   ├── error.tsx                 # 500 error page
 │   └── page.tsx                  # Homepage
 ├── components/                   # Reusable UI components
 │   ├── ui/                       # Shadcn UI components
@@ -50,6 +53,7 @@ hypertropher-app/
 │   │   ├── input.tsx             # Form input components
 │   │   ├── label.tsx             # Form labels
 │   │   ├── multi-select.tsx      # Multi-selection dropdown
+│   │   ├── textarea.tsx         # Textarea input component
 │   │   ├── popover.tsx           # Popover components
 │   │   ├── profile-picture-upload.tsx # Profile picture upload component
 │   │   ├── restaurant-input.tsx  # Restaurant selection component (Google Maps + manual)

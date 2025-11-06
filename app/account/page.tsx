@@ -15,6 +15,7 @@ import { Check, Copy } from "lucide-react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { copyToClipboard } from "@/lib/clipboard"
 import { createClient } from "@/lib/supabase/client"
+import { Textarea } from "@/components/ui/textarea"
 
 
 interface InviteCode {
@@ -36,6 +37,8 @@ export default function AccountPage() {
   const [updatingName, setUpdatingName] = useState(false)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [usedByProfiles, setUsedByProfiles] = useState<Record<string, { name: string, profile_picture_url: string | null }>>({})
+  const [feedback, setFeedback] = useState("")
+  const [submittingFeedback, setSubmittingFeedback] = useState(false)
   const { user, signOut, invalidateUserCache, updateUserCity, updateUserProfilePicture } = useSession()
   const { invalidateCache: invalidateDishesCache } = useDishesCache()
   const supabase = createClient()
@@ -220,6 +223,45 @@ export default function AccountPage() {
     }
   }
 
+  const handleFeedbackSubmit = async () => {
+    if (!feedback.trim()) {
+      toast.error("Please enter your feedback", {
+        duration: 2000,
+      })
+      return
+    }
+
+    try {
+      setSubmittingFeedback(true)
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: feedback.trim(), type: 'general' }),
+      })
+
+      if (response.ok) {
+        toast.success("Thank you for your feedback! We'll review it soon.", {
+          duration: 4000,
+        })
+        setFeedback("")
+      } else {
+        const data = await response.json()
+        toast.error(data.error || "Failed to submit feedback. Please try again.", {
+          duration: 5000,
+        })
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      toast.error("Failed to submit feedback. Please try again.", {
+        duration: 5000,
+      })
+    } finally {
+      setSubmittingFeedback(false)
+    }
+  }
+
   return (
     <ProtectedRoute>
       <MainLayout>
@@ -380,6 +422,28 @@ export default function AccountPage() {
             <div className="space-y-2">
               <Label className="text-base font-medium">Phone Number</Label>
               <p className="text-muted-foreground">{user?.phone}</p>
+            </div>
+
+            {/* Feedback Section */}
+            <div className="space-y-2 pt-4 border-t">
+              <Label className="text-base font-medium">Send Feedback</Label>
+              <p className="text-sm text-muted-foreground">
+                Found a bug? Have a suggestion? We'd love to hear from you!
+              </p>
+              <Textarea
+                placeholder="Share your thoughts, report issues, or suggest features..."
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                disabled={submittingFeedback}
+                className="min-h-[100px]"
+              />
+              <Button
+                onClick={handleFeedbackSubmit}
+                disabled={submittingFeedback || !feedback.trim()}
+                className="w-full"
+              >
+                {submittingFeedback ? "Submitting..." : "Submit Feedback"}
+              </Button>
             </div>
 
             {/* Action Buttons */}

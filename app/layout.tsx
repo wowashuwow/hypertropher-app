@@ -17,9 +17,35 @@ const rethinkSans = Rethink_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "Hypertropher",
-  description: "Discover high-protein, affordable meals from restaurants",
-  generator: "v0.app",
+  title: "Hypertropher - Discover High-Protein Meals",
+  description: "A trusted, community-driven database of high-protein dishes from local restaurants and delivery apps. Find great-tasting, affordable protein-rich meals.",
+  keywords: ["high protein meals", "protein foods", "restaurant finder", "fitness nutrition"],
+  authors: [{ name: "Hypertropher" }],
+  creator: "Hypertropher",
+  publisher: "Hypertropher",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://hypertropher.com'),
+  openGraph: {
+    title: "Hypertropher - Discover High-Protein Meals",
+    description: "Find great-tasting, high-protein dishes from restaurants",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://hypertropher.com",
+    siteName: "Hypertropher",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hypertropher - Discover High-Protein Meals",
+    description: "Find great-tasting, high-protein dishes from restaurants",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
