@@ -19,9 +19,9 @@ interface DishCardProps {
   city: string
   imageUrl?: string
   price: string
-  protein: "Overloaded" | "Pretty Good"
-  taste: "Mouthgasm" | "Pretty Good"
-  satisfaction?: "Would Eat Everyday" | "Pretty Good"
+  protein: "Overloaded" | "Assured"
+  taste: "Exceptional" | "Assured"
+  satisfaction?: "Daily Fuel" | "Assured"
   comment?: string
   addedBy: string
   addedByProfilePicture?: string | null
@@ -62,7 +62,7 @@ export function DishCard({
   price,
   protein,
   taste,
-  satisfaction = "Pretty Good",
+  satisfaction = "Assured",
   comment,
   addedBy,
   addedByProfilePicture,
@@ -242,15 +242,15 @@ export function DishCard({
   }
 
   const getProteinEmojis = (protein: string) => {
-    return protein === "Overloaded" ? "💪💪💪" : "👍"
+    return protein === "Overloaded" ? "🔥" : "👍"
   }
 
   const getTasteEmojis = (taste: string) => {
-    return taste === "Mouthgasm" ? "🤤🤤🤤" : "👍"
+    return taste === "Exceptional" ? "🔥" : "👍"
   }
 
   const getSatisfactionEmojis = (satisfaction: string) => {
-    return satisfaction === "Would Eat Everyday" ? "🤩🤩🤩" : "👍"
+    return satisfaction === "Daily Fuel" ? "🔥" : "👍"
   }
 
 
@@ -329,7 +329,7 @@ export function DishCard({
             <span className="font-medium">{getTasteEmojis(taste)}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Satisfaction</span>
+            <span className="text-muted-foreground">Overall Satisfaction</span>
             <span className="font-medium">{getSatisfactionEmojis(satisfaction)}</span>
           </div>
         </div>

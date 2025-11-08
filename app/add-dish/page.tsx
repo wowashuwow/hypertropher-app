@@ -18,6 +18,16 @@ import { cn } from "@/lib/utils"
 import { compressImageWithTimeout, formatFileSize, getCompressionRatio } from "@/lib/image-compression"
 import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 
+const stripTrailingEmoji = (value: string) => {
+  if (!value) return ""
+  const trimmed = value.trimEnd()
+  const lastSpaceIndex = trimmed.lastIndexOf(" ")
+  if (lastSpaceIndex === -1) {
+    return trimmed.trim()
+  }
+  return trimmed.slice(0, lastSpaceIndex).trim()
+}
+
 export default function AddDishPage() {
   const router = useRouter()
   const { invalidateCache: invalidateDishesCache } = useDishesCache()
@@ -27,9 +37,9 @@ export default function AddDishPage() {
   const [dishName, setDishName] = useState("")
   const [proteinSource, setProteinSource] = useState<"Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other" | "">("")
   const [price, setPrice] = useState<string>("")
-  const [taste, setTaste] = useState<"Mouthgasm" | "Pretty Good" | "">("")
-  const [protein, setProtein] = useState<"Overloaded" | "Pretty Good" | "">("")
-  const [satisfaction, setSatisfaction] = useState<"Would Eat Everyday" | "Pretty Good" | "">("")
+  const [taste, setTaste] = useState<"Exceptional" | "Assured" | "">("")
+  const [protein, setProtein] = useState<"Overloaded" | "Assured" | "">("")
+  const [satisfaction, setSatisfaction] = useState<"Daily Fuel" | "Assured" | "">("")
   const [comment, setComment] = useState("")
   const [photo, setPhoto] = useState<File | null>(null)
   const [compressedPhoto, setCompressedPhoto] = useState<File | null>(null)
@@ -403,9 +413,18 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Taste</Label>
                   <ButtonGroup
-                    options={["🤤🤤🤤 Mouthgasm", "👍 Pretty Good"]}
-                    value={taste === "Mouthgasm" ? "🤤🤤🤤 Mouthgasm" : taste === "Pretty Good" ? "👍 Pretty Good" : ""}
-                    onChange={(value) => setTaste(value.replace(/^[^\w\s]*\s*/, '') as typeof taste)}
+                    options={["Assured 👍", "Exceptional 🔥"]}
+                    value={
+                      taste === "Assured"
+                        ? "Assured 👍"
+                        : taste === "Exceptional"
+                          ? "Exceptional 🔥"
+                          : ""
+                    }
+                    onChange={(value) => {
+                      const cleaned = stripTrailingEmoji(value)
+                      setTaste(cleaned as typeof taste)
+                    }}
                     name="taste"
                   />
                 </div>
@@ -413,9 +432,18 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Protein Content</Label>
                   <ButtonGroup
-                    options={["💪💪💪 Overloaded", "👍 Pretty Good"]}
-                    value={protein === "Overloaded" ? "💪💪💪 Overloaded" : protein === "Pretty Good" ? "👍 Pretty Good" : ""}
-                    onChange={(value) => setProtein(value.replace(/^[^\w\s]*\s*/, '') as typeof protein)}
+                    options={["Assured 👍", "Overloaded 🔥"]}
+                    value={
+                      protein === "Assured"
+                        ? "Assured 👍"
+                        : protein === "Overloaded"
+                          ? "Overloaded 🔥"
+                          : ""
+                    }
+                    onChange={(value) => {
+                      const cleaned = stripTrailingEmoji(value)
+                      setProtein(cleaned as typeof protein)
+                    }}
                     name="protein"
                   />
                 </div>
@@ -438,9 +466,18 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Overall Satisfaction</Label>
                   <ButtonGroup
-                    options={["🤩🤩🤩 Would Eat Everyday", "👍 Pretty Good"]}
-                    value={satisfaction === "Would Eat Everyday" ? "🤩🤩🤩 Would Eat Everyday" : satisfaction === "Pretty Good" ? "👍 Pretty Good" : ""}
-                    onChange={(value) => setSatisfaction(value.replace(/^[^\w\s]*\s*/, '') as typeof satisfaction)}
+                    options={["Assured 👍", "Daily Fuel 🔥"]}
+                    value={
+                      satisfaction === "Assured"
+                        ? "Assured 👍"
+                        : satisfaction === "Daily Fuel"
+                          ? "Daily Fuel 🔥"
+                          : ""
+                    }
+                    onChange={(value) => {
+                      const cleaned = stripTrailingEmoji(value)
+                      setSatisfaction(cleaned as typeof satisfaction)
+                    }}
                     name="satisfaction"
                   />
                 </div>

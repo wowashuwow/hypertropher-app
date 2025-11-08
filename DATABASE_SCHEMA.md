@@ -21,6 +21,8 @@ This document outlines the database schema for the Hypertropher application, bui
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-3)
     - [8. `restaurant_delivery_app_reports` table](#8-restaurant_delivery_app_reports-table)
       - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-4)
+    - [9. `feedback` table](#9-feedback-table)
+      - [Row Level Security (RLS) Policies](#row-level-security-rls-policies-5)
   - [Storage Buckets](#storage-buckets)
     - [`dish-photos` Bucket](#dish-photos-bucket)
     - [`profile-pictures` Bucket](#profile-pictures-bucket)
@@ -38,6 +40,7 @@ This document outlines the database schema for the Hypertropher application, bui
       - [3. Storage Security Enhancement (January 2025)](#3-storage-security-enhancement-january-2025)
       - [4. Delivery App Reporting System (October 2025)](#4-delivery-app-reporting-system-october-2025)
       - [5. Wishlist Items CASCADE Update (October 2025)](#5-wishlist-items-cascade-update-october-2025)
+      - [6. Rating Vocabulary Refresh (November 2025)](#6-rating-vocabulary-refresh-november-2025)
     - [Database Constraint Issues Resolved](#database-constraint-issues-resolved)
     - [Data Migration Strategy](#data-migration-strategy)
   - [Administrative Operations](#administrative-operations)
@@ -126,9 +129,9 @@ The core table containing all user-contributed dish information. **Note:** City 
 | `image_url` | `TEXT` | Nullable | The URL of the dish photo stored in Supabase Storage. |
 | `price` | `NUMERIC` | Not Null | The price of the dish. |
 | `protein_source`| `TEXT` | Not Null | The primary protein source (e.g., "Chicken", "Paneer"). |
-| `protein_content`| `ENUM (protein_rating_type)` | Nullable | User's rating for protein content (e.g., "Overloaded", "Pretty Good"). |
-| `taste` | `ENUM (taste_rating_type)` | Nullable | User's rating for taste (e.g., "Mouthgasm", "Pretty Good"). |
-| `satisfaction` | `ENUM (satisfaction_rating_type)` | Nullable | User's overall satisfaction rating (e.g., "Would Eat Everyday", "Pretty Good"). |
+| `protein_content`| `ENUM (protein_rating_type)` | Nullable | User's rating for protein content (e.g., "Overloaded", "Assured"). |
+| `taste` | `ENUM (taste_rating_type)` | Nullable | User's rating for taste (e.g., "Exceptional", "Assured"). |
+| `satisfaction` | `ENUM (satisfaction_rating_type)` | Nullable | User's overall satisfaction rating (e.g., "Daily Fuel", "Assured"). |
 | `comment` | `TEXT` | Nullable | Optional user comments about the dish. |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Default: `now()` | The timestamp when the dish was added. |
 
@@ -334,9 +337,9 @@ Defines the possible values for protein content ratings.
 
 **Values:**
 - `'Overloaded'` - High protein content rating
-- `'Pretty Good'` - Standard protein content rating
+- `'Assured'` - Baseline protein content rating (meets expectations)
 
-**Note:** Database also contains `'Great'` value for backward compatibility, but it is not currently used in the UI.
+**Note:** Database also contains legacy `'Great'` values for backward compatibility with historical data.
 
 **Usage:** Used by the `dishes.protein_content` column to ensure data consistency.
 
@@ -344,10 +347,10 @@ Defines the possible values for protein content ratings.
 Defines the possible values for taste ratings.
 
 **Values:**
-- `'Mouthgasm'` - Exceptional taste rating
-- `'Pretty Good'` - Standard taste rating
+- `'Exceptional'` - Exceptional taste rating
+- `'Assured'` - Baseline taste rating (meets expectations)
 
-**Note:** Database also contains `'Amazing'` and `'Great'` values for backward compatibility, but they are not currently used in the UI.
+**Note:** Database also contains legacy `'Amazing'` and `'Great'` values for backward compatibility, but they are not currently used in the UI.
 
 **Usage:** Used by the `dishes.taste` column to ensure data consistency.
 
@@ -355,10 +358,10 @@ Defines the possible values for taste ratings.
 Defines the possible values for overall satisfaction ratings.
 
 **Values:**
-- `'Would Eat Everyday'` - Highest satisfaction rating
-- `'Pretty Good'` - Standard satisfaction rating
+- `'Daily Fuel'` - Highest satisfaction rating (something you'd eat every day)
+- `'Assured'` - Baseline satisfaction rating (meets expectations)
 
-**Note:** Database also contains `'Great'` value for backward compatibility, but it is not currently used in the UI.
+**Note:** Database also contains legacy `'Great'` value for backward compatibility, but it is not currently used in the UI.
 
 **Usage:** Used by the `dishes.satisfaction` column to ensure data consistency.
 
@@ -577,6 +580,28 @@ FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE;
 - Interim solution until recommendation system provides permanent validation signals
 
 **Note:** This is an interim fix. The future recommendation system will use `dish_recommendations` to protect valuable dishes from deletion, while wishlists remain temporary personal planning tools.
+
+#### 6. Rating Vocabulary Refresh (November 2025)
+
+- **Goal:** Rename baseline rating to `Assured`, taste premium to `Exceptional`, overall premium to `Daily Fuel`.
+- **Manual Supabase step:** In the Supabase SQL editor, run each statement below individually (Postgres won’t allow these inside a transaction), then run the `UPDATE` to backfill existing rows:
+  ```sql
+  ALTER TYPE protein_rating_type RENAME VALUE 'Pretty Good' TO 'Assured';
+  ALTER TYPE taste_rating_type RENAME VALUE 'Mouthgasm' TO 'Exceptional';
+  ALTER TYPE taste_rating_type RENAME VALUE 'Pretty Good' TO 'Assured';
+  ALTER TYPE satisfaction_rating_type RENAME VALUE 'Would Eat Everyday' TO 'Daily Fuel';
+  ALTER TYPE satisfaction_rating_type RENAME VALUE 'Pretty Good' TO 'Assured';
+
+  UPDATE dishes
+  SET protein_content = CASE WHEN protein_content = 'Pretty Good' THEN 'Assured'::protein_rating_type ELSE protein_content END,
+      taste           = CASE WHEN taste = 'Mouthgasm' THEN 'Exceptional'::taste_rating_type
+                             WHEN taste = 'Pretty Good' THEN 'Assured'::taste_rating_type
+                             ELSE taste END,
+      satisfaction    = CASE WHEN satisfaction = 'Would Eat Everyday' THEN 'Daily Fuel'::satisfaction_rating_type
+                             WHEN satisfaction = 'Pretty Good' THEN 'Assured'::satisfaction_rating_type
+                             ELSE satisfaction END;
+  ```
+- **Aftercare:** Update any manual seed data or analytics using the old strings.
 
 ### Database Constraint Issues Resolved
 

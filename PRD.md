@@ -87,7 +87,7 @@ Build a valuable and trusted, community-sourced database of high-protein dishes 
 
 ### 4.4. DishCard Component Behavior
 * **FR-CARD-01:** The card must display the dish photo, name, restaurant, city, price, availability, and contributor.
-* **FR-CARD-02:** The card must display the ratings for Protein, Taste, and Satisfaction using the specified emoji system.
+* **FR-CARD-02:** The card must display the ratings for Protein, Taste, and Overall Satisfaction using the specified emoji system.
 * **FR-CARD-03:** The card must contain a bookmark icon for adding/removing the dish from the user's "Wishlist".
 * **FR-CARD-04:** The card must display conditional action buttons ("Navigate" for In-Store, multiple "Open [App Name]" buttons for Online dishes with multiple delivery apps).
 * **FR-CARD-05:** If a dish has a comment, the entire card will be expandable via the Shadcn UI Accordion component to show the comment text. Clicks on internal buttons must not trigger the expansion.

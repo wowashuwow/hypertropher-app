@@ -185,8 +185,9 @@
   - Handle empty states gracefully with appropriate messaging
 
 - [x] Implement enhanced rating system with improved text and emoji display
-  - Update rating text values: "Great" → "Pretty Good", "Amazing" → "Mouthgasm"
-  - Implement new emoji display logic: "Pretty Good" → 👍, "Overloaded" → 💪💪💪, "Mouthgasm" → 🤤🤤🤤, "Would Eat Everyday" → 🤩🤩🤩
+  - Update rating text values: baseline renamed to "Assured", taste premium → "Exceptional", overall premium → "Daily Fuel"
+  - Implement emoji display logic: "Assured" → 👍, "Overloaded" → 🔥, "Exceptional" → 🔥, "Daily Fuel" → 🔥
+  - Update UI copy to show "Overall Satisfaction" label while retaining existing satisfaction state keys
   - Update database ENUM types to reflect new rating values
   - Migrate existing data from old rating values to new ones
   - Update all TypeScript interfaces across the application

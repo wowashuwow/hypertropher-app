@@ -4400,15 +4400,12 @@ Implemented a comprehensive update to the rating system, improving the text labe
 ### Implementation Details
 
 #### 1. **Rating Text Updates**
-- **"Great" → "Pretty Good"**: More honest and relatable rating
-- **"Amazing" → "Mouthgasm"**: More engaging and expressive for taste ratings
-- **"Overloaded" and "Would Eat Everyday"**: Kept unchanged as they were already expressive
+- **Initial (Jan 2025)**: "Great" → "Pretty Good", "Amazing" → "Mouthgasm" to create more expressive copy
+- **Follow-up (Nov 2025)**: Baseline rating renamed to "Assured", taste premium to "Exceptional", overall satisfaction premium to "Daily Fuel" for clearer storytelling
 
 #### 2. **Enhanced Emoji Display Logic**
-- **"Pretty Good" ratings**: Show single 👍 (thumbs up)
-- **"Overloaded" protein**: Show triple 💪💪💪 (biceps emojis)
-- **"Mouthgasm" taste**: Show triple 🤤🤤🤤 (drooling face emojis)
-- **"Would Eat Everyday" satisfaction**: Show triple 🤩🤩🤩 (starry eyed emojis)
+- **Baseline ("Assured") rating**: Shows single 👍 (thumbs up)
+- **Premium ratings ("Overloaded", "Exceptional", "Daily Fuel")**: Unified to a single 🔥 to indicate elevated status
 
 #### 3. **Database Schema Migration**
 - **ENUM Type Updates**: Added new values to existing ENUM types
@@ -4417,13 +4414,13 @@ Implemented a comprehensive update to the rating system, improving the text labe
 
 #### 4. **Frontend Interface Updates**
 - **TypeScript Interfaces**: Updated all Dish interfaces across 6 files
-- **Form Components**: Modified add-dish and edit-dish forms with emoji-prefixed options
+- **Form Components**: Modified add-dish and edit-dish forms to show label-first options with trailing emojis (e.g., "Exceptional 🔥")
 - **Display Logic**: Updated DishCard helper functions for new emoji patterns
 - **State Management**: Maintained clean text storage while showing emojis in UI
 
 #### 5. **Form UX Enhancements**
-- **Visual Options**: Forms display emoji-prefixed options (e.g., "🤤🤤🤤 Mouthgasm")
-- **Clean Storage**: Database stores only clean text (e.g., "Mouthgasm")
+- **Visual Options**: Forms display options with trailing emojis (e.g., "Exceptional 🔥") for clarity
+- **Clean Storage**: Database stores only clean text (e.g., "Exceptional")
 - **Form Logic**: Strips emojis before saving to maintain data consistency
 
 ### Technical Implementation
@@ -4448,13 +4445,13 @@ UPDATE dishes SET
 ```typescript
 // Updated helper functions in DishCard
 const getProteinEmojis = (protein: string) => {
-  return protein === "Overloaded" ? "💪💪💪" : "👍"
+  return protein === "Overloaded" ? "🔥" : "👍"
 }
 const getTasteEmojis = (taste: string) => {
-  return taste === "Mouthgasm" ? "🤤🤤🤤" : "👍"
+  return taste === "Exceptional" ? "🔥" : "👍"
 }
 const getSatisfactionEmojis = (satisfaction: string) => {
-  return satisfaction === "Would Eat Everyday" ? "🤩🤩🤩" : "👍"
+  return satisfaction === "Daily Fuel" ? "🔥" : "👍"
 }
 ```
 
@@ -4491,6 +4488,13 @@ const getSatisfactionEmojis = (satisfaction: string) => {
 - The emoji display logic now properly conveys rating intensity through visual repetition
 - Database schema maintains integrity with proper ENUM constraints
 - Future rating system changes should follow the same migration pattern
+
+### Follow-up Update (2025-11-08)
+- Renamed rating labels to align with current copy: baseline → "Assured", taste premium → "Exceptional", satisfaction premium → "Daily Fuel".
+- Unified premium rating emoji to a single fire icon (`🔥`) for "Overloaded", "Exceptional", and "Daily Fuel" while keeping `Assured` as 👍.
+- Updated `DishCard` helper logic to return `🔥` for all premium ratings.
+- Adjusted Add Dish and Edit Dish forms to display label text before the emoji (e.g., "Exceptional 🔥") and added trailing-emoji stripping so only clean text values are submitted.
+- Updated dish card copy to display "Overall Satisfaction" instead of "Satisfaction" while keeping underlying field names unchanged.
 
 ---
 

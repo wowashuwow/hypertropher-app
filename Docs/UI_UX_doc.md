@@ -369,9 +369,9 @@ interface DishCardProps {
   restaurantName: string
   city: string
   price: string
-  protein: "💪 Overloaded" | "👍 Great"
-  taste: "🤤 Amazing" | "👍 Great"
-  satisfaction: "🤩 Would Eat Everyday" | "👍 Great"
+  protein: "Overloaded" | "Assured"
+  taste: "Exceptional" | "Assured"
+  satisfaction: "Daily Fuel" | "Assured"
   comment?: string
   addedBy: string
   availability: "In-Store" | "Online"

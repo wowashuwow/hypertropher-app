@@ -9,9 +9,9 @@ interface Dish {
   restaurant_name: string
   city: string
   price: string
-  protein: "Overloaded" | "Pretty Good"
-  taste: "Mouthgasm" | "Pretty Good"
-  satisfaction: "Would Eat Everyday" | "Pretty Good"
+  protein: "Overloaded" | "Assured"
+  taste: "Exceptional" | "Assured"
+  satisfaction: "Daily Fuel" | "Assured"
   comment?: string
   addedBy: string
   addedByProfilePicture?: string | null

@@ -79,23 +79,24 @@
 **Choose Provider:** Resend (recommended for MVP)
 
 **Steps:**
-1. Sign up at [resend.com](https://resend.com)
-2. Add domain: `mail.hypertropher.com` (or use main domain)
-3. Add DNS records (provided by Resend):
+1. ✅ Sign up at [resend.com](https://resend.com)
+2. ✅ Add domain: `mail.hypertropher.com` (or use main domain)
+3. ✅ Add DNS records (provided by Resend):
    - MX record
    - SPF record
    - DKIM record
    - DMARC record
-4. Get SMTP credentials from Resend dashboard
-5. Configure in Supabase:
+4. ✅ Get SMTP credentials from Resend dashboard
+5. ✅ Configure in Supabase:
    - Supabase Dashboard → Project Settings → Auth → SMTP Settings
    - Enter Resend SMTP credentials
-   - From address: `Hypertropher <noreply@mail.hypertropher.com>`
-6. Test OTP email delivery
+   - From address: `Hypertropher <verify@mail.hypertropher.com>`
+   - Port: `587` (STARTTLS)
+6. ✅ Test OTP email delivery
 
 **Verification:**
-- [ ] OTP emails arrive in inbox (not spam)
-- [ ] "From" address displays correctly
+- [x] OTP emails arrive in inbox (not spam)
+- [x] "From" address displays correctly
 - [ ] Email deliverability score > 8/10 (use mail-tester.com)
 
 ---
