@@ -322,15 +322,21 @@ export function DishCard({
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Protein</span>
-            <span className="font-medium">{getProteinEmojis(protein)}</span>
+            <span className="font-medium">
+              {protein} {getProteinEmojis(protein)}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Taste</span>
-            <span className="font-medium">{getTasteEmojis(taste)}</span>
+            <span className="font-medium">
+              {taste} {getTasteEmojis(taste)}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Overall Satisfaction</span>
-            <span className="font-medium">{getSatisfactionEmojis(satisfaction)}</span>
+            <span className="font-medium">
+              {satisfaction} {getSatisfactionEmojis(satisfaction)}
+            </span>
           </div>
         </div>
       </div>

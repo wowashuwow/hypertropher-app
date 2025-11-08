@@ -4495,6 +4495,7 @@ const getSatisfactionEmojis = (satisfaction: string) => {
 - Updated `DishCard` helper logic to return `🔥` for all premium ratings.
 - Adjusted Add Dish and Edit Dish forms to display label text before the emoji (e.g., "Exceptional 🔥") and added trailing-emoji stripping so only clean text values are submitted.
 - Updated dish card copy to display "Overall Satisfaction" instead of "Satisfaction" while keeping underlying field names unchanged.
+- Dish cards now render rating labels alongside their emojis (e.g., "Assured 👍") for clearer context.
 
 ---
 
