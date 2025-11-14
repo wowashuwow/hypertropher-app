@@ -60,6 +60,39 @@ Real mobile devices render with different constraints than DevTools emulation—
 
 ---
 
+### [UX-054] - iOS Auto-Zoom on Comments Textarea
+**Date:** 2025-11-14  
+**Severity:** Medium (Mobile UX)  
+**Status:** ✅ Completed
+
+**Description:**  
+On real iOS devices (Safari), tapping the comments textarea caused the page to zoom in automatically. Keyboard dismiss didn't reset the zoom, leaving the page zoomed in and broken. This only occurred on production device, not in desktop DevTools mobile emulation.
+
+**Root Cause:**  
+iOS Safari automatically zooms to 100% (or higher) when focusing any input with font-size < 16px. The comments textarea in add-dish form used raw HTML with `text-sm` (14px) instead of the app's `Textarea` component which has `text-base md:text-sm` (16px on mobile, 14px on tablet+). iOS doesn't trigger zoom at 16px+ font sizes.
+
+**Resolution:**  
+1. Replaced raw `<textarea>` with `<Textarea>` component in `add-dish/page.tsx`
+2. `Textarea` component already has `text-base md:text-sm` which prevents iOS zoom
+3. Other inputs (dishName, price) weren't affected because they use `<Input>` component with same sizing
+4. This aligns with app's established pattern: always use component library components, not raw HTML
+
+**Files Modified:**  
+- `app/add-dish/page.tsx` – Import and use `Textarea` component instead of raw textarea
+
+**Testing Results:**  
+✅ Component swap doesn't affect form submission or API calls  
+✅ All props (value, onChange, id, placeholder) work identically  
+✅ State management and data capture unchanged  
+⚠️ Awaiting user confirmation on real iOS device
+
+**Notes:**  
+- Edit-dish form doesn't have comments field, so no changes needed there
+- Textarea component follows standard React controlled component pattern
+- Only style difference that matters: `text-base` on mobile prevents iOS zoom
+
+---
+
 ### [BUG-048] - Complete Profile Page Stuck on Loading for New Signups
 **Date:** 2025-11-06
 **Severity:** High (Blocking Signup Flow)
