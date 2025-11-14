@@ -37,6 +37,7 @@ next-env.d.ts
 
 # private/internal files
 .private/
+.cursor/
 
 # migration files (contains sensitive data)
 *-credentials.txt
