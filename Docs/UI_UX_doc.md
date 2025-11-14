@@ -412,10 +412,11 @@ interface InlineCitySelectorProps {
 - **Interaction**: Dropdown with city list and "Be the first" option
 
 **Layout Guidelines:**
-- City name takes maximum available space with `flex-1 mr-3`
+- City name takes maximum available space with `flex-1 mr-2 sm:mr-3 min-w-0`
 - Dish count pill is right-aligned with `flex-shrink-0` to prevent compression
 - Uses `justify-between` layout for optimal space distribution
 - Proper text truncation with ellipsis for long city names
+- Responsive pill sizing: `text-xs px-1.5 py-0.5` (mobile) / `sm:text-sm px-2 py-1` (tablet+) for mobile display optimization
 
 ### Navigation Components
 ```typescript

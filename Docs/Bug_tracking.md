@@ -8,7 +8,7 @@ This document tracks all bugs, errors, and issues encountered during the develop
 ### [UX-052] - Dish Card Copy Buttons & Report Modal Touch Targets
 **Date:** 2025-11-14  
 **Severity:** Enhancement (Mobile Usability)  
-**Status:** ✅ Completed (Pending user verification)
+**Status:** ✅ Completed
 
 **Description:**  
 Dish card titles and restaurant names had no dedicated copy affordance beyond delivery-app buttons, and the report availability dialog used tiny circular checkboxes that were difficult to tap on mobile.
@@ -20,14 +20,43 @@ Dish card titles and restaurant names had no dedicated copy affordance beyond de
 **Resolution:**  
 1. Added inline icon-only copy buttons beside dish and restaurant names that swap between `Copy` and `CopyCheck` icons with green success highlight—no toasts.  
 2. Enlarged report dialog rows into pill-style labels with 20px checkboxes, 36px app logos, `text-base` labels, and full-row click handling for reliable taps.
+3. Increased restaurant name text size from `text-xs` to `text-sm` for better readability.
+4. Removed city suffix from restaurant name line (city context remains via distance chip and filters).
 
 **Files Modified:**  
-- `components/dish-card.tsx` – Copy buttons, clipboard handling, enlarged report UI  
+- `components/dish-card.tsx` – Copy buttons, clipboard handling, enlarged report UI, restaurant name sizing, removed city suffix
 - `Docs/UI_UX_doc.md` – Documented copy interaction pattern and report dialog sizing
 
 **Testing Results:**  
-✅ Manual verification in browser dev tools for mobile widths (copy buttons + dialog)  
-⚠️ Awaiting user confirmation before marking fully verified
+✅ Copy buttons work correctly with icon swap and green highlight  
+✅ Report dialog touch targets enlarged and easily tappable  
+✅ Restaurant name displays with increased font size and without city suffix  
+✅ No breaking changes to existing functionality
+
+---
+
+### [UX-053] - Inline City Selector Text Cutoff on Mobile
+**Date:** 2025-11-14  
+**Severity:** Low (Mobile Display)  
+**Status:** ✅ Completed
+
+**Description:**  
+City name in the inline city selector on non-logged-in users' homepage was truncated too early on real mobile devices, though it displayed correctly in desktop browser mobile emulation.
+
+**Root Cause:**  
+Real mobile devices render with different constraints than DevTools emulation—viewport width, safe areas (notches), and OS-level rendering can reduce available space. Component used `mr-3` margin and full-size dish count pill, leaving insufficient space for city text on constrained widths.
+
+**Resolution:**  
+1. Added `min-w-0` to flex container and city name span to ensure proper truncation behavior (Flexbox spec fix).
+2. Reduced right margin on mobile: `mr-2` (mobile) / `sm:mr-3` (tablet+) – frees ~4px.
+3. Reduced dish count pill size on mobile: `text-xs px-1.5 py-0.5` (mobile) / `sm:text-sm px-2 py-1` (tablet+) – frees ~8-12px.
+
+**Files Modified:**  
+- `components/ui/inline-city-selector.tsx` – Responsive spacing and sizing adjustments
+
+**Testing Results:**  
+✅ Manual verification in browser mobile viewport  
+⚠️ Awaiting user confirmation on real mobile device (Airtel/Android)
 
 ---
 
