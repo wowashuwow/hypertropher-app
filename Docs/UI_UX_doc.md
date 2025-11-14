@@ -388,6 +388,8 @@ interface DishCardProps {
 - **Price**: Prominent display with currency
 - **Actions**: Bookmark and navigation buttons
 - **Comments**: Expandable accordion for long comments
+- **Copy Actions**: Inline icon-only buttons (Copy → CopyCheck) beside dish and restaurant names, no toast feedback, green success flicker (`text-emerald-600 bg-emerald-50`) with subtle scale animation
+- **Availability Reporting**: Checklist rows use rounded pill containers with 44px+ touch targets, 20px checkboxes, 36px delivery-app logos, and `text-base` labels for easy tapping on mobile
 
 ### Inline City Selector Component
 ```typescript

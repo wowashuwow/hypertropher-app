@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bookmark, Link, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud } from "lucide-react"
+import { Bookmark, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud, Copy, CopyCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -84,6 +84,10 @@ export function DishCard({
   const [bookmarked, setBookmarked] = useState(isBookmarked)
   const [isExpanded, setIsExpanded] = useState(false)
   const [copyingStates, setCopyingStates] = useState<Record<string, boolean>>({})
+  const [copyFeedback, setCopyFeedback] = useState<{ dish: boolean; restaurant: boolean }>({
+    dish: false,
+    restaurant: false,
+  })
   const [reportModalOpen, setReportModalOpen] = useState(false)
   const [selectedAppsToReport, setSelectedAppsToReport] = useState<string[]>([])
   const [isReporting, setIsReporting] = useState(false)
@@ -137,6 +141,16 @@ export function DishCard({
     }
   }
 
+  const handleCopyText = async (value: string, type: "dish" | "restaurant") => {
+    const success = await copyToClipboard(value)
+    if (success) {
+      setCopyFeedback((prev) => ({ ...prev, [type]: true }))
+      setTimeout(() => {
+        setCopyFeedback((prev) => ({ ...prev, [type]: false }))
+      }, 1200)
+    }
+  }
+
 
   const handleDeliveryAppClick = async (appName: string) => {
     // Set copying state for this specific app
@@ -144,11 +158,9 @@ export function DishCard({
     
     try {
       // Copy restaurant name to clipboard first
-      const copySuccess = await copyToClipboard(restaurantName)
+      const copySuccess = await copyToClipboard(currentRestaurantName)
       
-      if (copySuccess) {
-        toast.success(`Copied "${restaurantName}" to clipboard`)
-      } else {
+      if (!copySuccess) {
         toast.error("Failed to copy restaurant name")
       }
       
@@ -270,7 +282,26 @@ export function DishCard({
       {/* Content Section - Flexible */}
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex items-start justify-between mb-0.5 gap-2">
-          <h2 className="text-lg font-semibold text-card-foreground leading-tight">{dishName}</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-lg font-semibold text-card-foreground leading-tight">{dishName}</h2>
+            <button
+              type="button"
+              aria-label="Copy dish name"
+              onClick={() => handleCopyText(dishName, "dish")}
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200",
+                "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40",
+                "active:scale-95",
+                copyFeedback.dish && "text-emerald-600 bg-emerald-50 scale-110"
+              )}
+            >
+              {copyFeedback.dish ? (
+                <CopyCheck className="h-4 w-4 transition-all duration-200" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </button>
+          </div>
           <div className="flex flex-wrap gap-1 self-start">
             {/* Distance or Cloud Kitchen indicator */}
             {isCloudKitchen ? (
@@ -286,9 +317,28 @@ export function DishCard({
             ) : null}
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mb-2">
-          {restaurantName} · {city}
-        </p>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
+          <span className="truncate" title={currentRestaurantName}>
+            {currentRestaurantName}
+          </span>
+          <button
+            type="button"
+            aria-label="Copy restaurant name"
+            onClick={() => handleCopyText(currentRestaurantName, "restaurant")}
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200",
+              "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40",
+              "active:scale-95",
+              copyFeedback.restaurant && "text-emerald-600 bg-emerald-50 scale-110"
+            )}
+          >
+            {copyFeedback.restaurant ? (
+              <CopyCheck className="h-3.5 w-3.5 transition-all duration-200" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+          </button>
+        </div>
 
         {/* Added by section */}
         <div className="flex items-center gap-2 mb-3">
@@ -562,35 +612,44 @@ export function DishCard({
           <div className="grid gap-4 py-4">
             {deliveryApps && deliveryApps.length > 0 && (
               <div className="space-y-3">
-                {deliveryApps.map((app) => (
-                  <div key={app} className="flex items-center space-x-3">
-                    <Checkbox
-                      id={`report-${app}`}
-                      checked={selectedAppsToReport.includes(app)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedAppsToReport([...selectedAppsToReport, app])
-                        } else {
-                          setSelectedAppsToReport(selectedAppsToReport.filter(a => a !== app))
-                        }
-                      }}
-                    />
+                {deliveryApps.map((app) => {
+                  const isChecked = selectedAppsToReport.includes(app)
+                  return (
                     <Label
+                      key={app}
                       htmlFor={`report-${app}`}
-                      className="flex items-center gap-2 cursor-pointer flex-1"
+                      className={cn(
+                        "flex items-center gap-3 rounded-2xl border px-3 py-2.5 transition-all cursor-pointer",
+                        "bg-muted/40 hover:bg-muted/60",
+                        isChecked && "border-primary/40 bg-primary/5"
+                      )}
                     >
-                      <img 
-                        src={getDeliveryAppLogo(app)} 
-                        alt={`${app} logo`}
-                        className="h-5 w-5 rounded-[3px]"
-                        onError={(e) => {
-                          e.currentTarget.src = "/logos/placeholder.svg"
+                      <Checkbox
+                        id={`report-${app}`}
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedAppsToReport([...selectedAppsToReport, app])
+                          } else {
+                            setSelectedAppsToReport(selectedAppsToReport.filter(a => a !== app))
+                          }
                         }}
+                        className="h-5 w-5"
                       />
-                      <span>{app}</span>
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={getDeliveryAppLogo(app)} 
+                          alt={`${app} logo`}
+                          className="h-9 w-9 rounded-[6px]"
+                          onError={(e) => {
+                            e.currentTarget.src = "/logos/placeholder.svg"
+                          }}
+                        />
+                        <span className="text-base font-medium text-foreground">{app}</span>
+                      </div>
                     </Label>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

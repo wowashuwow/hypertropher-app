@@ -5,6 +5,32 @@ This document tracks all bugs, errors, and issues encountered during the develop
 
 ## Recent Fixes (Restaurant-Centric Implementation)
 
+### [UX-052] - Dish Card Copy Buttons & Report Modal Touch Targets
+**Date:** 2025-11-14  
+**Severity:** Enhancement (Mobile Usability)  
+**Status:** ✅ Completed (Pending user verification)
+
+**Description:**  
+Dish card titles and restaurant names had no dedicated copy affordance beyond delivery-app buttons, and the report availability dialog used tiny circular checkboxes that were difficult to tap on mobile.
+
+**Root Cause:**  
+- Copy-to-clipboard relied on delivery app actions with toast feedback, offering no direct copy control for dish/restaurant names.  
+- Report dialog rows used 16px checkboxes with minimal padding, violating the required 44px touch target guidance.
+
+**Resolution:**  
+1. Added inline icon-only copy buttons beside dish and restaurant names that swap between `Copy` and `CopyCheck` icons with green success highlight—no toasts.  
+2. Enlarged report dialog rows into pill-style labels with 20px checkboxes, 36px app logos, `text-base` labels, and full-row click handling for reliable taps.
+
+**Files Modified:**  
+- `components/dish-card.tsx` – Copy buttons, clipboard handling, enlarged report UI  
+- `Docs/UI_UX_doc.md` – Documented copy interaction pattern and report dialog sizing
+
+**Testing Results:**  
+✅ Manual verification in browser dev tools for mobile widths (copy buttons + dialog)  
+⚠️ Awaiting user confirmation before marking fully verified
+
+---
+
 ### [BUG-048] - Complete Profile Page Stuck on Loading for New Signups
 **Date:** 2025-11-06
 **Severity:** High (Blocking Signup Flow)
