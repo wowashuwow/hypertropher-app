@@ -28,9 +28,9 @@ export function InlineCitySelector({
       <Select value={selectedCity} onValueChange={onCityChange}>
         <SelectTrigger className="inline-flex h-auto px-3 py-2 sm:py-1.5 text-lg sm:text-xl font-medium text-foreground bg-card border border-border rounded-lg shadow-sm hover:bg-muted/50 hover:border-primary/50 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary min-w-0 w-full sm:w-80 md:w-96">
           <SelectValue>
-            <div className="flex items-center justify-between w-full min-w-0 pr-6">
-              <span className="text-lg sm:text-xl font-medium truncate min-w-0">{selectedCity}</span>
-              <span className="text-xs sm:text-sm text-muted-foreground bg-muted px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md whitespace-nowrap flex-shrink-0 ml-2">
+            <div className="flex items-center justify-between w-full min-w-0">
+              <span className="text-lg sm:text-xl font-medium truncate flex-1 mr-2 sm:mr-3 min-w-0">{selectedCity}</span>
+              <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-md whitespace-nowrap flex-shrink-0">
                 {dishCount} dishes
               </span>
             </div>
