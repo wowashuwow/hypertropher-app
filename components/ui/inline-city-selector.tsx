@@ -30,8 +30,8 @@ export function InlineCitySelector({
           <SelectValue>
             <div className="flex items-center w-full min-w-0 gap-1">
               <span className="text-lg sm:text-xl font-medium truncate flex-1 min-w-0">{selectedCity}</span>
-              <span className="text-[10px] sm:text-xs text-muted-foreground bg-muted px-1 sm:px-2 py-0.5 rounded-md whitespace-nowrap flex-shrink-0">
-                {dishCount}
+              <span className="text-xs sm:text-sm text-muted-foreground bg-muted px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md whitespace-nowrap flex-shrink-0">
+                {dishCount} dishes
               </span>
             </div>
           </SelectValue>
