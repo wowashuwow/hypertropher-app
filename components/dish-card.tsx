@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bookmark, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud, Copy, CopyCheck } from "lucide-react"
+import { Bookmark, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud, Copy, CopyCheck, HandPlatter, Hotel } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -281,29 +281,36 @@ export function DishCard({
 
       {/* Content Section - Flexible */}
       <div className="p-4 flex flex-col flex-grow">
+        {/* Dish title + copy button */}
         <div className="flex items-start justify-between mb-0.5 gap-2">
-          <div className="flex items-center gap-1.5">
-            <h2 className="text-lg font-semibold text-card-foreground leading-tight">{dishName}</h2>
-            <button
-              type="button"
-              aria-label="Copy dish name"
-              onClick={() => handleCopyText(dishName, "dish")}
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200",
-                "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40",
-                "active:scale-95",
-                copyFeedback.dish && "text-emerald-600 bg-emerald-50 scale-110"
-              )}
-            >
-              {copyFeedback.dish ? (
-                <CopyCheck className="h-4 w-4 transition-all duration-200" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </button>
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <HandPlatter className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-card-foreground leading-tight truncate">
+              {dishName}
+            </h2>
           </div>
-          <div className="flex flex-wrap gap-1 self-start">
-            {/* Distance or Cloud Kitchen indicator */}
+          <button
+            type="button"
+            aria-label="Copy dish name"
+            onClick={() => handleCopyText(dishName, "dish")}
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200 flex-shrink-0",
+              "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40",
+              "active:scale-95",
+              copyFeedback.dish && "text-emerald-600 bg-emerald-50 scale-110"
+            )}
+          >
+            {copyFeedback.dish ? (
+              <CopyCheck className="h-4 w-4 transition-all duration-200" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+
+        {/* Distance / Cloud Kitchen pill under title, left-aligned */}
+        {(isCloudKitchen || distance !== undefined) && (
+          <div className="mb-1">
             {isCloudKitchen ? (
               <span className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-green-100 text-green-800">
                 <Cloud className="h-3 w-3" />
@@ -316,26 +323,32 @@ export function DishCard({
               </span>
             ) : null}
           </div>
-        </div>
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
-          <span className="truncate" title={currentRestaurantName}>
-            {currentRestaurantName}
-          </span>
+        )}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <Hotel className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+            <span
+              className="text-lg font-medium text-muted-foreground truncate"
+              title={currentRestaurantName}
+            >
+              {currentRestaurantName}
+            </span>
+          </div>
           <button
             type="button"
             aria-label="Copy restaurant name"
             onClick={() => handleCopyText(currentRestaurantName, "restaurant")}
             className={cn(
-              "flex h-7 w-7 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200",
+              "flex h-8 w-8 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200 flex-shrink-0",
               "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40",
               "active:scale-95",
               copyFeedback.restaurant && "text-emerald-600 bg-emerald-50 scale-110"
             )}
           >
             {copyFeedback.restaurant ? (
-              <CopyCheck className="h-3.5 w-3.5 transition-all duration-200" />
+              <CopyCheck className="h-4 w-4 transition-all duration-200" />
             ) : (
-              <Copy className="h-3.5 w-3.5" />
+              <Copy className="h-4 w-4" />
             )}
           </button>
         </div>

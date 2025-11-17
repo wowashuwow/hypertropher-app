@@ -93,6 +93,35 @@ iOS Safari automatically zooms to 100% (or higher) when focusing any input with 
 
 ---
 
+### [UX-055] - Dish Card Title Icons and Restaurant Typography
+**Date:** 2025-11-14  
+**Severity:** Enhancement (Visual/UI)  
+**Status:** ✅ Completed
+
+**Description:**  
+Updated dish cards to visually group dish and restaurant information with icons and aligned typography while keeping all existing functionality intact.
+
+**Root Cause:**  
+Previous design used smaller text for restaurant name and no visual distinction between dish vs restaurant beyond label order, making the card feel slightly unbalanced.
+
+**Resolution:**  
+1. Added `HandPlatter` icon before dish name and `Hotel` icon before restaurant name on dish cards.  
+2. Set restaurant name font size to match dish name (`text-lg`) with `font-medium` and muted color for hierarchy.  
+3. Wrapped dish and restaurant rows in flex containers with `min-w-0` and `truncate` to preserve responsive layout and prevent overflow.  
+4. Aligned dish and restaurant copy buttons in a shared right column and moved distance/cloud pill to its own row beneath the title to avoid misalignment.  
+5. Kept copy-to-clipboard buttons and distance/cloud-kitchen pills fully functional.
+
+**Files Modified:**  
+- `components/dish-card.tsx` – Title layout, icons, copy button alignment, and restaurant typography  
+- `Docs/UI_UX_doc.md` – Updated dish card visual specs with new icons and typography
+
+**Testing Results:**  
+✅ Dish cards render correctly on Discover, My Dishes, and My Wishlist  
+✅ Long dish/restaurant names truncate without breaking layout  
+✅ Copy buttons, navigation, and availability indicators continue to work as before  
+
+---
+
 ### [BUG-048] - Complete Profile Page Stuck on Loading for New Signups
 **Date:** 2025-11-06
 **Severity:** High (Blocking Signup Flow)

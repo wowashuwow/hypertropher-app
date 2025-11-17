@@ -384,11 +384,13 @@ interface DishCardProps {
 
 **Visual Specifications:**
 - **Image**: 1:1 aspect ratio, object-cover
+- **Titles**: Dish name and restaurant name both use `text-lg`; dish name is `font-semibold`, restaurant is `font-medium text-muted-foreground` for subtle hierarchy
 - **Ratings**: Emoji-based rating system
 - **Price**: Prominent display with currency
 - **Actions**: Bookmark and navigation buttons
 - **Comments**: Expandable accordion for long comments
 - **Copy Actions**: Inline icon-only buttons (Copy → CopyCheck) beside dish and restaurant names, no toast feedback, green success flicker (`text-emerald-600 bg-emerald-50`) with subtle scale animation
+- **Title Icons**: `HandPlatter` icon before dish name, `Hotel` icon before restaurant name; both `h-4 w-4` and `text-muted-foreground`
 - **Availability Reporting**: Checklist rows use rounded pill containers with 44px+ touch targets, 20px checkboxes, 36px delivery-app logos, and `text-base` labels for easy tapping on mobile
 
 ### Inline City Selector Component
