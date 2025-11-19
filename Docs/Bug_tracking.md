@@ -6879,7 +6879,7 @@ Changed delivery app button text for better clarity:
 {copyingStates[app] ? "Copying..." : `Open ${app}`}
 
 // After  
-{copyingStates[app] ? "Copying..." : `Check on ${app}`}
+{copyingStates[app] ? "Copying..." : `Available on ${app}`}
 ```
 
 #### 2. **Fixed Toast Visibility** - `components/dish-card.tsx`
@@ -6916,7 +6916,7 @@ Made navigation button text more specific:
 ```
 
 ### Technical Details
-- **Button Text**: "Check on [App]" better indicates the search/check action users perform
+- **Button Text**: "Available on [App]" clearly indicates where the dish is available
 - **Toast Timing**: 1-second delay ensures clipboard confirmation is visible before browser dialog appears
 - **Logo Rounding**: 3px border-radius provides subtle rounding for 16px logos without making them circular
 - **Navigation Clarity**: "Open in Google Maps" explicitly states the destination app

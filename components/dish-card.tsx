@@ -152,6 +152,9 @@ export function DishCard({
   }
 
 
+  // NOTE: Deep linking for delivery apps has been disabled for now.
+  // Keeping the original implementation commented out in case we restore it later.
+  /*
   const handleDeliveryAppClick = async (appName: string) => {
     // Set copying state for this specific app
     setCopyingStates(prev => ({ ...prev, [appName]: true }))
@@ -190,6 +193,7 @@ export function DishCard({
       setCopyingStates(prev => ({ ...prev, [appName]: false }))
     }
   }
+  */
 
   const handleReportClick = () => {
     if (!deliveryApps || deliveryApps.length === 0) return
@@ -419,11 +423,13 @@ export function DishCard({
               <span>Open in Google Maps</span>
             </Button>
             
-            {/* Delivery apps - horizontal layout */}
+            {/* Delivery apps - names only (logos & deep links disabled) */}
             {deliveryApps && deliveryApps.length > 0 && (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-muted-foreground">Check on:</span>
+                  <span className="text-sm text-muted-foreground">Available on:</span>
+                  {/* Previous clickable logo buttons kept for reference */}
+                  {/*
                   {deliveryApps.map((app) => (
                     <button
                       key={app}
@@ -445,6 +451,15 @@ export function DishCard({
                       />
                     </button>
                   ))}
+                  */}
+                  {deliveryApps.map((app) => (
+                    <span
+                      key={app}
+                      className="text-sm px-2 py-1 rounded-full bg-muted text-foreground"
+                    >
+                      {app}
+                    </span>
+                  ))}
                   <Button
                     variant="outline"
                     size="sm"
@@ -460,7 +475,9 @@ export function DishCard({
         ) : availabilityInfo.type === 'online' && deliveryApps && deliveryApps.length > 0 ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-muted-foreground">Check on:</span>
+              <span className="text-sm text-muted-foreground">Available on:</span>
+              {/* Previous clickable logo buttons kept for reference */}
+              {/*
               {deliveryApps.map((app) => (
                 <button
                   key={app}
@@ -482,6 +499,15 @@ export function DishCard({
                   />
                 </button>
               ))}
+              */}
+              {deliveryApps.map((app) => (
+                <span
+                  key={app}
+                  className="text-sm px-2 py-1 rounded-full bg-muted text-foreground"
+                >
+                  {app}
+                </span>
+              ))}
               <Button
                 variant="outline"
                 size="sm"
@@ -497,11 +523,14 @@ export function DishCard({
             className="w-full bg-green-600 hover:bg-green-700 text-white border-0 flex items-center justify-center gap-2"
             disabled
           >
+            {/* Generic online icon hidden for now */}
+            {/*
             <img 
               src="/logos/placeholder.svg" 
               alt="Online delivery"
               className="h-4 w-4 flex-shrink-0"
             />
+            */}
             <span>Online</span>
           </Button>
         ) : (
@@ -650,6 +679,8 @@ export function DishCard({
                         className="h-5 w-5"
                       />
                       <div className="flex items-center gap-3">
+                        {/* Delivery app logo hidden in report modal; keep name only */}
+                        {/*
                         <img 
                           src={getDeliveryAppLogo(app)} 
                           alt={`${app} logo`}
@@ -658,6 +689,7 @@ export function DishCard({
                             e.currentTarget.src = "/logos/placeholder.svg"
                           }}
                         />
+                        */}
                         <span className="text-base font-medium text-foreground">{app}</span>
                       </div>
                     </Label>

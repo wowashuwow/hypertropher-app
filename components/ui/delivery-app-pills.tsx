@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { getDeliveryAppLogo } from "@/lib/delivery-apps"
+// import { getDeliveryAppLogo } from "@/lib/delivery-apps"
 
 interface DeliveryAppPillsProps {
   availableApps: string[]
@@ -49,11 +49,14 @@ export function DeliveryAppPills({
           disabled={disabled}
           className="flex-1 min-w-fit text-xs sm:text-sm flex items-center gap-2"
         >
+          {/* Delivery app logo hidden for now, keeping text-only pills */}
+          {/*
           <img 
             src={getDeliveryAppLogo(app)} 
             alt={`${app} logo`}
             className="w-4 h-4 rounded-[3px]"
           />
+          */}
           {app}
         </Button>
       ))}
