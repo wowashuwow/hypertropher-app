@@ -759,13 +759,13 @@ export default function EditDishPage() {
 
                 {/* Ratings */}
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Taste</Label>
+                <div className="space-y-2">
+                  <Label>Taste</Label>
                   <ButtonGroup
-                    options={["Assured 👍", "Exceptional 🔥"]}
-                    value={
-                      taste === "Assured"
-                        ? "Assured 👍"
+                    options={["Assured ✅", "Exceptional 🔥"]}
+                      value={
+                        taste === "Assured"
+                          ? "Assured ✅"
                         : taste === "Exceptional"
                           ? "Exceptional 🔥"
                           : ""
@@ -778,13 +778,13 @@ export default function EditDishPage() {
                   />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Protein Content</Label>
+                <div className="space-y-2">
+                  <Label>Protein Content</Label>
                   <ButtonGroup
-                    options={["Assured 👍", "Overloaded 🔥"]}
-                    value={
-                      protein === "Assured"
-                        ? "Assured 👍"
+                    options={["Assured ✅", "Overloaded 🔥"]}
+                      value={
+                        protein === "Assured"
+                          ? "Assured ✅"
                         : protein === "Overloaded"
                           ? "Overloaded 🔥"
                           : ""
@@ -811,13 +811,13 @@ export default function EditDishPage() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Overall Satisfaction</Label>
+                <div className="space-y-2">
+                  <Label>Overall Satisfaction</Label>
                   <ButtonGroup
-                    options={["Assured 👍", "Daily Fuel 🔥"]}
-                    value={
-                      satisfaction === "Assured"
-                        ? "Assured 👍"
+                    options={["Assured ✅", "Daily Fuel 🔥"]}
+                      value={
+                        satisfaction === "Assured"
+                          ? "Assured ✅"
                         : satisfaction === "Daily Fuel"
                           ? "Daily Fuel 🔥"
                           : ""

@@ -412,12 +412,12 @@ export default function AddDishPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Taste</Label>
-                  <ButtonGroup
-                    options={["Assured 👍", "Exceptional 🔥"]}
+                <Label>Taste</Label>
+                <ButtonGroup
+                  options={["Assured ✅", "Exceptional 🔥"]}
                     value={
                       taste === "Assured"
-                        ? "Assured 👍"
+                        ? "Assured ✅"
                         : taste === "Exceptional"
                           ? "Exceptional 🔥"
                           : ""
@@ -433,10 +433,10 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Protein Content</Label>
                   <ButtonGroup
-                    options={["Assured 👍", "Overloaded 🔥"]}
-                    value={
-                      protein === "Assured"
-                        ? "Assured 👍"
+                    options={["Assured ✅", "Overloaded 🔥"]}
+                      value={
+                        protein === "Assured"
+                          ? "Assured ✅"
                         : protein === "Overloaded"
                           ? "Overloaded 🔥"
                           : ""
@@ -467,10 +467,10 @@ export default function AddDishPage() {
                 <div className="space-y-2">
                   <Label>Overall Satisfaction</Label>
                   <ButtonGroup
-                    options={["Assured 👍", "Daily Fuel 🔥"]}
-                    value={
-                      satisfaction === "Assured"
-                        ? "Assured 👍"
+                    options={["Assured ✅", "Daily Fuel 🔥"]}
+                      value={
+                        satisfaction === "Assured"
+                          ? "Assured ✅"
                         : satisfaction === "Daily Fuel"
                           ? "Daily Fuel 🔥"
                           : ""

@@ -186,7 +186,7 @@
 
 - [x] Implement enhanced rating system with improved text and emoji display
   - Update rating text values: baseline renamed to "Assured", taste premium → "Exceptional", overall premium → "Daily Fuel"
-  - Implement emoji display logic: "Assured" → 👍, "Overloaded" → 🔥, "Exceptional" → 🔥, "Daily Fuel" → 🔥
+  - Implement emoji display logic: "Assured" → ✅, "Overloaded" → 🔥, "Exceptional" → 🔥, "Daily Fuel" → 🔥
   - Update UI copy to show "Overall Satisfaction" label while retaining existing satisfaction state keys
   - Display rating labels alongside emojis on dish cards for better clarity
   - Update database ENUM types to reflect new rating values

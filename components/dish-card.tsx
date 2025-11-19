@@ -254,15 +254,15 @@ export function DishCard({
   }
 
   const getProteinEmojis = (protein: string) => {
-    return protein === "Overloaded" ? "🔥" : "👍"
+    return protein === "Overloaded" ? "🔥" : "✅"
   }
 
   const getTasteEmojis = (taste: string) => {
-    return taste === "Exceptional" ? "🔥" : "👍"
+    return taste === "Exceptional" ? "🔥" : "✅"
   }
 
   const getSatisfactionEmojis = (satisfaction: string) => {
-    return satisfaction === "Daily Fuel" ? "🔥" : "👍"
+    return satisfaction === "Daily Fuel" ? "🔥" : "✅"
   }
 
 

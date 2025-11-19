@@ -4521,7 +4521,7 @@ Implemented a comprehensive update to the rating system, improving the text labe
 - **Follow-up (Nov 2025)**: Baseline rating renamed to "Assured", taste premium to "Exceptional", overall satisfaction premium to "Daily Fuel" for clearer storytelling
 
 #### 2. **Enhanced Emoji Display Logic**
-- **Baseline ("Assured") rating**: Shows single 👍 (thumbs up)
+- **Baseline ("Assured") rating**: Shows single ✅ (check mark)
 - **Premium ratings ("Overloaded", "Exceptional", "Daily Fuel")**: Unified to a single 🔥 to indicate elevated status
 
 #### 3. **Database Schema Migration**
@@ -4608,11 +4608,11 @@ const getSatisfactionEmojis = (satisfaction: string) => {
 
 ### Follow-up Update (2025-11-08)
 - Renamed rating labels to align with current copy: baseline → "Assured", taste premium → "Exceptional", satisfaction premium → "Daily Fuel".
-- Unified premium rating emoji to a single fire icon (`🔥`) for "Overloaded", "Exceptional", and "Daily Fuel" while keeping `Assured` as 👍.
+- Unified premium rating emoji to a single fire icon (`🔥`) for "Overloaded", "Exceptional", and "Daily Fuel" while keeping `Assured` as ✅.
 - Updated `DishCard` helper logic to return `🔥` for all premium ratings.
 - Adjusted Add Dish and Edit Dish forms to display label text before the emoji (e.g., "Exceptional 🔥") and added trailing-emoji stripping so only clean text values are submitted.
 - Updated dish card copy to display "Overall Satisfaction" instead of "Satisfaction" while keeping underlying field names unchanged.
-- Dish cards now render rating labels alongside their emojis (e.g., "Assured 👍") for clearer context.
+- Dish cards now render rating labels alongside their emojis (e.g., "Assured ✅") for clearer context.
 
 ---
 
