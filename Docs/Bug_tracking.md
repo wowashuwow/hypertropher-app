@@ -4440,6 +4440,13 @@ Replaced the MultiSelect dropdown component for delivery app selection with a mo
 - **Better Accessibility**: Clear visual indicators and proper labeling
 - **Responsive Design**: Works across all screen sizes with wrapping layout
 
+#### 6. **Follow-up Update (2025-11-14) - Temporarily Hide Logos & Deep Links**
+- **Change**: Delivery app logos and deep-link buttons have been temporarily removed from the UI to simplify the experience.
+- **Forms**: `DeliveryAppPills` now renders text-only pills showing app names (logos are commented out, selection logic unchanged).
+- **Dish Cards**: The "Available on" row now shows non-clickable text chips with app names only. Previous clickable logo buttons and deep-link handler are preserved in comments.
+- **Reporting Modal**: Still uses `deliveryApps` for reporting, but now shows only app names next to checkboxes (logos commented out).
+- **Infrastructure**: Logo mapping (`DELIVERY_APP_LOGOS`, `getDeliveryAppLogo`) and deep-link utilities (`getDeepLinkUrl`, `getWebFallbackUrl`) remain implemented for potential future reuse.
+
 ### Technical Implementation
 ```typescript
 // Logo mapping system
