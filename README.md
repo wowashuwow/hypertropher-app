@@ -1,12 +1,14 @@
 ## Hypertropher
 
+![Hypertropher featured image](./public/og-image.png)
+
 Hypertropher is a private, invite-only web app for serious gym-goers who rely on outside food and want a **trusted, shared database of high‑protein dishes**.  
 Instead of wasting money on trial‑and‑error meals, friends log dishes they've actually tried (with ratings, photos, and comments) so everyone can quickly find reliable, high‑protein options in their city.
 
 ### Who it’s for
 - People who train regularly and care about protein intake.
-- Friends who want to share their best dishes with a small, trusted circle.
-- Users who mostly eat from restaurants / delivery apps and don’t want to cook every meal.
+- People who mostly eat from restaurants / delivery apps and don’t want to cook every meal.
+- People who want to share their trusted dishes with their friends.
 
 ### What it does
 - **Dish discovery**
