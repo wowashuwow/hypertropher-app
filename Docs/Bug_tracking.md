@@ -7383,3 +7383,30 @@ The scroll event handler in `app/page.tsx` was calling `setScrollPosition(window
 - [Noon Food](https://www.noon.com)
 - [Careem](https://www.careem.com)
 - [Talabat](https://www.talabat.com)
+
+---
+
+### [SECURITY-001] - React2Shell (CVE-2025-55182) Remediation
+**Date:** 2025-12-06
+**Severity:** Critical
+**Status:** ✅ Resolved
+
+**Description:**
+Addressed the React2Shell vulnerability (CVE-2025-55182) which affects React Server Components. The application was running React 19.1.1, which was vulnerable.
+
+**Root Cause:**
+Usage of vulnerable React 19 versions (`< 19.1.2`) in combination with Next.js App Router (Server Components).
+
+**Resolution:**
+- Updated `react` and `react-dom` to patched version `19.2.1`.
+- Maintained `next` at `14.2.25` for stability (using `--legacy-peer-deps` to bypass React 18 requirement).
+- Verified build and type safety.
+
+**Files Modified:**
+- `package.json`
+- `package-lock.json`
+
+**Testing Results:**
+✅ `npm list react react-dom` confirms version 19.2.1.
+✅ `npm run build` completes successfully.
+
