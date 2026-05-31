@@ -1,21 +1,39 @@
 # Implementation Plan for Hypertropher
 
+**Last audited:** May 2026 (aligned with codebase on `main`)  
+**Current app URL layout:** Discover feed at `/` (Stage 12 will move feed to `/app` and add landing at `/`)  
+**Auth:** Email + OTP only (phone auth removed in FEATURE-022)
+
+## Stage index (quick reference)
+
+| Stage | Topic | Status |
+|-------|--------|--------|
+| 1–4.5 | Foundation, auth, dishes, session | ✅ Complete |
+| 5–7 | Integrations, UI/UX, polish | ✅ Complete (minor items deferred) |
+| 8 | Client-side performance / caching | ✅ Partial (caching done; server-side sort/filter deferred) |
+| 9 | Restaurant-centric architecture | ✅ Complete |
+| 9.1 | Middle East delivery apps (Noon, Careem, Talabat) | ✅ Complete |
+| 11 | Security (React CVE patch) | ✅ Complete |
+| 12 | Landing page, `/app` split, LinkedIn invites | 📋 Planned |
+
+*Numbering note: An older changelog used **“Stage 10”** for the Middle East expansion—that work is **Stage 9.1** above. **Stage 10** is intentionally unused in the stage list to avoid confusion. New landing-page work is **Stage 12** (next stage after 11).*
+
 ## Feature Analysis
 
 ### Identified Features:
-- **Authentication System**: Phone-based OTP authentication with invite codes
-- **User Management**: Profile creation, city selection, invite code generation
-- **Dish Contribution**: Add dishes with photos, ratings, and location data
-- **Dish Discovery**: Browse, filter, and sort dishes by protein type and price
+- **Authentication System**: Email OTP authentication with invite codes (invite-only signup)
+- **User Management**: Profile creation, global city selection, 5 invite codes per new user
+- **Dish Contribution**: Add dishes with optional photos, ratings, restaurant/location data
+- **Dish Discovery**: Browse (including logged-out), filter by protein, sort by price/distance
 - **Wishlist Management**: Save and manage favorite dishes
-- **Restaurant Integration**: Google Maps Places API for restaurant search
-- **Image Storage**: Supabase Storage for dish photos
+- **Restaurant Integration**: Google Maps Places API + cloud kitchen manual entry
+- **Image Storage**: Supabase Storage with client-side compression
 - **Responsive Design**: Mobile-first UI with desktop support
 
 ### Feature Categorization:
 - **Must-Have Features:** Authentication, Dish CRUD, User profiles, Basic filtering
-- **Should-Have Features:** Wishlist, Google Maps integration, Image uploads
-- **Nice-to-Have Features:** Advanced sorting, Social features, Public profiles
+- **Should-Have Features:** Wishlist, Google Maps integration, Image uploads, distance sorting
+- **Nice-to-Have Features:** Server-side sorting/filtering, Social features, Public profiles
 
 ## Recommended Tech Stack
 
@@ -34,7 +52,7 @@
 ### Additional Tools:
 - **UI Library:** Shadcn UI with Tailwind CSS - Modern, accessible component library
 - **Documentation:** https://ui.shadcn.com/
-- **Authentication:** Supabase Auth - Secure phone-based authentication
+- **Authentication:** Supabase Auth - Email OTP (magic link fallback route retained)
 - **Documentation:** https://supabase.com/docs/guides/auth
 - **Storage:** Supabase Storage - File storage for dish images
 - **Documentation:** https://supabase.com/docs/guides/storage
@@ -50,9 +68,9 @@
 #### Sub-steps:
 - [x] Set up Supabase project and environment variables
 - [x] Create and implement database schema
-- [x] Configure Supabase Auth with phone provider
+- [x] Configure Supabase Auth (originally phone; migrated to email OTP in FEATURE-022)
 - [x] Set up Supabase client and server configurations
-- [x] Create admin user and initial invite codes
+- [x] Create initial invite codes (seeded via Supabase / service role; no in-app admin UI)
 
 ### Stage 2: Core Authentication & User Management ✅ COMPLETE
 **Duration:** 3-4 days
@@ -82,23 +100,23 @@
 #### Sub-steps:
 - [x] Build combined login/signup page and API
 - [x] Implement dynamic session handling and route protection
-- [x] Connect homepage to live data from API
+- [x] Connect discover feed (`app/page.tsx`, route `/`) to live data from API
 - [x] Connect "My Dishes" page to live data
 - [x] Connect "My Wishlist" page to live data
 - [x] Display user's invite codes in account page
-- [x] Implement admin invite code generation
+- [x] Auto-generate 5 invite codes per user on profile completion (`app/api/users/route.ts`)
 
 ### Stage 4.5: Security & UX Fixes ✅ COMPLETE
 **Duration:** 1 day
 **Dependencies:** Stage 4 completion
 
 #### SUB-STEPS:
-- [x] Fix phone number exposure in user profile API (BUG-002)
+- [x] Fix sensitive data exposure in user profile API (BUG-002; phone field later deprecated)
 - [x] Implement personalized user greetings on homepage (BUG-003)
 - [x] Fix city update persistence across app (BUG-001)
 - [x] Document all security fixes and bug resolutions
 
-### Stage 5: Advanced Features & Integrations
+### Stage 5: Advanced Features & Integrations ✅ COMPLETE
 **Duration:** 2-3 days
 **Dependencies:** Stage 4.5 completion
 
@@ -118,11 +136,11 @@
 - [x] Implement Rethink Sans font with responsive typography
 - [x] Update app title styling with mobile-optimized sizing
 - [x] Normalize letter spacing across all components
-- [ ] Add advanced filtering and sorting options
-- [ ] **Deferred:** Server-side sorting and filtering (moved to V2 for performance optimization)
+- [x] Client-side filtering and sorting (protein, price, distance — BUG-023/024)
+- [ ] **Deferred:** Server-side sorting and filtering (Stage 8 / V2)
 - [x] Create wishlist management system
 
-### Stage 6: Pre-Deployment UI/UX Enhancements
+### Stage 6: Pre-Deployment UI/UX Enhancements ✅ COMPLETE
 **Duration:** 2-3 days
 **Dependencies:** Stage 5 completion
 
@@ -143,8 +161,8 @@
   - Ensure proper alignment and styling consistency
 
 - [x] Add clipboard copy functionality for online dishes
-  - Copy dish name to clipboard when "Open in <app>" button is clicked
-  - Show "Copied dish name to clipboard" feedback message
+  - Copy **restaurant name** to clipboard when "Open in &lt;app&gt;" is clicked (updated from dish name)
+  - Toast feedback on copy success/failure
   - Integrate with existing deep linking functionality
 
 - [x] Implement profile picture functionality
@@ -174,15 +192,9 @@
   - Update both add dish and edit dish forms with dynamic filtering
   - Handle cases where no delivery apps are available for a location
 
-- [x] Implement delivery app pills UI with SVG logos
-  - Replace MultiSelect component with DeliveryAppPills component
-  - Create wrapping flex layout matching protein source pills pattern
-  - Add SVG logos for all delivery apps (Swiggy, Zomato, Uber Eats, DoorDash, Grubhub, Postmates, Just Eat, Deliveroo, Grab, Foodpanda, iFood, PedidosYa, Rappi)
-  - Implement multi-select functionality with visual feedback
-  - Add logo mapping system in lib/delivery-apps.ts
-  - Update both add-dish and edit-dish pages with new component
-  - Maintain existing form validation and state management
-  - Handle empty states gracefully with appropriate messaging
+- [x] Implement delivery app pills UI with logos (`DeliveryAppPills`, `lib/delivery-apps.ts`)
+  - **Note:** Add/edit dish forms later moved to **auto-apply all regional apps** (FEATURE-023); pills component retained for legacy/edit paths
+  - Official WebP logos for 16 apps (FEATURE-019)
 
 - [x] Implement enhanced rating system with improved text and emoji display
   - Update rating text values: baseline renamed to "Assured", taste premium → "Exceptional", overall premium → "Daily Fuel"
@@ -205,7 +217,7 @@
   - Update DishCard component with enhanced click handler and user feedback
   - Maintain existing functionality while adding comprehensive app coverage
 
-### Stage 7: Polish & Deployment
+### Stage 7: Polish & Deployment ✅ MOSTLY COMPLETE
 **Duration:** 2-3 days
 **Dependencies:** Stage 6 completion
 
@@ -261,10 +273,10 @@
   - ✅ Fixed restaurant name text editing functionality (backspace and typing)
   - ✅ Ensured feature parity between add dish and edit dish forms
 - [x] **Navigate Button Implementation**: Functional restaurant navigation for In-Store dishes
-  - ✅ Added place_id column to dishes table for Google Maps restaurant navigation
-  - ✅ Updated add/edit dish forms to capture and store place_id from Google Places API
-  - ✅ Implemented handleNavigate function in DishCard with Google Maps restaurant page URLs
-  - ✅ Fixed data transformation in homepage and my-dishes pages to include place_id
+  - ✅ `place_id` stored on `restaurants` table (Stage 9 schema; was previously on `dishes`)
+  - ✅ Updated add/edit dish forms to capture place_id via Google Places API
+  - ✅ Implemented handleNavigate in DishCard with Google Maps restaurant page URLs
+  - ✅ Fixed data transformation in discover feed and my-dishes pages to include place_id
   - ✅ Fixed wishlist API to include place_id in select query and data transformation
   - ✅ Updated all Dish interfaces and DishCard component to handle place_id
   - ✅ Added comprehensive error handling for missing place_id data
@@ -307,14 +319,14 @@
 2. **Stage 8 Performance Optimization (Future Issue)**: Address unnecessary API calls second - performance improvement but not breaking functionality
 3. **Rationale**: Current issue affects every navigation, while performance issue is more subtle but impacts overall app speed
 
-- [ ] Deploy to Vercel with environment configuration
-- [ ] Add invite code verification feedback
-- [ ] Implement secure invite code passing
-- [ ] Add UX improvements to auth flow
-- [ ] Conduct comprehensive testing
-- [ ] Optimize performance and fix bugs
+- [x] Deploy to Vercel with environment configuration (production domain `hypertropher.com`; see `Docs/PRE_LAUNCH_CHECKLIST.md` for DNS verification items)
+- [x] Add invite code verification feedback on signup (`codeValidationError` UI in `app/signup/page.tsx`)
+- [x] Implement secure invite code passing (user metadata + `complete-profile` / OTP flow)
+- [x] Auth flow UX improvements (ProtectedRoute, MainLayout on auth pages, BUG-025)
+- [ ] Conduct comprehensive regression testing (ongoing; user verification before major releases)
+- [ ] Optimize performance and fix bugs (ongoing; server-side items deferred to Stage 8)
 
-### Stage 8: Performance Optimization (V2)
+### Stage 8: Performance Optimization (V2) — PARTIAL
 **Duration:** 3-4 days
 **Dependencies:** Stage 7 completion
 
@@ -347,18 +359,173 @@
 - [ ] Add caching strategies
 - [ ] Performance testing and monitoring
 
+### Stage 9: Restaurant-Centric Architecture ✅ COMPLETE
+**Duration:** ~1 week  
+**Dependencies:** Stage 5–7 foundations
+
+#### Summary (see also Current Status journal below)
+- [x] `restaurants`, `dish_availability_channels`, `dish_delivery_apps` tables; `dishes.restaurant_id`
+- [x] `RestaurantInput` (Google Maps + cloud kitchen), automatic In-Store vs Online logic
+- [x] APIs: `/api/restaurants`, `/api/dishes/availability-channels`, `/api/dishes/delivery-apps`
+- [x] Data migration from legacy dish-level restaurant fields
+- [x] Updated `DishCard`, add-dish, edit-dish for new model
+
+### Stage 9.1: Middle East Delivery App Expansion ✅ COMPLETE
+**Dependencies:** Stage 9
+
+- [x] Noon, Careem, Talabat + 7 countries (see detailed journal in Current Status Summary)
+- [x] BUG-021 city format parsing for delivery app region detection
+
+### Stage 11: Security Updates ✅ COMPLETE
+- [x] React2Shell (CVE-2025-55182): `react` / `react-dom` → 19.2.1 (see SECURITY-001 in `Docs/Bug_tracking.md`)
+
+### Stage 12: Landing Page, `/app` URL Split, LinkedIn Invites & Optional Photo UX
+**Status:** 🚧 IN PROGRESS (implementation started May 2026)
+**Duration:** 2-3 days
+**Dependencies:** Stages 1–9.1 and 11 complete (core app functional)
+
+#### Goals
+1. **Welcome page at `/`** — Minimal, bold, motivating copy for invite-only community; no hero images required.
+2. **App (dish discovery) at `/app`** — Move current homepage feed from `/` to `/app` without changing feed behavior.
+3. **LinkedIn for invite requests** — "Request invite" opens founder LinkedIn in a new tab (manual approval; selective community).
+4. **Optional photos UX** — Messaging + honest dish cards when no photo (building the trusted list matters more than images).
+5. **Invite stewardship** — Note on Account page above user's 5 invite codes.
+
+#### Product decisions (locked)
+| Topic | Decision |
+|-------|----------|
+| Primary audience | Serious gym-goers who depend on outside food for gains and want to help people like them |
+| Invite flow | User messages on LinkedIn → founder manually sends invite code |
+| LinkedIn URL | `https://www.linkedin.com/in/ashutoshbhosale/` |
+| Exclusivity | Highly selective; not open to everyone; say this clearly on landing |
+| Cities | Global framing; encourage "be first in your city" (no city list on landing) |
+| Browse CTA on landing | **No** — primary CTA is request invite; public browse stays at `/app` for those who find it |
+| Signup secondary CTA | "Already have a code?" → `/signup` |
+| Footer / legal | Out of scope for v1 |
+
+#### Part A — Move dish discovery to `/app`
+- [ ] Move `app/page.tsx` → `app/app/page.tsx` (same feed logic; new URL only).
+- [ ] Create shared route constants in `lib/constants.ts`:
+  - `ROUTES.landing` = `/`
+  - `ROUTES.app` = `/app`
+  - `ROUTES.signup` = `/signup`
+  - `INVITE_LINKEDIN_URL` = `https://www.linkedin.com/in/ashutoshbhosale/`
+- [ ] Update all "product home" links from `/` to `/app`:
+  - [ ] `components/header.tsx` — logo + "Discover" (when pointing at feed)
+  - [ ] `components/bottom-navigation.tsx` — Discover tab
+  - [ ] `app/verify-otp/page.tsx` — after successful login / existing user signup
+  - [ ] `app/complete-profile/page.tsx` — after profile complete + already-complete redirect
+  - [ ] `app/add-dish/page.tsx` — after successful dish submit
+  - [ ] `app/auth/callback/route.ts` — default `next` param → `/app` (not `/`)
+- [ ] Update recovery links where "home" means the app:
+  - [ ] `app/not-found.tsx`
+  - [ ] `app/error.tsx`
+- [ ] Grep repo for remaining `href="/"` and `push('/')` that mean feed (not landing).
+
+#### Part B — Welcome page at `/`
+- [ ] New `app/page.tsx` — marketing/welcome page (do **not** use `MainLayout` / bottom nav).
+- [ ] Optional: `app/(marketing)/layout.tsx` — minimal chrome (logo only or none).
+- [ ] **Page structure (minimal, text-forward):**
+  1. Hero — outcome headline + who it's for + primary CTA (Request invite → LinkedIn)
+  2. Problem — trial-and-error eating out, misleading "high protein" menus, siloed finds
+  3. What it is — community protein diary; global; be first in your city
+  4. Who belongs — three criteria (regular gym-goer; dependent on outside food for gains; cares about solving this for people like them)
+  5. Exclusivity — invite-only; founder approves each member personally
+  6. Contribute — photos **not** required; building the trusted database is the priority
+  7. After join — 5 invite codes; only for people who meet the same bar
+  8. Secondary link — "Already have a code?" → `/signup`
+- [ ] Design: match `Docs/UI_UX_doc.md` (Rethink Sans, primary red/orange, mobile-first, confident tone). No stock photos required.
+- [ ] Per-route metadata on `/` (title/description for invite/community story); keep discover metadata on `/app`.
+
+#### Part C — Logged-in visitors on `/` (redirect rules)
+Show a loading state while login status is unknown. Then:
+| User state | Action |
+|------------|--------|
+| Not logged in | Show welcome page |
+| Logged in, profile incomplete | Redirect to `/complete-profile` |
+| Logged in, profile complete | Redirect to `/app` |
+
+**Implementation notes:**
+- Prefer `router.replace()` (not `push`) so Back button doesn't trap users on welcome page after login.
+- Post-auth flows (verify-otp, complete-profile, add-dish) should go **directly to `/app`** so users don't depend on welcome-page redirect.
+- Do **not** block incomplete-profile users from `/app` unless product decision changes later (current app allows browse mid-signup).
+
+#### Part D — LinkedIn invite CTAs (replace signup misdirects)
+- [ ] `components/ui/be-first-modal.tsx` — "Request Invite" → `INVITE_LINKEDIN_URL` (new tab), not `/signup`
+- [ ] `app/app/page.tsx` — empty-state "Request Invite Code" opens modal (unchanged trigger; fixed destination)
+- [ ] Remove or fix dead `handleBeFirst` → `/signup` in feed if unused
+- [ ] `app/signup/page.tsx` — add helper above form: "Don't have a code? Request an invite on LinkedIn" → same URL
+- [ ] Welcome page primary button → LinkedIn (new tab)
+
+#### Part E — Optional photos (UX only; API already allows null `image_url`)
+- [ ] `app/add-dish/page.tsx` — label photo as optional; short copy: skip if you don't have one; list > photos
+- [ ] `components/dish-card.tsx` — when no `image_url`: neutral no-photo layout (icon + dish name / protein), **not** stock meal image
+- [ ] Remove misleading fallback `delicious-high-protein-meal.jpg` when mapping dishes:
+  - [ ] `app/app/page.tsx` (after move)
+  - [ ] `app/my-dishes/page.tsx`
+  - [ ] `app/api/wishlist/route.ts` (transform)
+- [ ] Pass `imageUrl` explicitly; avoid `DishCard` default prop that looks like a real dish
+- [ ] Landing copy mentions photos are not required (Part B)
+
+#### Part F — Account invite codes stewardship
+- [ ] `app/account/page.tsx` — callout **above** "Your Invite Codes":
+  - You receive 5 codes after joining
+  - Only share with regular gym-goers who eat out for gains and will contribute
+  - Same selective standard as you; don't invite random people
+
+#### Part G — Documentation (after implementation)
+- [ ] Create `Docs/landing-page.md` — final welcome page copy + CTA URLs
+- [ ] Update `Docs/project_structure.md` — `/` = landing, `/app` = discover feed
+- [ ] Update `Docs/UI_UX_doc.md` — nav hrefs, user journey (landing → LinkedIn / signup → app)
+- [ ] Update `Docs/PRE_LAUNCH_CHECKLIST.md` — mark landing page item when done
+
+#### Out of scope (Stage 12)
+- Footer, privacy policy, contact page
+- "Browse dishes" as primary welcome CTA
+- Dish screenshots / proof gallery on landing
+- Forcing profile completion before browsing `/app`
+- Sanitizing `auth/callback` `next` open-redirect (separate hardening task)
+
+#### Manual testing checklist (user verification required before marking complete)
+- [ ] Logged out: `hypertropher.com/` shows welcome page (no bottom app menu)
+- [ ] Logged out: `hypertropher.com/app` shows dish list and filters
+- [ ] Logged in with complete profile: visiting `/` sends to `/app`
+- [ ] Logged in, incomplete profile: visiting `/` sends to `/complete-profile`
+- [ ] Login / OTP / complete profile / add dish success → `/app`
+- [ ] "Request invite" (welcome, modal, signup helper) → LinkedIn in new tab
+- [ ] "Already have a code?" → `/signup`
+- [ ] Discover tab + header Discover on signup pages → `/app`
+- [ ] Add dish without photo → card looks acceptable (no fake meal photo)
+- [ ] Account page shows invite stewardship note above codes
+- [ ] Logo from `/app` (logged in) → `/app`
+
+#### Files expected to change (implementation reference)
+| Area | Files |
+|------|--------|
+| Routes | `app/page.tsx` (new landing), `app/app/page.tsx` (moved feed) |
+| Constants | `lib/constants.ts` (new) |
+| Nav | `components/header.tsx`, `components/bottom-navigation.tsx` |
+| Auth redirects | `app/verify-otp/page.tsx`, `app/complete-profile/page.tsx`, `app/auth/callback/route.ts` |
+| CTAs | `components/ui/be-first-modal.tsx`, `app/signup/page.tsx` |
+| Photos | `components/dish-card.tsx`, `app/add-dish/page.tsx`, `app/my-dishes/page.tsx`, `app/api/wishlist/route.ts` |
+| Account | `app/account/page.tsx` |
+| Errors | `app/not-found.tsx`, `app/error.tsx` |
+| Docs | `Docs/landing-page.md`, `Docs/project_structure.md`, `Docs/UI_UX_doc.md` |
+
 ## Current Status Summary
+
+> **Changelog vs stages:** Older entries below are a historical journal. For authoritative stage status, use the **Stage index** and **Implementation Stages** sections above.
 
 ### ✅ Completed (Stages 1-4.5)
 - **Foundation & Setup**: Supabase integration, database schema, authentication
-- **Core Authentication**: Phone-based OTP, invite codes, user management
+- **Core Authentication**: Email OTP, invite codes, user management (FEATURE-022)
 
 - **Dish Functionality**: CRUD operations, image uploads, data validation
 - **Dynamic Data**: Live API connections, session handling, route protection
-- **Security & UX**: Phone number protection, personalized greetings, bug fixes
+- **Security & UX**: Profile API hardening (BUG-002), personalized greetings, city persistence (BUG-001)
 
 ### ✅ Completed (Stage 5 - Partial)
-- **Multi-Select Delivery Apps**: Custom MultiSelect component, multiple app selection, deep linking
+- **Delivery Apps**: Multi-select era → auto-apply by region (FEATURE-023); deep linking + 16 apps
 - **UI/UX Improvements**: Styling fixes, alignment improvements, design system consistency
 - **Form Enhancements**: Restaurant name field, optional URL field
 - **Data Quality**: Removed all mock data, improved error handling, database-only data source
@@ -408,14 +575,21 @@
 - **User Experience**: Name remains cached when city changes, no unnecessary loading flickers
 - **Files Modified**: `lib/auth/session-provider.tsx`, `app/account/page.tsx`
 
-### 🚧 In Progress (Stage 5 - Remaining)
-- **Advanced Features**: Advanced filtering and sorting (deferred to V2)
+### 📋 Planned (Stage 12 — Landing Page & URL Split)
+- **Status:** Documented; implementation not started
+- **Scope:** Welcome page at `/`, discover feed at `/app`, LinkedIn invite CTAs, optional photo UX, account invite stewardship note
+- **See:** Stage 12 section under Implementation Stages
+
+### 🚧 Deferred (not blocking MVP)
+- **Server-side** sorting and filtering (Stage 8)
+- **Stage 7** UI Phase 3.2 / 3.3 nav and card animations
+- Upload retry, real upload progress, CDN/PWA (see Future Performance section — compression already shipped)
 
 ### 📋 Next Steps
-- Complete UI/UX pre-deployment enhancements (Stage 6)
-- Deploy to Vercel
-- Conduct comprehensive testing
-- Performance optimization and bug fixes
+1. **Implement Stage 12** (landing, `/app`, LinkedIn, photo UX, account note) — after plan approval
+2. User verification testing per Stage 12 checklist
+3. Update `Docs/PRE_LAUNCH_CHECKLIST.md` (landing page, any open DNS items)
+4. Optional V2: server-side sort/filter, recommendation system (`FEATURE-Recommendation-System.md`)
 
 ### 🚧 Critical Bug Fixed (January 30, 2025 - Morning)
 **What We Actually Fixed Today (Morning):**
@@ -445,8 +619,9 @@
 - **Accessibility Compliance**: Implemented `richColors={true}` and proper `duration` for WCAG compliance
 - **Mobile-Friendly Offset**: Added 16px top offset for optimal mobile positioning
 
-### ✅ Completed (Stage 9 - Restaurant-Centric Architecture Implementation)
-**Major Architecture Overhaul - Restaurant-Centric Schema Implementation:**
+### ✅ Completed (Stage 9 — Restaurant-Centric Architecture)
+**Major Architecture Overhaul - Restaurant-Centric Schema Implementation:**  
+*(Also documented under Implementation Stages → Stage 9.)*
 
 - **Database Schema Redesign**: Implemented new restaurant-centric architecture with 4 new tables:
   - `restaurants` table for centralized restaurant data (Google Maps + manual entries)
@@ -488,16 +663,18 @@
   - **Flexible Availability**: Dishes can be available in multiple channels simultaneously
   - **Future-Proof Architecture**: Easily extensible for new availability channels
 
-### ✅ Completed (Stage 11 - Security Updates)
-**React2Shell (CVE-2025-55182) Remediation:**
+### ✅ Completed (Stage 11 — Security Updates)
+**React2Shell (CVE-2025-55182) Remediation:**  
+*(Also documented under Implementation Stages → Stage 11.)*
 - **Issue**: Application was using vulnerable React 19.1.1 version with Next.js App Router (Server Components).
 - **Resolution**: Updated `react` and `react-dom` to patched version `19.2.1`.
 - **Constraint**: Maintained `next` at `14.2.25` for stability using `--legacy-peer-deps`.
 - **Validation**: Verified build and type safety, deployed to Vercel production.
 - **Documentation**: Logged as [SECURITY-001] in Bug_tracking.md.
 
-### ✅ Completed (Stage 10 - Middle East Delivery App Expansion)
-**Middle East Market Integration - Noon, Careem, and Talabat:**
+### ✅ Completed (Stage 9.1 — Middle East Delivery App Expansion)
+**Middle East Market Integration - Noon, Careem, and Talabat:**  
+*(This work was previously labeled “Stage 10” in the changelog; renumbered to **Stage 9.1** so **Stage 12** can be used for the landing page.)*
 
 - **New Delivery Apps Added**: Integrated 3 major Middle East delivery platforms:
   - **Noon Food**: UAE, Saudi Arabia, Egypt (3 countries)
@@ -509,7 +686,7 @@
   - Updated existing countries (UAE, Qatar, Pakistan) with new delivery options
 
 - **Technical Implementation**:
-  - Created placeholder SVG logos for Noon, Careem, Talabat (`public/logos/`)
+  - Official WebP logos for Noon, Careem, Talabat (`public/logos/*.webp`)
   - Updated `DELIVERY_APPS_BY_COUNTRY` mapping with all new countries and apps
   - Updated `DELIVERY_APP_LOGOS` mapping with new logo paths
   - Added deep link schemes: `noon://`, `careem://`, `talabat://`
@@ -634,20 +811,19 @@
 - Enhanced SEO metadata in `app/layout.tsx` (Open Graph, Twitter Cards)
 - Implemented basic feedback system (form in Account page, API endpoint, database table)
 
-### 🎯 MVP Status: ~99% Complete - Restaurant-Centric Architecture + Middle East Expansion + UX Polish + Performance Optimization + Email Auth + Pre-Launch Security
-The core functionality is working and secure with a new restaurant-centric architecture that eliminates data duplication. Google Maps Places API integration provides intelligent restaurant search with location-aware results. Multi-select delivery apps feature is complete with proper styling and deep linking. All mock data has been removed, ensuring consistent database-only data source. Wishlist and My Dishes functionality is fully operational with proper database persistence and RLS policies. Dish edit and delete functionality is implemented with conditional UI and ownership validation. Invite codes system is now fully functional with automatic generation, status indicators, and secure access controls. **Major architecture improvement**: Restaurant-centric schema implemented with automatic availability logic (Google Maps = In-Store, Delivery apps = Online). **Geographic expansion**: Added 3 major Middle East delivery apps (Noon, Careem, Talabat) covering 7 new countries.
+### 🎯 MVP Status: ~99% Complete (pre–Stage 12 landing)
+The core app is working in production: restaurant-centric schema, email OTP + invite codes, discover feed at `/` (public browse + city picker — FEATURE-021), wishlist, my dishes, add/edit/delete, 16 delivery apps with deep links, client-side compression (FEATURE-020), session caching (Stage 8), security headers and error pages (FEATURE-027).
 
-#### Sub-steps:
-- [ ] Deploy to Vercel with environment configuration
-- [ ] Add invite code verification feedback
-- [ ] Implement secure invite code passing
-- [ ] Add UX improvements to auth flow
-- [ ] Conduct comprehensive testing
-- [ ] Optimize performance and fix bugs
-- [ ] **Future Enhancement**: Add city selection for non-logged-in users ✅ COMPLETED (FEATURE-021)
-  - Allow non-logged-in users to select a city if at least one dish exists for that city
-  - This will help convey the real value of the app by showing users dishes in their specific city
-  - Brainstorm implementation approach (dropdown, location detection, etc.)
+**Remaining for public launch positioning:** Stage 12 (welcome page at `/`, feed at `/app`, LinkedIn invite CTAs, optional-photo UX, invite stewardship copy).
+
+#### Legacy checklist (superseded — kept for history)
+- [x] Deploy to Vercel — done
+- [x] Invite code verification feedback — done
+- [x] Secure invite code passing — done
+- [x] Auth UX improvements — done
+- [x] Non-logged-in city selection (FEATURE-021) — done
+- [ ] Comprehensive testing — ongoing
+- [ ] Server-side performance items — deferred
 
 ## Future Feature Enhancements
 
@@ -736,20 +912,17 @@ Basic feedback collection system is implemented for MVP. Future enhancement will
 
 ## Future Performance Optimization Tasks
 
-### Stage 7: Form Submission Performance Optimization
+> **Note:** Client-side image compression is **already implemented** (FEATURE-020, `lib/image-compression.ts`). Task 7.1 compression subtasks below are **superseded** unless requirements change.
 
-#### **Task 7.1: Advanced Photo Upload Optimization**
-**Objective**: Implement comprehensive photo upload performance improvements
-**Priority**: High
-**Estimated Time**: 2-3 days
+### Deferred: Form Submission & Infrastructure Performance (V2)
+
+#### **Task 7.1: Advanced Photo Upload Optimization** — PARTIALLY SUPERSEDED
+**Objective**: Further photo upload improvements beyond FEATURE-020  
+**Priority**: Medium (compression done; retry/progress remain)
 
 **Subtasks**:
-- [ ] **Image Compression Before Upload**
-  - Implement client-side image compression using Canvas API
-  - Add quality settings (80%, 90%, 95%) for different use cases
-  - Resize large images to optimal dimensions (max 1920x1080)
-  - Reduce file size by 60-80% while maintaining quality
-  - Add file size validation and warnings for oversized images
+- [x] **Image Compression Before Upload** — ✅ Done in FEATURE-020 (`lib/image-compression.ts`)
+  - Adaptive quality by file size, max width 1200–1400px, 85–90% size reduction typical
 
 - [ ] **Upload Retry Logic and Error Handling**
   - Implement exponential backoff retry mechanism
@@ -869,10 +1042,11 @@ Basic feedback collection system is implemented for MVP. Future enhancement will
 - **Page Load Time**: < 2 seconds for all pages
 
 ### **Implementation Priority Order**
-1. **Immediate (Quick Wins)**: Image compression, upload retry logic
-2. **Short-term (1-2 weeks)**: Parallel processing, database optimization
-3. **Medium-term (1-2 months)**: CDN implementation, advanced caching
-4. **Long-term (3+ months)**: PWA features, advanced monitoring
+1. **Done:** Client-side image compression (FEATURE-020)
+2. **Next (optional):** Upload retry logic, real upload progress
+3. **Short-term:** Parallel processing, database optimization
+4. **Medium-term:** CDN, advanced caching
+5. **Long-term:** PWA, monitoring dashboards
 
 ## Resource Links
 - [Next.js 14 Documentation](https://nextjs.org/docs)
