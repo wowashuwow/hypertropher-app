@@ -2,7 +2,8 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { MapPin, BicepsFlexed, BookHeart, Handshake, HandHelping, Forward,  } from "lucide-react"
+import { MapPin, BicepsFlexed, BookHeart, Handshake, HandHelping, Forward } from "lucide-react"
+import { INVITE_LINKEDIN_URL } from "@/lib/constants"
 
 interface BeFirstModalProps {
   isOpen: boolean
@@ -11,11 +12,6 @@ interface BeFirstModalProps {
 }
 
 export function BeFirstModal({ isOpen, onClose, selectedCity }: BeFirstModalProps) {
-  const handleRequestInvite = () => {
-    onClose()
-    window.location.href = '/signup'
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -60,8 +56,15 @@ export function BeFirstModal({ isOpen, onClose, selectedCity }: BeFirstModalProp
             <Button onClick={onClose} variant="outline" className="flex-1">
               Maybe Later
             </Button>
-            <Button onClick={handleRequestInvite} className="flex-1">
-              Request Invite Code
+            <Button asChild className="flex-1">
+              <a
+                href={INVITE_LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => onClose()}
+              >
+                Request Invite Code
+              </a>
             </Button>
           </div>
         </div>

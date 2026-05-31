@@ -128,7 +128,7 @@ export async function GET() {
           comment: dish.comment,
           addedBy: dish.users?.name || "Unknown",
           availability: hasInStore && hasOnline ? "Both" : hasInStore ? "In-Store" : "Online",
-          image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
+          image_url: dish.image_url || null,
           protein_source: dish.protein_source,
           delivery_apps: deliveryApps,
           place_id: restaurantData.place_id || null,

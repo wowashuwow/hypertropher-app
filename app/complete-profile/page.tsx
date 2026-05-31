@@ -11,6 +11,7 @@ import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 import { createClient } from "@/lib/supabase/client"
 import { useSession } from "@/lib/auth/session-provider"
 import { MainLayout } from "@/components/main-layout"
+import { ROUTES } from "@/lib/constants"
 
 
 export default function CompleteProfilePage() {
@@ -28,7 +29,7 @@ export default function CompleteProfilePage() {
   // Redirect if profile is already complete
   useEffect(() => {
     if (!loading && userProfile && userProfile.city) {
-      router.push('/');
+      router.replace(ROUTES.app);
     }
   }, [userProfile, loading, router]);
 
@@ -97,7 +98,7 @@ export default function CompleteProfilePage() {
         invalidateUserCache();
         await refreshSession();
         // Redirect to homepage after session is refreshed
-        router.push('/');
+        router.replace(ROUTES.app);
       } else {
         const data = await response.json();
         setMessage({type: 'error', text: data.error || 'Failed to update profile. Please try again.'});
@@ -113,7 +114,7 @@ export default function CompleteProfilePage() {
   // Redirect non-authenticated users to signup
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/signup');
+      router.push(ROUTES.signup);
     }
   }, [loading, user, router]);
 

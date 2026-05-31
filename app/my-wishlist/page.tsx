@@ -123,7 +123,7 @@ export default function MyListPage() {
                   comment={dish.comment}
                   addedBy={dish.addedBy}
                   addedByProfilePicture={dish.users?.profile_picture_url || null}
-                  imageUrl={dish.image_url}
+                  imageUrl={dish.image_url ?? undefined}
                   // New restaurant-centric props
                   restaurant={dish.restaurant}
                   hasInStore={dish.hasInStore}

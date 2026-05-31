@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const token = requestUrl.searchParams.get('token')
   const tokenHash = requestUrl.searchParams.get('token_hash')
   const type = requestUrl.searchParams.get('type')
-  const next = requestUrl.searchParams.get('next') || '/'
+  const next = requestUrl.searchParams.get('next') || '/app'
 
   const cookieStore = cookies()
   const supabase = createClient(cookieStore)

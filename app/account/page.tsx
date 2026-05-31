@@ -291,6 +291,11 @@ export default function AccountPage() {
 
             {/* Invite Codes Section */}
             <div className="space-y-2">
+              <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground leading-relaxed">
+                You get five invite codes. Only share them with regular gym-goers who eat out
+                for gains and will contribute to the list — the same selective standard you met,
+                not random signups.
+              </div>
               <Label className="text-base font-medium">Your Invite Codes</Label>
               {loadingCodes ? (
                 <p className="text-muted-foreground">Loading invite codes...</p>

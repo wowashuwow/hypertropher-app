@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bookmark, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud, Copy, CopyCheck, HandPlatter, Hotel } from "lucide-react"
+import { Bookmark, MapPin, ChevronDown, ChevronUp, Edit, Trash2, Cloud, Copy, CopyCheck, HandPlatter, Hotel, UtensilsCrossed } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -58,7 +58,7 @@ export function DishCard({
   dishName,
   restaurantName,
   city,
-  imageUrl = "/delicious-high-protein-meal.jpg",
+  imageUrl,
   price,
   protein,
   taste,
@@ -91,6 +91,8 @@ export function DishCard({
   const [reportModalOpen, setReportModalOpen] = useState(false)
   const [selectedAppsToReport, setSelectedAppsToReport] = useState<string[]>([])
   const [isReporting, setIsReporting] = useState(false)
+
+  const hasImage = Boolean(imageUrl && imageUrl.trim().length > 0)
 
   const handleBookmarkClick = () => {
     setBookmarked(!bookmarked)
@@ -273,8 +275,23 @@ export function DishCard({
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 relative flex flex-col h-full">
       {/* Image Section */}
-      <div className="aspect-[4/5] relative">
-        <img src={imageUrl || "/placeholder.svg"} alt={dishName} className="w-full h-full object-cover" />
+      <div
+        className={cn(
+          "relative",
+          hasImage ? "aspect-[4/5]" : "aspect-[3/2] bg-muted flex items-center justify-center"
+        )}
+      >
+        {hasImage ? (
+          <img src={imageUrl} alt={dishName} className="w-full h-full object-cover" />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 px-4 text-center">
+            <UtensilsCrossed className="h-10 w-10 text-muted-foreground/60" aria-hidden />
+            <p className="text-sm font-medium text-muted-foreground line-clamp-2">{dishName}</p>
+            {proteinSource && (
+              <p className="text-xs text-muted-foreground/80 uppercase tracking-wide">{proteinSource}</p>
+            )}
+          </div>
+        )}
         <button
           onClick={handleBookmarkClick}
           className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md"

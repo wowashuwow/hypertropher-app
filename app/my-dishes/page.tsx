@@ -93,7 +93,7 @@ export default function MyDishesPage() {
           comment: dish.comment,
           addedBy: dish.users?.name || "Unknown",
           addedByProfilePicture: dish.users?.profile_picture_url || null,
-          image_url: dish.image_url || "/delicious-high-protein-meal.jpg",
+          image_url: dish.image_url || null,
           // New restaurant-centric fields
           restaurant: dish.restaurant,
           hasInStore: dish.hasInStore,
@@ -204,7 +204,7 @@ export default function MyDishesPage() {
                   comment={dish.comment}
                   addedBy={dish.addedBy}
                   addedByProfilePicture={dish.addedByProfilePicture}
-                  imageUrl={dish.image_url}
+                  imageUrl={dish.image_url ?? undefined}
                   // New restaurant-centric props
                   restaurant={dish.restaurant}
                   hasInStore={dish.hasInStore}

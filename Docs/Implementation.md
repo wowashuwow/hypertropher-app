@@ -1,7 +1,7 @@
 # Implementation Plan for Hypertropher
 
 **Last audited:** May 2026 (aligned with codebase on `main`)  
-**Current app URL layout:** Discover feed at `/` (Stage 12 will move feed to `/app` and add landing at `/`)  
+**Current app URL layout:** Landing at `/`, discover feed at `/app` (Stage 12 complete)  
 **Auth:** Email + OTP only (phone auth removed in FEATURE-022)
 
 ## Stage index (quick reference)
@@ -14,7 +14,7 @@
 | 9 | Restaurant-centric architecture | ✅ Complete |
 | 9.1 | Middle East delivery apps (Noon, Careem, Talabat) | ✅ Complete |
 | 11 | Security (React CVE patch) | ✅ Complete |
-| 12 | Landing page, `/app` split, LinkedIn invites | 📋 Planned |
+| 12 | Landing page, `/app` split, LinkedIn invites | ✅ Complete |
 
 *Numbering note: An older changelog used **“Stage 10”** for the Middle East expansion—that work is **Stage 9.1** above. **Stage 10** is intentionally unused in the stage list to avoid confusion. New landing-page work is **Stage 12** (next stage after 11).*
 
@@ -379,17 +379,18 @@
 ### Stage 11: Security Updates ✅ COMPLETE
 - [x] React2Shell (CVE-2025-55182): `react` / `react-dom` → 19.2.1 (see SECURITY-001 in `Docs/Bug_tracking.md`)
 
-### Stage 12: Landing Page, `/app` URL Split, LinkedIn Invites & Optional Photo UX
-**Status:** 🚧 IN PROGRESS (implementation started May 2026)
+### Stage 12: Landing Page, `/app` URL Split, LinkedIn Invites & Optional Photo UX ✅ COMPLETE
+**Status:** ✅ Complete (May 2026). User-approved copy in `components/landing-page.tsx`. Spec archive: **`Docs/landing-page-spec-final.yaml`**. QA preview while logged in: `/?preview=landing`.
 **Duration:** 2-3 days
 **Dependencies:** Stages 1–9.1 and 11 complete (core app functional)
 
 #### Goals
-1. **Welcome page at `/`** — Minimal, bold, motivating copy for invite-only community; no hero images required.
+1. **Welcome page at `/`** — Dark, high-contrast, PRD-aligned copy; visually strong (not a gray text column).
 2. **App (dish discovery) at `/app`** — Move current homepage feed from `/` to `/app` without changing feed behavior.
 3. **LinkedIn for invite requests** — "Request invite" opens founder LinkedIn in a new tab (manual approval; selective community).
 4. **Optional photos UX** — Messaging + honest dish cards when no photo (building the trusted list matters more than images).
 5. **Invite stewardship** — Note on Account page above user's 5 invite codes.
+6. **Cross-nav** — Browse dishes on landing; About on logged-out app header.
 
 #### Product decisions (locked)
 | Topic | Decision |
@@ -399,43 +400,45 @@
 | LinkedIn URL | `https://www.linkedin.com/in/ashutoshbhosale/` |
 | Exclusivity | Highly selective; not open to everyone; say this clearly on landing |
 | Cities | Global framing; encourage "be first in your city" (no city list on landing) |
-| Browse CTA on landing | **No** — primary CTA is request invite; public browse stays at `/app` for those who find it |
-| Signup secondary CTA | "Already have a code?" → `/signup` |
+| Landing visual | **Dark** theme (`.dark` tokens); WCAG AA contrast — white on black, **white text on red buttons** (not black on `#ff3333`) |
+| Browse CTA on landing | **Yes** — secondary link/header → `/app`; primary CTA remains request invite |
+| Signup secondary CTA | "Already have an invite code?" → `/signup` |
 | Footer / legal | Out of scope for v1 |
+| Copy source | `PRD.md`; as-built in **`components/landing-page.tsx`** (see **`Docs/landing-page.md`**) |
 
 #### Part A — Move dish discovery to `/app`
-- [ ] Move `app/page.tsx` → `app/app/page.tsx` (same feed logic; new URL only).
-- [ ] Create shared route constants in `lib/constants.ts`:
+- [x] Move `app/page.tsx` → `app/app/page.tsx` (same feed logic; new URL only).
+- [x] Create shared route constants in `lib/constants.ts`:
   - `ROUTES.landing` = `/`
   - `ROUTES.app` = `/app`
   - `ROUTES.signup` = `/signup`
   - `INVITE_LINKEDIN_URL` = `https://www.linkedin.com/in/ashutoshbhosale/`
-- [ ] Update all "product home" links from `/` to `/app`:
-  - [ ] `components/header.tsx` — logo + "Discover" (when pointing at feed)
-  - [ ] `components/bottom-navigation.tsx` — Discover tab
-  - [ ] `app/verify-otp/page.tsx` — after successful login / existing user signup
-  - [ ] `app/complete-profile/page.tsx` — after profile complete + already-complete redirect
-  - [ ] `app/add-dish/page.tsx` — after successful dish submit
-  - [ ] `app/auth/callback/route.ts` — default `next` param → `/app` (not `/`)
-- [ ] Update recovery links where "home" means the app:
-  - [ ] `app/not-found.tsx`
-  - [ ] `app/error.tsx`
-- [ ] Grep repo for remaining `href="/"` and `push('/')` that mean feed (not landing).
+- [x] Update all "product home" links from `/` to `/app`:
+  - [x] `components/header.tsx` — logo + "Discover" (when pointing at feed)
+  - [x] `components/bottom-navigation.tsx` — Discover tab
+  - [x] `app/verify-otp/page.tsx` — after successful login / existing user signup
+  - [x] `app/complete-profile/page.tsx` — after profile complete + already-complete redirect
+  - [x] `app/add-dish/page.tsx` — after successful dish submit
+  - [x] `app/auth/callback/route.ts` — default `next` param → `/app` (not `/`)
+- [x] Update recovery links where "home" means the app:
+  - [x] `app/not-found.tsx`
+  - [x] `app/error.tsx`
+- [x] Grep repo for remaining `href="/"` and `push('/')` that mean feed (not landing).
 
 #### Part B — Welcome page at `/`
-- [ ] New `app/page.tsx` — marketing/welcome page (do **not** use `MainLayout` / bottom nav).
-- [ ] Optional: `app/(marketing)/layout.tsx` — minimal chrome (logo only or none).
-- [ ] **Page structure (minimal, text-forward):**
-  1. Hero — outcome headline + who it's for + primary CTA (Request invite → LinkedIn)
-  2. Problem — trial-and-error eating out, misleading "high protein" menus, siloed finds
-  3. What it is — community protein diary; global; be first in your city
-  4. Who belongs — three criteria (regular gym-goer; dependent on outside food for gains; cares about solving this for people like them)
-  5. Exclusivity — invite-only; founder approves each member personally
-  6. Contribute — photos **not** required; building the trusted database is the priority
-  7. After join — 5 invite codes; only for people who meet the same bar
-  8. Secondary link — "Already have a code?" → `/signup`
-- [ ] Design: match `Docs/UI_UX_doc.md` (Rethink Sans, primary red/orange, mobile-first, confident tone). No stock photos required.
-- [ ] Per-route metadata on `/` (title/description for invite/community story); keep discover metadata on `/app`.
+- [x] New `app/page.tsx` — marketing/welcome page (do **not** use `MainLayout` / bottom nav).
+- [x] `components/landing-redirect.tsx` (session redirects).
+- [x] **`components/landing-page.tsx`** (from **`Docs/landing-page-spec-final.yaml`**, user-edited hero copy):
+  - [x] Dark root (`className="dark"`), hero glow, card sections (`#141414`), sticky mobile CTA bar
+  - [x] Copy from spec: hero, pain grid, value columns, who + invite + 5 codes, final CTA
+  - [x] Contrast: white on red buttons; body subheads `text-foreground/80` where long
+  - [x] Header: Browse dishes → `/app`
+  - [x] LinkedIn: `<a target="_blank">` + helper under button
+  - [x] Secondary: "Already have an invite code?" → `/signup`
+- [x] Per-route metadata on `/` (from spec); discover metadata on `/app` via `app/app/layout.tsx`.
+
+#### Part B.1 — App header cross-link (Phase 2)
+- [x] Logged-out `components/header.tsx`: **About** → `/` (visible mobile + desktop)
 
 #### Part C — Logged-in visitors on `/` (redirect rules)
 Show a loading state while login status is unknown. Then:
@@ -451,53 +454,47 @@ Show a loading state while login status is unknown. Then:
 - Do **not** block incomplete-profile users from `/app` unless product decision changes later (current app allows browse mid-signup).
 
 #### Part D — LinkedIn invite CTAs (replace signup misdirects)
-- [ ] `components/ui/be-first-modal.tsx` — "Request Invite" → `INVITE_LINKEDIN_URL` (new tab), not `/signup`
-- [ ] `app/app/page.tsx` — empty-state "Request Invite Code" opens modal (unchanged trigger; fixed destination)
-- [ ] Remove or fix dead `handleBeFirst` → `/signup` in feed if unused
-- [ ] `app/signup/page.tsx` — add helper above form: "Don't have a code? Request an invite on LinkedIn" → same URL
-- [ ] Welcome page primary button → LinkedIn (new tab)
+- [x] `components/ui/be-first-modal.tsx` — "Request Invite" → `INVITE_LINKEDIN_URL` (new tab), not `/signup`
+- [x] `app/app/page.tsx` — empty-state "Request Invite Code" opens modal (unchanged trigger; fixed destination)
+- [x] Remove dead `handleBeFirst` → `/signup` in feed
+- [x] `app/signup/page.tsx` — helper: "Don't have a code? Request an invite on LinkedIn"
+- [x] Welcome page primary button → LinkedIn (new tab)
 
 #### Part E — Optional photos (UX only; API already allows null `image_url`)
-- [ ] `app/add-dish/page.tsx` — label photo as optional; short copy: skip if you don't have one; list > photos
-- [ ] `components/dish-card.tsx` — when no `image_url`: neutral no-photo layout (icon + dish name / protein), **not** stock meal image
-- [ ] Remove misleading fallback `delicious-high-protein-meal.jpg` when mapping dishes:
-  - [ ] `app/app/page.tsx` (after move)
-  - [ ] `app/my-dishes/page.tsx`
-  - [ ] `app/api/wishlist/route.ts` (transform)
-- [ ] Pass `imageUrl` explicitly; avoid `DishCard` default prop that looks like a real dish
-- [ ] Landing copy mentions photos are not required (Part B)
+- [x] `app/add-dish/page.tsx` — label photo as optional; short copy: skip if you don't have one; list > photos
+- [x] `components/dish-card.tsx` — when no `image_url`: neutral no-photo layout (icon + dish name / protein), **not** stock meal image
+- [x] Remove misleading fallback `delicious-high-protein-meal.jpg` when mapping dishes:
+  - [x] `app/app/page.tsx` (after move)
+  - [x] `app/my-dishes/page.tsx`
+  - [x] `app/api/wishlist/route.ts` (transform)
+- [x] Pass `imageUrl` explicitly; removed `DishCard` default stock meal image
+- [x] Landing copy mentions photos are not required (Part B)
 
 #### Part F — Account invite codes stewardship
-- [ ] `app/account/page.tsx` — callout **above** "Your Invite Codes":
+- [x] `app/account/page.tsx` — callout **above** "Your Invite Codes":
   - You receive 5 codes after joining
   - Only share with regular gym-goers who eat out for gains and will contribute
   - Same selective standard as you; don't invite random people
 
 #### Part G — Documentation (after implementation)
-- [ ] Create `Docs/landing-page.md` — final welcome page copy + CTA URLs
-- [ ] Update `Docs/project_structure.md` — `/` = landing, `/app` = discover feed
-- [ ] Update `Docs/UI_UX_doc.md` — nav hrefs, user journey (landing → LinkedIn / signup → app)
-- [ ] Update `Docs/PRE_LAUNCH_CHECKLIST.md` — mark landing page item when done
+- [x] `Docs/landing-page.md` — as-built summary
+- [x] `Docs/landing-page-spec-final.yaml` — copy/layout spec archive
+- [x] Update `Docs/project_structure.md` — `/` = landing, `/app` = discover feed
+- [x] Update `Docs/UI_UX_doc.md` — Discover nav href → `/app`
+- [x] Update `Docs/PRE_LAUNCH_CHECKLIST.md` — landing page verified
 
 #### Out of scope (Stage 12)
 - Footer, privacy policy, contact page
-- "Browse dishes" as primary welcome CTA
+- Framer Motion / heavy animation (optional later)
 - Dish screenshots / proof gallery on landing
 - Forcing profile completion before browsing `/app`
 - Sanitizing `auth/callback` `next` open-redirect (separate hardening task)
 
-#### Manual testing checklist (user verification required before marking complete)
-- [ ] Logged out: `hypertropher.com/` shows welcome page (no bottom app menu)
-- [ ] Logged out: `hypertropher.com/app` shows dish list and filters
-- [ ] Logged in with complete profile: visiting `/` sends to `/app`
-- [ ] Logged in, incomplete profile: visiting `/` sends to `/complete-profile`
-- [ ] Login / OTP / complete profile / add dish success → `/app`
-- [ ] "Request invite" (welcome, modal, signup helper) → LinkedIn in new tab
-- [ ] "Already have a code?" → `/signup`
-- [ ] Discover tab + header Discover on signup pages → `/app`
-- [ ] Add dish without photo → card looks acceptable (no fake meal photo)
-- [ ] Account page shows invite stewardship note above codes
-- [ ] Logo from `/app` (logged in) → `/app`
+#### Manual testing checklist
+- [x] Logged out: `/` dark landing, no bottom nav (user verified May 2026)
+- [x] Browse dishes / About cross-links
+- [x] `/app` feed; auth redirects to `/app` or `/complete-profile`
+- [x] LinkedIn invite CTAs; signup helper; optional-photo UX; account stewardship note
 
 #### Files expected to change (implementation reference)
 | Area | Files |
@@ -575,21 +572,14 @@ Show a loading state while login status is unknown. Then:
 - **User Experience**: Name remains cached when city changes, no unnecessary loading flickers
 - **Files Modified**: `lib/auth/session-provider.tsx`, `app/account/page.tsx`
 
-### 📋 Planned (Stage 12 — Landing Page & URL Split)
-- **Status:** Documented; implementation not started
-- **Scope:** Welcome page at `/`, discover feed at `/app`, LinkedIn invite CTAs, optional photo UX, account invite stewardship note
-- **See:** Stage 12 section under Implementation Stages
-
 ### 🚧 Deferred (not blocking MVP)
 - **Server-side** sorting and filtering (Stage 8)
 - **Stage 7** UI Phase 3.2 / 3.3 nav and card animations
 - Upload retry, real upload progress, CDN/PWA (see Future Performance section — compression already shipped)
 
 ### 📋 Next Steps
-1. **Implement Stage 12** (landing, `/app`, LinkedIn, photo UX, account note) — after plan approval
-2. User verification testing per Stage 12 checklist
-3. Update `Docs/PRE_LAUNCH_CHECKLIST.md` (landing page, any open DNS items)
-4. Optional V2: server-side sort/filter, recommendation system (`FEATURE-Recommendation-System.md`)
+1. Optional V2: server-side sort/filter, recommendation system (`FEATURE-Recommendation-System.md`)
+2. Pre-launch: remaining items in `Docs/PRE_LAUNCH_CHECKLIST.md`
 
 ### 🚧 Critical Bug Fixed (January 30, 2025 - Morning)
 **What We Actually Fixed Today (Morning):**
@@ -812,9 +802,7 @@ Show a loading state while login status is unknown. Then:
 - Implemented basic feedback system (form in Account page, API endpoint, database table)
 
 ### 🎯 MVP Status: ~99% Complete (pre–Stage 12 landing)
-The core app is working in production: restaurant-centric schema, email OTP + invite codes, discover feed at `/` (public browse + city picker — FEATURE-021), wishlist, my dishes, add/edit/delete, 16 delivery apps with deep links, client-side compression (FEATURE-020), session caching (Stage 8), security headers and error pages (FEATURE-027).
-
-**Remaining for public launch positioning:** Stage 12 (welcome page at `/`, feed at `/app`, LinkedIn invite CTAs, optional-photo UX, invite stewardship copy).
+The core app is working in production: restaurant-centric schema, email OTP + invite codes, landing at `/` and discover feed at `/app` (Stage 12), public browse + city picker (FEATURE-021), wishlist, my dishes, add/edit/delete, 16 delivery apps with deep links, client-side compression (FEATURE-020), session caching (Stage 8), security headers and error pages (FEATURE-027).
 
 #### Legacy checklist (superseded — kept for history)
 - [x] Deploy to Vercel — done

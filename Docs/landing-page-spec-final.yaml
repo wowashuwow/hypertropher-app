@@ -1,0 +1,448 @@
+version: "2.0"
+theme: dark
+
+# ============================================================
+# METADATA
+# ============================================================
+
+metadata:
+  title: "Hypertropher — Shared Protein Diary for Serious Lifters"
+  description: "Invite-only app for gym-goers who eat out. Discover, rate, and log high-protein dishes from restaurants and delivery apps. Built by lifters, for lifters."
+
+# ============================================================
+# GLOBAL CONSTANTS
+# ============================================================
+
+global:
+  font: "Rethink Sans"
+  max_content_width: "max-w-5xl"
+  primary_cta:
+    label: "Request an Invite"
+    href: "https://www.linkedin.com/in/ashutoshbhosale/"
+    opens: new_tab
+    helper_text: "Opens LinkedIn in a new tab. Send Ashutosh a message to apply."
+  secondary_cta:
+    label: "Already have an invite code?"
+    href: "/signup"
+  tertiary_cta:
+    label: "Browse dishes"
+    href: "/app"
+
+# ============================================================
+# SECTIONS
+# ============================================================
+
+sections:
+
+  # ----------------------------------------------------------
+  # HEADER
+  # ----------------------------------------------------------
+  - id: header
+    layout:
+      type: sticky_header
+      tailwind_shell: "sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm"
+      inner: "max-w-5xl mx-auto px-6 h-16 flex items-center justify-between"
+    elements:
+      - id: logo
+        type: text_logo
+        copy: "HYPERTROPHER"
+        href: "/"
+        tailwind: "font-extrabold uppercase tracking-tight text-foreground text-xl"
+      - id: nav_browse
+        type: link
+        copy: "Browse dishes"
+        href: "/app"
+        tailwind: "text-base text-muted-foreground hover:text-foreground transition-colors"
+
+  # ----------------------------------------------------------
+  # HERO
+  # ----------------------------------------------------------
+  - id: hero
+    layout:
+      type: hero_full_viewport
+      min_height: "min-h-[85vh]"
+      tailwind_shell: "relative flex flex-col items-center justify-center px-6 py-24 text-center min-h-[85vh] bg-[radial-gradient(ellipse_80%_50%_at_50%_40%,rgba(255,51,51,0.12),transparent)]"
+      # Background: radial red glow at 12% opacity centred at 50% 40% over #0a0a0a.
+      # Pure CSS via Tailwind arbitrary value. No image. No food photo.
+      animation: "animate-in fade-in duration-500 motion-reduce:animate-none on inner content div only"
+    elements:
+      - id: eyebrow
+        type: label
+        copy: "INVITE ONLY"
+        tailwind: "inline-block text-sm font-semibold uppercase tracking-widest text-primary mb-6"
+      - id: headline
+        type: h1
+        copy: "Know what to order before you order it."
+        tailwind: "text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-foreground leading-tight mb-6 max-w-3xl mx-auto"
+      - id: subhead
+        type: paragraph
+        copy: "A community-built database of high-protein dishes, logged by lifters who depend on restaurants and delivery apps."
+        tailwind: "text-lg sm:text-xl text-foreground/75 max-w-xl mx-auto mb-10 leading-relaxed"
+      - id: cta_primary
+        type: button_primary
+        copy: "Request an Invite"
+        href: "https://www.linkedin.com/in/ashutoshbhosale/"
+        tailwind: "bg-primary text-white font-semibold px-8 py-3 rounded-md text-base hover:bg-primary/90 transition-colors inline-block"
+        # IMPORTANT: text-white NOT text-primary-foreground.
+        # text-primary-foreground resolves to black on #ff3333 = WCAG fail.
+        # text-white on #ff3333 = 5.9:1 = WCAG AA pass.
+        implementation: "<Button asChild><a href={INVITE_LINKEDIN_URL} target='_blank' rel='noopener noreferrer'>Request an Invite</a></Button>"
+      - id: cta_helper
+        type: caption
+        copy: "Opens LinkedIn in a new tab. Send Ashutosh a message to apply."
+        tailwind: "mt-3 text-sm text-muted-foreground"
+      - id: cta_secondary_row
+        type: link_group
+        tailwind: "mt-6 flex items-center justify-center gap-5 text-sm"
+        links:
+          - id: signup_link
+            copy: "Already have an invite code?"
+            href: "/signup"
+          - id: browse_link
+            copy: "Browse dishes →"
+            href: "/app"
+
+  # ----------------------------------------------------------
+  # QUALIFIER CALLOUT
+  # One line. No heading. No cards. Sits between hero and pain.
+  # Qualifies the reader before they invest time in the page.
+  # ----------------------------------------------------------
+  - id: qualifier
+    layout:
+      type: static_section
+      tailwind_shell: "px-6 py-6 border-b border-border"
+    elements:
+      - id: qualifier_text
+        type: paragraph
+        copy: "Built for people who train seriously and depend on outside food."
+        tailwind: "text-base text-muted-foreground text-center max-w-xl mx-auto"
+
+  # ----------------------------------------------------------
+  # PAIN SECTION
+  # Four cards. No sub-heading below "Sound familiar?".
+  # Cards read as cumulative — one bad week, not four separate problems.
+  # Each card: bg-card, border-l-2 border-primary, rounded-md, p-5.
+  # ----------------------------------------------------------
+  - id: pain_section
+    layout:
+      type: static_section
+      tailwind_shell: "px-6 py-20"
+    elements:
+      - id: pain_inner
+        type: column
+        tailwind: "max-w-5xl mx-auto"
+      - id: pain_heading
+        type: h2
+        copy: "Sound familiar?"
+        tailwind: "text-3xl sm:text-4xl font-bold text-foreground mb-12 text-center"
+      - id: pain_list
+        type: card_grid
+        tailwind: "grid grid-cols-1 sm:grid-cols-2 gap-4"
+        columns:
+          - id: pain_1
+            title: "Money down the drain"
+            copy: "You order something marked high-protein. It arrives 60% pasta. Nobody else knows to avoid it."
+            icon: "CircleDollarSign"
+          - id: pain_2
+            title: "The same five dishes, forever"
+            copy: "Getting burned enough times teaches you to stop exploring. Chicken, rice, grilled fish. Safe. Boring."
+            icon: "RefreshCw"
+          - id: pain_3
+            title: "Labels that lie"
+            copy: "The macro breakdown looks right on the menu. You check it after eating and the numbers make no sense. You already paid for it."
+            icon: "AlertTriangle"
+          - id: pain_4
+            title: "Your findings die with you"
+            copy: "You found the best grilled chicken in a 10km radius. Took three bad orders to get there. That knowledge lives in your head and nowhere else."
+            icon: "Lock"
+
+  # ----------------------------------------------------------
+  # VALUE COLUMNS
+  # No eyebrow. No section heading. Three columns speak for themselves.
+  # grid-cols-1 on mobile, md:grid-cols-3 on medium+.
+  # No card background or border — whitespace separates columns.
+  # ----------------------------------------------------------
+  - id: value_columns
+    layout:
+      type: static_section
+      tailwind_shell: "px-6 py-20 border-t border-border"
+    elements:
+      - id: value_grid
+        type: card_grid
+        tailwind: "max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8"
+        columns:
+          - id: col_discover
+            title: "Know before you order"
+            copy: "Filter by city, protein type, price. Every dish was logged by someone who lifts and depends on outside food."
+            icon: "Search"
+          - id: col_trust
+            title: "Stop guessing"
+            copy: "Taste, protein, and satisfaction ratings from people who also train and depend on outside food. Open a card and know whether it's worth ordering."
+            icon: "UserCheck"
+          - id: col_contribute
+            title: "Your finds outlive the meal"
+            copy: "Add dishes from any restaurant or delivery app. Rate, comment, photo optional. What took you three bad orders to learn takes the next person three seconds."
+            icon: "PlusCircle"
+
+  # ----------------------------------------------------------
+  # WHO GETS IN
+  # No eyebrow. Heading only: "Selective on purpose."
+  # Criteria: three large cards in a grid. Not a bullet list.
+  # Five codes callout below criteria.
+  # ----------------------------------------------------------
+  - id: who_invite
+    layout:
+      type: static_section
+      tailwind_shell: "px-6 py-20 border-t border-border"
+    elements:
+      - id: who_inner
+        type: column
+        tailwind: "max-w-5xl mx-auto text-center"
+      - id: who_heading
+        type: h2
+        copy: "Selective on purpose."
+        tailwind: "text-4xl sm:text-5xl font-bold text-foreground mb-6"
+      - id: who_body
+        type: paragraph
+        copy: "Hypertropher is invite-only. The founder approves every member personally. Three things get you in."
+        tailwind: "text-lg text-foreground/75 max-w-xl mx-auto mb-12"
+      - id: who_criteria
+        type: card_grid
+        tailwind: "grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-12"
+        # These are large prominent cards, not a small bullet list.
+        # Icon: size 28, text-primary, centered, mb-3.
+        # Text: text-base font-bold text-foreground, centered, leading-snug.
+        columns:
+          - id: crit_1
+            title: "You lift consistently. Not occasionally."
+            copy: ""
+            icon: "Dumbbell"
+          - id: crit_2
+            title: "You depend on outside food for most meals."
+            copy: ""
+            icon: "UtensilsCrossed"
+          - id: crit_3
+            title: "You'll add dishes. Not just scroll."
+            copy: ""
+            icon: "PenLine"
+      - id: who_codes_callout
+        type: card
+        tailwind: "bg-card border border-border rounded-lg p-6 max-w-sm mx-auto text-center"
+        # Five codes block sits below the criteria grid.
+      - id: who_codes_heading
+        type: h3
+        copy: "You decide who comes in next."
+        tailwind: "text-xl font-bold text-foreground mb-3"
+      - id: who_codes_body
+        type: paragraph
+        copy: "Every member gets five invite codes. Pass them only to people who meet the same bar. A bad entry hurts everyone who depends on it."
+        tailwind: "text-base text-foreground/75"
+
+  # ----------------------------------------------------------
+  # FINAL CTA
+  # ----------------------------------------------------------
+  - id: final_cta
+    layout:
+      type: static_section
+      tailwind_shell: "px-6 py-24 border-t border-border text-center"
+    elements:
+      - id: final_eyebrow
+        type: label
+        copy: "READY TO JOIN"
+        tailwind: "block text-sm font-semibold uppercase tracking-widest text-primary mb-4"
+      - id: final_heading
+        type: h2
+        copy: "Be the first in your city."
+        tailwind: "text-3xl sm:text-4xl font-bold text-foreground mb-4"
+      - id: final_body
+        type: paragraph
+        copy: "Message the founder on LinkedIn. The template below is all you need."
+        tailwind: "text-lg text-foreground/75 max-w-sm mx-auto mb-8"
+      - id: message_template
+        type: card
+        tailwind: "bg-card border border-border rounded-md px-5 py-4 max-w-sm mx-auto mb-10 text-left"
+        # Template label + template text. Two elements inside this card.
+      - id: message_template_label
+        type: caption
+        copy: "What to say"
+        tailwind: "text-xs text-muted-foreground uppercase tracking-widest mb-2 font-semibold block"
+      - id: message_template_text
+        type: paragraph
+        copy: "I lift regularly, depend on outside food, and I'll contribute."
+        tailwind: "text-sm text-foreground leading-relaxed"
+      - id: final_cta_btn
+        type: button_primary
+        copy: "Request an Invite"
+        href: "https://www.linkedin.com/in/ashutoshbhosale/"
+        tailwind: "bg-primary text-white font-semibold px-8 py-3 rounded-md text-base hover:bg-primary/90 transition-colors inline-block"
+        implementation: "<Button asChild><a href={INVITE_LINKEDIN_URL} target='_blank' rel='noopener noreferrer'>Request an Invite</a></Button>"
+      - id: final_cta_helper
+        type: caption
+        copy: "Opens LinkedIn in a new tab. Send Ashutosh a message to apply."
+        tailwind: "mt-3 text-sm text-muted-foreground block"
+      - id: final_secondary_row
+        type: link_group
+        tailwind: "mt-6 flex items-center justify-center gap-5 text-sm"
+        links:
+          - id: final_signup
+            copy: "Already have an invite code?"
+            href: "/signup"
+          - id: final_browse
+            copy: "Browse dishes →"
+            href: "/app"
+
+# ============================================================
+# MOBILE STICKY BAR
+# md:hidden — desktop never sees this.
+# Shows after user scrolls past 100vh (scroll listener).
+# iOS safe area padding on bottom.
+# ============================================================
+
+mobile_sticky:
+  enabled: true
+  tailwind_shell: "fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-3 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-background/95 backdrop-blur-sm border-t border-border md:hidden"
+  scroll_behavior: "opacity-0 pointer-events-none below 100px scrollY; opacity-100 at or above. CSS transition-opacity duration-300. No Framer Motion."
+  elements:
+    - id: sticky_invite
+      type: button_primary
+      copy: "Request an Invite"
+      href: "https://www.linkedin.com/in/ashutoshbhosale/"
+      tailwind: "flex-1 bg-primary text-white font-semibold py-2.5 rounded-md text-sm text-center hover:bg-primary/90 transition-colors"
+      implementation: "<Button asChild><a href={INVITE_LINKEDIN_URL} target='_blank' rel='noopener noreferrer'>Request an Invite</a></Button>"
+    - id: sticky_browse
+      type: link
+      copy: "Browse dishes"
+      href: "/app"
+      tailwind: "text-sm text-muted-foreground hover:text-foreground transition-colors"
+
+# ============================================================
+# IMPLEMENTATION NOTES
+# ============================================================
+
+implementation_notes:
+
+  file: "components/landing-page.tsx"
+  directive: "'use client' at top of file — required for sticky bar scroll listener"
+
+  root_wrapper: >
+    <div className="dark min-h-screen bg-background text-foreground">
+    The 'dark' class activates CSS variable overrides from app/globals.css.
+    The app uses light theme. This wrapper is landing-only.
+
+  css_tokens:
+    background: "#0a0a0a"
+    foreground: "#ffffff"
+    card: "#141414"
+    primary: "#ff3333"
+    muted_foreground: "#a0a0a0"
+    border: "#2a2a2a"
+
+  constants_import: "import { ROUTES, INVITE_LINKEDIN_URL } from '@/lib/constants'"
+
+  wcag_notes:
+    - "text-white on bg-primary (#ff3333) = 5.9:1. PASSES WCAG AA."
+    - "NEVER use text-primary-foreground on bg-primary. It resolves to black = FAIL."
+    - "text-foreground/75 (white at 75% opacity) on #0a0a0a = readable for body paragraphs."
+    - "text-muted-foreground (#a0a0a0) on #0a0a0a = 5.2:1. Use only for short captions."
+
+  primary_cta_pattern: >
+    All primary CTA buttons use:
+    <Button asChild className="bg-primary text-white ...">
+      <a href={INVITE_LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+        Request an Invite
+      </a>
+    </Button>
+    Never use window.open(). Never use text-primary-foreground.
+
+  internal_links: "Use Next.js <Link> for /signup and /app. Plain <a> only for LinkedIn."
+
+  pain_cards:
+    background: "bg-card"
+    left_border: "border-l-2 border-primary"
+    shape: "rounded-md p-5"
+    icon_size: 22
+    icon_color: "text-primary mb-3"
+    title: "text-base font-bold text-foreground mb-2"
+    body: "text-base text-foreground/75 leading-relaxed"
+
+  value_columns:
+    no_card_background: true
+    icon_size: 28
+    icon_color: "text-primary mb-4"
+    title: "text-lg font-bold text-foreground mb-2"
+    body: "text-base text-foreground/75 leading-relaxed"
+
+  criteria_cards:
+    note: "These are large prominent cards, NOT a small bullet list."
+    background: "bg-card"
+    border: "border border-border"
+    shape: "rounded-lg p-6 text-center"
+    icon_size: 28
+    icon_color: "text-primary mx-auto mb-3"
+    title: "text-base font-bold text-foreground leading-snug"
+    body: "none — copy field is empty, render title only"
+
+  five_codes_block:
+    wrapper: "bg-card border border-border rounded-lg p-6 max-w-sm mx-auto text-center mt-8"
+    heading: "text-xl font-bold text-foreground mb-3"
+    body: "text-base text-foreground/75"
+
+  hero_background: >
+    Implemented as Tailwind arbitrary class on the section element:
+    bg-[radial-gradient(ellipse_80%_50%_at_50%_40%,rgba(255,51,51,0.12),transparent)]
+    No JS. No image. No separate element needed.
+
+  hero_animation: >
+    Apply animate-in fade-in duration-500 to the inner content div inside hero.
+    Add motion-reduce:animate-none to respect prefers-reduced-motion.
+    No other animation anywhere on the page.
+
+  sticky_scroll_logic: |
+    const [showSticky, setShowSticky] = useState(false)
+    useEffect(() => {
+      const handleScroll = () => setShowSticky(window.scrollY > window.innerHeight)
+      window.addEventListener('scroll', handleScroll, { passive: true })
+      return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+    Apply to sticky bar: className={`... transition-opacity duration-300 ${showSticky ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+
+  no_build:
+    - "No footer"
+    - "No pricing section"
+    - "No testimonials"
+    - "No food photography or stock images"
+    - "No app screenshots"
+    - "No fake user counts or stats"
+    - "No phone number or SMS language"
+    - "No Framer Motion"
+    - "No new npm packages"
+
+  separate_task: >
+    components/header.tsx: when user is logged out, add nav link 'About' pointing to '/'.
+    This is out of scope for landing-page.tsx.
+
+  em_dash_rule: >
+    Zero em dashes (—) or en dashes (–) anywhere in any user-visible string.
+    Use periods to split clauses. Use commas for parentheticals.
+
+  research_citations:
+    - decision: "hero min-h-[85vh]"
+      source: "https://woobox.com/articles/above-the-fold-design-priorities"
+    - decision: "text-white on button_primary"
+      source: "https://webaim.org/articles/contrast/"
+    - decision: "Headline is outcome-led not product description"
+      source: "https://www.omniconvert.com/blog/hero-section-examples/ — clarity beats cleverness; name the outcome"
+    - decision: "Subhead formula: what + who + how"
+      source: "https://home.growthschool.io/newsletter/how-to-write-a-perfect-hero-section-for-your-landing-page"
+    - decision: "No redundant section headings"
+      source: "https://atticusli.com/blog/posts/hero-section-formula-headline-subhead-cta-visual-order/ — subhead must add second dimension not repeat headline"
+    - decision: "Criteria as large cards not bullet list"
+      source: "https://www.ofspace.co/blog/startup-hero-sections-analysis — key trust/gate elements need visual prominence"
+    - decision: "Primary CTA repeated in hero and final section"
+      source: "https://www.landingpageflow.com/post/best-cta-placement-strategies-for-landing-pages"
+    - decision: "Sticky mobile bar with safe-area-inset padding"
+      source: "https://medium.com/@tharunbalaji110/understanding-mobile-viewport-units"
+    - decision: "Helper text warns of new tab"
+      source: "https://blog.pope.tech/2024/01/02/how-to-make-external-links-accessible/"
+    - decision: "CSS-only animation, no Framer Motion"
+      source: "https://web.dev/articles/css-web-vitals"

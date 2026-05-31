@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "@/lib/auth/session-provider"
+import { ROUTES } from "@/lib/constants"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -18,12 +19,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       // If no user at all, redirect to signup
       if (!user) {
         setIsRedirecting(true)
-        router.push('/signup')
+        router.push(ROUTES.signup)
       }
       // If user exists but no profile (incomplete signup), redirect to complete-profile
       else if (!userProfile) {
         setIsRedirecting(true)
-        router.push('/complete-profile')
+        router.push(ROUTES.completeProfile)
       }
     }
   }, [user, userProfile, loading, router])

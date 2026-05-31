@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { Home, Bookmark, PlusCircle, User, LogIn } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSession } from "@/lib/auth/session-provider"
+import { ROUTES } from "@/lib/constants"
 
 export function BottomNavigation() {
   const pathname = usePathname()
@@ -13,7 +14,7 @@ export function BottomNavigation() {
 
   const publicNavItems = [
     {
-      href: "/",
+      href: ROUTES.app,
       icon: Home,
       label: "Discover",
     },
@@ -45,7 +46,7 @@ export function BottomNavigation() {
           type: "separator" as const,
         },
         {
-          href: "/signup",
+          href: ROUTES.signup,
           icon: LogIn,
           label: "Signup / Login",
         },
@@ -64,7 +65,7 @@ export function BottomNavigation() {
           if ('href' in item && 'icon' in item && 'label' in item) {
             const Icon = item.icon as React.ComponentType<{ className?: string }>
             const isActive = pathname === item.href || 
-              (item.href === "/signup" && pathname === "/signup")
+              (item.href === ROUTES.signup && pathname === ROUTES.signup)
 
             return (
               <Link

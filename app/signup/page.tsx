@@ -10,6 +10,7 @@ import { MainLayout } from "@/components/main-layout"
 import { useRouter } from "next/navigation"
 import { Check, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { INVITE_LINKEDIN_URL } from "@/lib/constants"
 
 type AuthMode = 'signup' | 'login'
 
@@ -141,6 +142,19 @@ export default function SignUpPage() {
               ? "Enter your invite code and email to get started."
               : "Sign in to continue to Hypertropher."}
           </p>
+          {authMode === 'signup' && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Don&apos;t have a code?{" "}
+              <a
+                href={INVITE_LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary hover:text-primary/80 underline-offset-4 hover:underline"
+              >
+                Request an invite on LinkedIn
+              </a>
+            </p>
+          )}
         </div>
 
         <div className="flex justify-center">

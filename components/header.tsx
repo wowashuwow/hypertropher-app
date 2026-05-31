@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useSession } from "@/lib/auth/session-provider"
+import { ROUTES } from "@/lib/constants"
 
 interface HeaderProps {
   isLoggedIn?: boolean
@@ -15,14 +16,22 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
     <header className="w-full py-4 px-6 border-b border-border bg-card">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo/App Name */}
-        <Link href="/" className="text-3xl sm:text-2xl font-extrabold text-foreground uppercase">
+        <Link href={ROUTES.app} className="text-3xl sm:text-2xl font-extrabold text-foreground uppercase">
           HYPERTROPHER
         </Link>
 
         {/* Navigation */}
         <div className="flex items-center space-x-4">
+          {!isLoggedIn && (
+            <Link
+              href={ROUTES.landing}
+              className="text-sm sm:text-base text-primary hover:text-primary/80 font-medium"
+            >
+              About
+            </Link>
+          )}
           <div className="hidden lg:flex items-center space-x-4">
-            <Link href="/" className="text-primary hover:text-primary/80 font-medium">
+            <Link href={ROUTES.app} className="text-primary hover:text-primary/80 font-medium">
               Discover
             </Link>
             {isLoggedIn && (
@@ -66,7 +75,7 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
             </Link>
           ) : (
             <>
-              <Link href="/signup">
+              <Link href={ROUTES.signup}>
                 <Button size="sm" className="hidden lg:block">Login</Button>
               </Link>
             </>

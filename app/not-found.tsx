@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Home } from 'lucide-react'
+import { ROUTES } from '@/lib/constants'
 
 export default function NotFound() {
   return (
@@ -14,9 +15,9 @@ export default function NotFound() {
           </p>
         </div>
         <Button asChild size="lg">
-          <Link href="/" className="inline-flex items-center gap-2">
+          <Link href={ROUTES.app} className="inline-flex items-center gap-2">
             <Home className="w-4 h-4" />
-            Go Home
+            Browse dishes
           </Link>
         </Button>
       </div>

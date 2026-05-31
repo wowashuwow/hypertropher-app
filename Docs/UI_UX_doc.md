@@ -430,12 +430,20 @@ interface InlineCitySelectorProps {
 
 // Navigation Items
 const navItems = [
-  { href: "/", icon: Home, label: "Discover" },
+  { href: "/app", icon: Home, label: "Discover" },
   { href: "/add-dish", icon: PlusCircle, label: "Add Dish" },
   { href: "/my-wishlist", icon: Bookmark, label: "My Wishlist" },
   { href: "/my-dishes", icon: User, label: "My Dishes" }
 ]
 ```
+
+### Marketing landing (`/`)
+
+- **Theme:** Dark only on `/` (wrap in `className="dark"`; app routes stay light).
+- **Tokens:** Use `.dark` values from `app/globals.css` (`#0a0a0a` background, `#ffffff` text, `#141414` cards).
+- **Contrast:** Primary CTAs use **white label on red** (`#ff3333`); do not use black `primary-foreground` on red buttons. Secondary text: `muted-foreground` (`#a0a0a0`) for one-line helpers only.
+- **Nav:** Landing header — Browse dishes → `/app`. Logged-out app header — About → `/`.
+- **Docs:** `Docs/landing-page.md` (as-built), `Docs/landing-page-spec-final.yaml` (archive).
 
 ## User Journey Maps
 

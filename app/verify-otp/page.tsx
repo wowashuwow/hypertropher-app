@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { MainLayout } from "@/components/main-layout"
 import { useSession } from "@/lib/auth/session-provider"
+import { ROUTES } from "@/lib/constants"
 
 export default function VerifyOtpPage() {
   const [otp, setOtp] = useState("")
@@ -24,7 +25,7 @@ export default function VerifyOtpPage() {
 
   useEffect(() => {
     if (!email) {
-      router.push('/signup')
+      router.push(ROUTES.signup)
     }
   }, [email, router])
 
@@ -55,10 +56,9 @@ export default function VerifyOtpPage() {
         // Check if user needs to complete profile (signup flow)
         if (mode === 'signup' && !data.hasProfile) {
           // New user - redirect to complete profile
-          router.push('/complete-profile')
+          router.push(ROUTES.completeProfile)
         } else {
-          // Existing user login or signup with profile - go to homepage
-          router.push('/')
+          router.push(ROUTES.app)
         }
       } else {
         setMessage({type: 'error', text: data.error || 'Invalid OTP code. Please try again.'})

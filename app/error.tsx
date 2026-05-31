@@ -3,6 +3,8 @@
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Home, RefreshCw } from 'lucide-react'
+import Link from 'next/link'
+import { ROUTES } from '@/lib/constants'
 
 export default function Error({
   error,
@@ -31,10 +33,10 @@ export default function Error({
             Try Again
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <a href="/" className="inline-flex items-center gap-2">
+            <Link href={ROUTES.app} className="inline-flex items-center gap-2">
               <Home className="w-4 h-4" />
-              Go Home
-            </a>
+              Browse dishes
+            </Link>
           </Button>
         </div>
       </div>

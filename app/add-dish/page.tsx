@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Upload, AlertCircle } from "lucide-react"
 import { MainLayout } from "@/components/main-layout"
 import { ProtectedRoute } from "@/lib/auth/route-protection"
+import { ROUTES } from "@/lib/constants"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -300,7 +301,7 @@ export default function AddDishPage() {
       // Invalidate dishes cache so discover page shows new dish
       invalidateDishesCache()
       alert("Dish submitted successfully!")
-      router.push('/')
+      router.push(ROUTES.app)
     } catch (error) {
       console.error("Submission Error:", error)
       alert((error as Error).message)
@@ -400,7 +401,10 @@ export default function AddDishPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="photo">Photo</Label>
+                <Label htmlFor="photo">Photo (optional)</Label>
+                <p className="text-sm text-muted-foreground">
+                  Skip if you don&apos;t have one — building the trusted list matters more than photos.
+                </p>
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                   <input id="photo" type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   <label htmlFor="photo" className="cursor-pointer">

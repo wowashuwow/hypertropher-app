@@ -41,7 +41,10 @@ hypertropher-app/
 │   ├── loading.tsx                # Global loading states
 │   ├── not-found.tsx             # 404 error page
 │   ├── error.tsx                 # 500 error page
-│   └── page.tsx                  # Homepage
+│   ├── page.tsx                  # Landing page (invite / welcome)
+│   └── app/
+│       ├── layout.tsx            # Discover feed metadata
+│       └── page.tsx              # Discover feed (dish grid)
 ├── components/                   # Reusable UI components
 │   ├── ui/                       # Shadcn UI components
 │   │   ├── badge.tsx             # Status and category badges
@@ -66,6 +69,8 @@ hypertropher-app/
 │   ├── bottom-navigation.tsx     # Mobile navigation
 │   ├── dish-card.tsx             # Dish display component
 │   ├── header.tsx                # App header
+│   ├── landing-page.tsx          # Welcome page content
+│   ├── landing-redirect.tsx      # Auth redirects from /
 │   └── main-layout.tsx           # Layout wrapper
 ├── lib/                          # Utility libraries and configurations
 │   ├── auth/                     # Authentication utilities
@@ -81,6 +86,7 @@ hypertropher-app/
 │   │   └── service.ts            # Service role client for admin operations
 │   ├── services/                 # Service layer utilities
 │   │   └── reporting.ts          # Delivery app reporting service logic
+│   ├── constants.ts              # App routes and external URLs (LinkedIn invite)
 │   ├── clipboard.ts              # Clipboard API utility with fallback support
 │   ├── deep-links.ts             # Deep link configuration for all delivery apps
 │   ├── delivery-apps.ts          # Delivery apps by country mapping and utilities
