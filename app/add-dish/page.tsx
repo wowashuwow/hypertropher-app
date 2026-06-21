@@ -403,7 +403,7 @@ export default function AddDishPage() {
               <div className="space-y-2">
                 <Label htmlFor="photo">Photo (optional)</Label>
                 <p className="text-sm text-muted-foreground">
-                  Skip if you don&apos;t have one — building the trusted list matters more than photos.
+                  Skip if you don&apos;t have one. The list matters more than photos.
                 </p>
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                   <input id="photo" type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />

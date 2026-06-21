@@ -25,6 +25,17 @@
 - Secondary: Already have an invite code? → `/signup`
 - Tertiary: Browse dishes → `/app`
 
+## Sections (as-built June 2026)
+
+| Section | Notes |
+|---------|-------|
+| Hero | "INVITE ONLY" label, h1, subtext, LinkedIn CTA, secondary links |
+| Pain grid | "Sound familiar?" — 4 cards |
+| Value columns | Search / No scams / Help others — 3 columns |
+| Who gets in | "Selective on purpose." — 3 criteria cards + invite trust card |
+| Final CTA | LinkedIn template + CTA |
+| Hypertrophy definition | Full-width, bottom of page. "HYPERTROPHY." in large bold display, pronunciation in mono, clinical definition. Added June 2026. |
+
 ## Hero copy (user-edited May 2026)
 
 - **H1:** Discover high-protein dishes your city's lifters trust.

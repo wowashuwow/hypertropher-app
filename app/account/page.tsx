@@ -11,11 +11,13 @@ import { useSession } from "@/lib/auth/session-provider"
 import { ProfilePictureUpload } from "@/components/ui/profile-picture-upload"
 import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 import { toast } from "sonner"
-import { Check, Copy } from "lucide-react"
+import { Check, Copy, BookOpen, Map } from "lucide-react"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { copyToClipboard } from "@/lib/clipboard"
 import { createClient } from "@/lib/supabase/client"
 import { Textarea } from "@/components/ui/textarea"
+import Link from "next/link"
+import { ROUTES } from "@/lib/constants"
 
 
 interface InviteCode {
@@ -266,7 +268,25 @@ export default function AccountPage() {
     <ProtectedRoute>
       <MainLayout>
         <div className="max-w-2xl mx-auto py-8 px-6">
-          <h1 className="text-3xl font-bold text-foreground mb-8">Your Account</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-6">Your Account</h1>
+
+          {/* Quick links */}
+          <div className="flex gap-3 mb-8">
+            <Link
+              href={ROUTES.guide}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:border-primary/50 transition-colors"
+            >
+              <BookOpen size={15} className="text-primary" />
+              How to use Hypertropher
+            </Link>
+            <Link
+              href={ROUTES.roadmap}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium text-foreground hover:border-primary/50 transition-colors"
+            >
+              <Map size={15} className="text-primary" />
+              Roadmap
+            </Link>
+          </div>
 
           <div className="space-y-6">
             {/* City Selector */}
@@ -292,9 +312,8 @@ export default function AccountPage() {
             {/* Invite Codes Section */}
             <div className="space-y-2">
               <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground leading-relaxed">
-                You get five invite codes. Only share them with regular gym-goers who eat out
-                for gains and will contribute to the list — the same selective standard you met,
-                not random signups.
+                You get 3 invite codes. Only share them with gym-goers who eat out for gains
+                and will contribute. Hold the same standard you were held to.
               </div>
               <Label className="text-base font-medium">Your Invite Codes</Label>
               {loadingCodes ? (

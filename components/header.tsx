@@ -22,14 +22,12 @@ export function Header({ isLoggedIn = false }: HeaderProps) {
 
         {/* Navigation */}
         <div className="flex items-center space-x-4">
-          {!isLoggedIn && (
-            <Link
-              href={ROUTES.landing}
-              className="text-sm sm:text-base text-primary hover:text-primary/80 font-medium"
-            >
-              About
-            </Link>
-          )}
+          <Link
+            href={isLoggedIn ? ROUTES.about : ROUTES.landing}
+            className="text-sm sm:text-base text-primary hover:text-primary/80 font-medium"
+          >
+            About
+          </Link>
           <div className="hidden lg:flex items-center space-x-4">
             <Link href={ROUTES.app} className="text-primary hover:text-primary/80 font-medium">
               Discover

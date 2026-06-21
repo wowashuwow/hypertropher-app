@@ -11,6 +11,7 @@ import { BeFirstModal } from "@/components/ui/be-first-modal"
 import { ROUTES } from "@/lib/constants"
 import { useGeolocation } from "@/lib/hooks/use-geolocation"
 import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
+import { OnboardingTour } from "@/components/onboarding-tour"
 
 
 type ProteinSource = "All" | "Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other"
@@ -590,6 +591,7 @@ export default function HomePage() {
 
   return (
     <MainLayout>
+      {user && <OnboardingTour city={userCity} />}
       <div className="max-w-7xl mx-auto py-8 px-6">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-4">Hey {userName}! 👋</h1>

@@ -222,7 +222,7 @@ export function LandingPage() {
                 You decide who else joins.
               </p>
               <p className="text-base text-foreground/75">
-                Every member gets five invite codes. Pass them only to people who
+                Every member gets 3 invite codes. Pass them only to people who
                 meet the same bar. A bad entry hurts everyone.
               </p>
             </div>
@@ -278,6 +278,23 @@ export function LandingPage() {
             >
               Browse dishes →
             </Link>
+          </div>
+        </section>
+
+        <section className="px-6 py-24 border-t border-border">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">
+              What we&apos;re actually building for
+            </p>
+            <h2 className="text-6xl sm:text-7xl md:text-8xl font-extrabold tracking-tight text-foreground uppercase mb-8">
+              Hypertrophy.
+            </h2>
+            <p className="text-base text-muted-foreground font-mono mb-6">
+              /ˌhaɪpərˈtrōfē/ &nbsp; noun
+            </p>
+            <p className="text-xl sm:text-2xl text-foreground/75 leading-relaxed max-w-2xl">
+              The enlargement of skeletal muscle fibers through mechanical tension, metabolic stress, and muscle damage. Requires consistent training and adequate protein intake to sustain.
+            </p>
           </div>
         </section>
       </main>

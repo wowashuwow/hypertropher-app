@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
     // Note: We don't fail the signup if this fails, but it should succeed now
   }
 
-  // Generate 5 new invite codes for the new user
+  // Generate 3 new invite codes for the new user
   const newCodes = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     newCodes.push({
       code: generateInviteCode(),
       generated_by_user_id: user.id,

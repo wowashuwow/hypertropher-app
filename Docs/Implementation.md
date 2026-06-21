@@ -17,7 +17,8 @@
 | 11 | Security (React CVE patch) | ✅ Complete |
 | 12 | Landing page, `/app` split, LinkedIn invites | ✅ Complete |
 | 13 | App-wide dark theme (match landing) | ✅ Complete |
-| 14 | Code quality, performance & security hardening | 📋 Planned (next) |
+| 14 | Code quality, performance & security hardening | 📋 Planned |
+| 15 | Trust network rebrand: landing, guide, roadmap, onboarding tour | ✅ Complete |
 
 *Numbering note: An older changelog used **“Stage 10”** for the Middle East expansion—that work is **Stage 9.1** above. **Stage 10** is intentionally unused in the stage list to avoid confusion. New landing-page work is **Stage 12** (next stage after 11).*
 
@@ -687,6 +688,156 @@ Audit each file; prefer tokens over hardcoded colors.
 | Landing/app header double styles | Implement Part B spec once; compare side-by-side `/` vs `/app` |
 | Contrast on orange/yellow accents | Use accent colors for decoration only, not small text on `#0a0a0a` |
 
+### Stage 15: Trust Network Rebrand — Landing, Guide, Roadmap, Onboarding Tour
+**Status:** 📋 **PLANNED — next stage**
+**Duration:** 3–4 days
+**Dependencies:** Stage 13 complete
+
+#### Product context (why this stage exists)
+Hypertropher's positioning was drifting toward "food discovery app." The true identity is a **trusted close-friends dish network** built on a social trust graph. The invite system (now **3 codes** per user, down from 5) is the foundation of that graph — you vouch for who you bring in. Future features (friends-only mode, friends-of-friends filtering) depend on this graph being high-quality from day one. This stage aligns all user-facing surfaces with that identity.
+
+#### Locked product decisions
+| Decision | Choice |
+|----------|--------|
+| Invite codes per user | **3** (reduced from 5 — tighter network, higher trust) |
+| Landing hero positioning | Close-friends trust network, not food discovery |
+| Contribution emphasis | Equal to discovery — both pillars of the product |
+| Hypertrophy definition | Clinical definition, dramatically styled, bottom of landing |
+| Guide access | `/guide` page + 4-step onboarding tour shown once post-signup |
+| Roadmap + Guide links | From Account page only — keeps main nav clean |
+| `/about` page | Landing content without redirect — fixes logged-in access gap |
+| Screenshots | In `/guide` only (not landing) |
+
+---
+
+#### Task A — Change invite codes 5 → 3
+**Files:** `app/api/users/route.ts`, `app/account/page.tsx`, `components/landing-page.tsx`
+
+- [ ] Change invite code generation count from 5 to 3 in `app/api/users/route.ts`
+- [ ] Update stewardship copy in `app/account/page.tsx` ("You receive 3 codes after joining")
+- [ ] Update any "5 codes" references in `components/landing-page.tsx`
+
+> Note: This only affects new users going forward. Existing users keep however many codes they have.
+
+---
+
+#### Task B — `/about` page + logged-in header fix
+**Files:** new `app/about/page.tsx`, `components/header.tsx`
+
+- [ ] Create `app/about/page.tsx` — same content as landing (`<LandingPage />` component) but wrapped in a plain layout with **no** `LandingRedirect`. Accessible to logged-in and logged-out users.
+- [ ] Add `ROUTES.about = '/about'` to `lib/constants.ts`
+- [ ] Update logged-in `components/header.tsx`: show "About" → `/about` for logged-in users (currently only shows for logged-out)
+
+---
+
+#### Task C — `/roadmap` page
+**File:** new `app/roadmap/page.tsx`, new `components/roadmap-page.tsx`
+
+Public-facing. Tone: excited and honest — this is where we're taking the network.
+
+Sections:
+1. **Where we are** — invite-only, city-based, dual-pillar (contribute + discover), trust graph foundation
+2. **Friends-only mode** — coming soon: see only dishes added or recommended by your direct connections
+3. **Friends-of-friends** — expand trust one hop at a time; every invite extends the graph responsibly
+4. **Social proof tied to real relationships** — recommendations from people you know, not anonymous ratings
+5. **Why the invite limit exists** — 3 invites keeps the graph tight and trustworthy; quality > quantity
+6. **CTA** — "Request an invite" (LinkedIn) or "Share your invite code with the right person"
+
+- [ ] Build `components/roadmap-page.tsx` with sections above
+- [ ] Create `app/roadmap/page.tsx` (no MainLayout; standalone dark page like landing)
+- [ ] Add `ROUTES.roadmap = '/roadmap'` to `lib/constants.ts`
+- [ ] Link from `app/account/page.tsx` — "See what's coming →" above or below invite codes section
+
+---
+
+#### Task D — `/guide` page
+**File:** new `app/guide/page.tsx`, new `components/guide-page.tsx`
+
+Reference guide — accessible anytime from Account page. Also the destination if user taps "Read the guide" inside the onboarding tour.
+
+Sections:
+1. **Your city filter** — When logged in, you only see dishes from the city set in your profile. To change it: Account → City. Logged-out browsing shows dishes from the city selector in the feed.
+2. **Ratings explained**
+   - Protein: **Overloaded 🔥** (exceptional protein content) / **Assured ✅** (reliable but not exceptional)
+   - Taste: **Exceptional 🔥** / **Assured ✅**
+   - Overall Satisfaction: **Daily Fuel 🔥** (you'd eat this regularly for gains) / **Assured ✅** (solid but not a staple)
+3. **Contributing** — Adding dishes is how the network grows. Rate honestly; a dish anyone can find by searching doesn't need to be here — dishes your gym friends actually eat do.
+4. **Your 3 invite codes** — Only share with serious gym-goers who eat out for gains and will contribute. The standard you hold matters; every person you bring shapes what the community becomes.
+5. **App screenshots** (from `public/screenshots/`) — visual walkthrough of feed, dish card, add dish form, account page
+
+- [ ] Capture screenshots via puppeteer: `/app` feed, dish card scrolled into view, `/add-dish` form top, `/account` invite section. Save to `public/screenshots/`.
+- [ ] Build `components/guide-page.tsx` with sections above + embedded screenshots
+- [ ] Create `app/guide/page.tsx`
+- [ ] Add `ROUTES.guide = '/guide'` to `lib/constants.ts`
+- [ ] Link from `app/account/page.tsx` — "How to use Hypertropher →" near top of page
+
+---
+
+#### Task E — Onboarding tour (4-step overlay)
+**Files:** new `components/onboarding-tour.tsx`, `app/app/page.tsx`
+
+Shown exactly once, on first visit to `/app` after completing profile. Persisted via `localStorage` key `ht_tour_done`. Dismissable at any step.
+
+Steps:
+1. **Your city** — "You're seeing dishes from [city]. All dishes are city-specific. Change your city anytime from Account Settings."
+2. **Ratings** — "Three things rated per dish: Protein (Overloaded🔥 / Assured✅), Taste (Exceptional🔥 / Assured✅), Overall Satisfaction (Daily Fuel🔥 / Assured✅)."
+3. **Contributing** — "Added a great high-protein dish? Tap + Add Dish. This network runs on what members contribute."
+4. **Your invites** — "You have 3 invite codes. Only share with serious gym-goers who eat out for gains. The people you bring define this community."
+
+Footer on last step: "Read the full guide →" → `/guide`
+
+- [ ] Build `components/onboarding-tour.tsx` — modal overlay, step dots, Prev/Next/Done, dismiss X
+- [ ] Mount in `app/app/page.tsx` — check `localStorage.getItem('ht_tour_done')` on mount; show tour if not set; set key on completion or dismiss
+- [ ] Inject `userProfile.city` into step 1 copy dynamically
+
+---
+
+#### Task F — App screenshots for `/guide`
+*(Done as part of Task D, listed separately for clarity)*
+
+- [ ] Start dev server
+- [ ] Use puppeteer to capture and save:
+  - `public/screenshots/feed.png` — `/app` feed with dish cards visible
+  - `public/screenshots/dish-card.png` — single dish card scrolled into view
+  - `public/screenshots/add-dish.png` — add dish form (top half)
+  - `public/screenshots/account.png` — account page showing invite codes section
+
+---
+
+#### Task G — Landing page copy rewrite ~~CANCELLED~~
+**Decision (June 2026):** The full landing page copy rewrite (new hero, 6-section restructure, trust network positioning) was cancelled. The existing landing page copy in `components/landing-page.tsx` is retained as-is and is intentional.
+
+**What was done instead:**
+- The hypertrophy definition section was added to the bottom of `components/landing-page.tsx` as a standalone addition (dramatic all-caps display of "HYPERTROPHY." with clinical definition). This was the only element from the original Task G spec that was implemented.
+- "5 codes" references were updated to "3 codes" as part of Task A.
+
+**Do not reopen this task.** The current landing page copy is the approved version. Any future landing page work should be scoped as a new stage with fresh requirements.
+
+---
+
+#### Manual testing checklist (before marking complete)
+- [ ] `/` landing — new copy, no screenshots, hypertrophy definition at bottom, all CTAs work
+- [ ] `/about` — same as landing, accessible while logged in, no redirect
+- [ ] `/roadmap` — all sections render, LinkedIn CTA works, mobile layout correct
+- [ ] `/guide` — screenshots display, all sections readable, mobile layout correct
+- [ ] Account page — Guide link, Roadmap link, invite stewardship copy says "3 codes"
+- [ ] Onboarding tour — appears on first `/app` visit post-signup, city name injects correctly, doesn't reappear after dismiss/complete, "Read the full guide" links to `/guide`
+- [ ] Logged-in header — "About" link visible and goes to `/about`
+- [ ] Invite code generation — new users get 3 codes (test in Supabase or with fresh signup)
+- [ ] No references to "5 codes" remaining in UI copy
+
+#### Files changed (actual)
+| Area | Files |
+|------|--------|
+| Invite codes | `app/api/users/route.ts`, `app/account/page.tsx` |
+| Constants | `lib/constants.ts` (added `ROUTES.about`, `ROUTES.guide`, `ROUTES.roadmap`) |
+| New pages | `app/about/page.tsx`, `app/roadmap/page.tsx`, `app/guide/page.tsx` |
+| New components | `components/roadmap-page.tsx`, `components/guide-page.tsx`, `components/onboarding-tour.tsx` |
+| Updated | `components/landing-page.tsx` (hypertrophy definition added at bottom), `components/header.tsx`, `app/account/page.tsx`, `app/app/page.tsx` |
+| Screenshots | `public/screenshots/feed.png`, `public/screenshots/dish-card.png` (add-dish and account pending — require logged-in session) |
+
+---
+
 ### Stage 14: Code Quality, Performance & Security Hardening
 **Status:** 📋 **PLANNED — begin after Stage 13 (dark theme) is complete**
 **Duration:** 3–5 days
@@ -858,7 +1009,7 @@ Audit each file; prefer tokens over hardcoded colors.
 - Upload retry, real upload progress, CDN/PWA (see Future Performance section — compression already shipped)
 
 ### 📋 Next Steps
-1. **Stage 14** — Code quality, performance & security hardening (see stage plan above)
+1. **Stage 14** — Code quality, performance & security hardening
 2. Optional V2: server-side sort/filter, recommendation system (`FEATURE-Recommendation-System.md`)
 3. Pre-launch: remaining items in `Docs/PRE_LAUNCH_CHECKLIST.md`
 
@@ -1095,6 +1246,51 @@ The core app is working in production: restaurant-centric schema, email OTP + in
 - [ ] Server-side performance items — deferred
 
 ## Future Feature Enhancements
+
+### FEATURE-028: Dish Name Quality Enforcement (Medium Priority)
+**Status:** Planned. Research complete. Ready to implement.
+
+#### Background
+Users adding dishes with inconsistent casing ("grilled chicken" vs "Grilled Chicken") or spelling mistakes creates a poor browsing experience and makes the database harder to search. Two problems to solve:
+1. Casing inconsistency
+2. Spelling mistakes / typos in dish names
+
+#### No-photo dish UI (confirmed complete)
+Adding dishes without a photo is already fully implemented (Stage 12 Part E). The add-dish form marks photo as optional, the API accepts `image_url: null`, and `DishCard` has a neutral no-photo placeholder layout (UtensilsCrossed icon + dish name + protein source). No further work needed here.
+
+#### Sub-feature A: Auto title-case formatting
+**Approach:** Client-side only. Apply a `toTitleCase()` utility to `dishName` on every `onChange` event in `app/add-dish/page.tsx` and `app/edit-dish/[id]/page.tsx`.
+
+**Implementation:**
+- Add `toTitleCase(str: string): string` to `lib/utils.ts`
+- Handle common exceptions: prepositions and articles mid-name ("with", "and", "in", "a", "the") stay lowercase unless they are the first word
+- Apply on `setDishName(toTitleCase(e.target.value))` in both forms
+- No external dependency, instant feedback
+
+#### Sub-feature B: Dish name suggestions from own database
+**Approach:** When a user types in the dish name field, show suggestions from dishes already in the database. Prevents near-duplicates and spelling variants ("Griled Chicken" / "Grilled Chiken").
+
+**Recommended implementation:**
+- New API endpoint: `GET /api/dishes/suggestions?q=grilled+chic&city=Pune%2C+India` — returns distinct `dish_name` values matching the query (case-insensitive ILIKE), limited to 8 results
+- Client-side: debounced fetch (300ms) on dish name input; show a small dropdown of matching names the user can tap to fill
+- No external library needed; a simple `<ul>` dropdown anchored below the input is sufficient
+- City-scoped suggestions first (dishes from user's city), then global fallback
+
+**Why not external food APIs:**
+- Spoonacular, Edamam, Nutritionix are ingredient/recipe databases, not local restaurant dish name databases. Their suggestions ("Grilled Chicken Breast", "Chicken Tikka Masala") are generic and unlikely to match the specific dish names in the community's database.
+- Our own DB is a better signal: if "Grilled Fish with Sauteed Veggies" already exists, suggesting it prevents a duplicate entry with a typo.
+
+**Considered and rejected:** Fuse.js for client-side fuzzy search — the full dish name list would need to be pre-fetched, which is expensive. Server-side ILIKE is cheaper and more accurate for this use case.
+
+#### Files to change
+| File | Change |
+|------|--------|
+| `lib/utils.ts` | Add `toTitleCase()` |
+| `app/add-dish/page.tsx` | Apply title case on dish name input; add suggestion dropdown |
+| `app/edit-dish/[id]/page.tsx` | Same |
+| `app/api/dishes/suggestions/route.ts` | New endpoint (GET, public, rate-limited) |
+
+---
 
 ### Google OAuth Authentication (Medium Priority)
 **Status:** Planned for Future Implementation  
