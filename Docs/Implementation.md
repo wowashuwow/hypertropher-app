@@ -2,6 +2,7 @@
 
 **Last audited:** May 2026 (aligned with codebase on `main`)  
 **Current app URL layout:** Landing at `/`, discover feed at `/app` (Stage 12 complete)  
+**Theme:** Dark-only (Stage 13 complete). `:root` in `globals.css` uses dark palette; `className="dark"` on `<html>` in `layout.tsx`. Primary red unified to `#ff3333`.  
 **Auth:** Email + OTP only (phone auth removed in FEATURE-022)
 
 ## Stage index (quick reference)
@@ -15,6 +16,8 @@
 | 9.1 | Middle East delivery apps (Noon, Careem, Talabat) | ✅ Complete |
 | 11 | Security (React CVE patch) | ✅ Complete |
 | 12 | Landing page, `/app` split, LinkedIn invites | ✅ Complete |
+| 13 | App-wide dark theme (match landing) | ✅ Complete |
+| 14 | Code quality, performance & security hardening | 📋 Planned (next) |
 
 *Numbering note: An older changelog used **“Stage 10”** for the Middle East expansion—that work is **Stage 9.1** above. **Stage 10** is intentionally unused in the stage list to avoid confusion. New landing-page work is **Stage 12** (next stage after 11).*
 
@@ -509,6 +512,283 @@ Show a loading state while login status is unknown. Then:
 | Errors | `app/not-found.tsx`, `app/error.tsx` |
 | Docs | `Docs/landing-page.md`, `Docs/project_structure.md`, `Docs/UI_UX_doc.md` |
 
+### Stage 13: App-Wide Dark Theme (Match Landing) ✅ COMPLETE  
+**Duration:** 2–3 days  
+**Dependencies:** Stage 12 complete  
+
+#### Locked product / design decisions
+| Decision | Choice |
+|----------|--------|
+| Theme mode | **Dark only** (no light mode, no user toggle for v1) |
+| Brand red | **`#ff3333`** everywhere (landing `.dark` primary; retire light `#cc0000` on `:root`) |
+| Primary button label | **`text-white`** on `bg-primary` (never black `primary-foreground` on red) |
+| Typography | **Rethink Sans** (already global via `app/layout.tsx`; no change) |
+| App header | **Match landing:** sticky, `bg-background/90 backdrop-blur-sm`, `border-b`, `h-16`, `max-w-5xl`, logo `text-xl` extrabold uppercase |
+| Landing | Keep copy/layout; remove redundant inner `className="dark"` after global dark (optional cleanup) |
+| Routing / auth | **No behavior changes** (redirects, `/app`, LinkedIn CTAs unchanged) |
+
+#### Why the app looks wrong today
+- Landing wraps `className="dark"` locally → uses `.dark` tokens in `app/globals.css`.
+- App routes use `:root` **light** tokens (white `#ffffff` background, `#cc0000` primary).
+- Many screens use **hardcoded light Tailwind colors** (`bg-green-50`, `bg-red-50`, `bg-blue-600`, etc.) that will not flip with tokens.
+- Shadcn `Button` default uses `text-primary-foreground`; in `.dark` that is **black on `#ff3333`** (WCAG fail). Landing already overrides with `text-white`.
+
+#### Target design tokens (single palette on `:root`)
+Collapse landing dark values into `:root` so the whole app is dark without per-page wrappers:
+
+| Token | Value | Role |
+|-------|--------|------|
+| `background` | `#0a0a0a` | Page |
+| `foreground` | `#ffffff` | Headlines, primary UI text |
+| `card` | `#141414` | Cards, header, bottom nav |
+| `popover` | `#1a1a1a` | Select, dialog, dropdown surfaces |
+| `muted` | `#1f1f1f` | Input fills, chips, empty image areas |
+| `muted-foreground` | `#a0a0a0` | Captions, helpers, placeholders (short text only) |
+| `border` / `input` | `#2a2a2a` | Borders |
+| `primary` | `#ff3333` | Brand red (unified) |
+| `primary-foreground` | `#ffffff` | Text/icons on primary buttons |
+| `ring` | `#ff3333` | Focus rings |
+| `destructive` | `#ff3333` | Errors (or keep distinct if needed) |
+| `secondary` / `accent` | Keep landing dark oranges/yellows | Sparingly (icons, charts; not small body text on black) |
+
+**Text hierarchy (match landing):**
+- Long secondary copy: `text-foreground/75`
+- Short captions: `text-muted-foreground`
+- Nav links inactive: `text-muted-foreground hover:text-foreground`
+
+#### WCAG contrast rules (enforce in code review)
+| Pairing | Rule |
+|---------|------|
+| `foreground` on `background` | Default body/headings |
+| `foreground/75` on `background` | Paragraphs, card descriptions |
+| `muted-foreground` on `background` | One-line helpers only (~5.2:1 on `#0a0a0a`) |
+| `text-white` on `primary` (`#ff3333`) | All primary CTAs (~5.9:1 AA) |
+| `text-primary` on `background` | Links; verify if borderline |
+| Focus | Visible `ring-ring` on inputs/buttons |
+
+#### Implementation phases
+
+##### Part A — Global foundation
+- [ ] `app/globals.css`: Move dark token set to `:root`; set `--primary: #ff3333`, `--primary-foreground: #ffffff`; align sidebar/chart/destructive to same red family.
+- [ ] `app/layout.tsx`: Add `className="dark"` to `<html>` (or rely on `:root` only if `.dark` block removed); set Sonner `<Toaster theme="dark" />` (today: no theme, `richColors` only).
+- [ ] `components/ui/button.tsx`: Default variant `text-white` on `bg-primary` (belt-and-suspenders).
+- [ ] `components/ui/badge.tsx`, `checkbox.tsx`: Same primary-foreground fix if used on red.
+- [ ] Add semantic utility classes in `globals.css` (or small `components/ui/alert-banner.tsx`):
+  - `alert-success`, `alert-error`, `alert-info` using `bg-card` + tinted border (no `*-50` light washes).
+- [ ] `globals.css`: Dark-tuned shadows for `.comment-tray-3d` (lighter shadows on dark bg).
+- [ ] **Google Maps Places** (`globals.css`): Style `.pac-container`, `.pac-item`, `.pac-item-selected` (dark bg, light text, `border-border`) — used by `restaurant-search-input.tsx`, `city-search-input.tsx`, `use-google-places.ts`.
+- [ ] Optional: `prefers-color-scheme` — not needed (dark-only).
+
+##### Part B — App shell (match landing header)
+- [ ] `components/header.tsx`: Sticky `top-0 z-50`, `bg-background/90 backdrop-blur-sm`, inner `max-w-5xl mx-auto px-6 h-16`; logo `text-xl`; Add Dish `text-white`; profile fallback avatar → on-brand (`from-primary/80 to-primary` or `bg-muted` + initials), not blue–purple gradient.
+- [ ] `components/bottom-navigation.tsx`: Already `bg-card`; verify active/inactive contrast on dark.
+- [ ] `components/main-layout.tsx`: `bg-background`; loading spinner uses tokens.
+- [ ] `components/landing-page.tsx`: Remove redundant outer `dark` wrapper (optional, after global dark).
+- [ ] `components/landing-redirect.tsx`: Simplify loading wrappers if redundant.
+
+##### Part C — Shadcn / shared UI (`components/ui/`)
+Audit each file; prefer tokens over hardcoded colors.
+
+| File | Notes |
+|------|--------|
+| `button.tsx` | Part A |
+| `input.tsx`, `textarea.tsx`, `label.tsx` | Placeholder/disabled on dark |
+| `select.tsx`, `popover.tsx`, `dialog.tsx` | `bg-popover` surfaces |
+| `card.tsx` | Default card |
+| `checkbox.tsx`, `badge.tsx` | Primary contrast |
+| `command.tsx` | If used in combobox patterns |
+| `multi-select.tsx` | Dropdown |
+| `delivery-app-pills.tsx` | Already `bg-muted` |
+| `inline-city-selector.tsx` | Token-based; verify Select dropdown |
+| `city-search-input.tsx` | Custom dropdown `bg-background` — OK; Maps pac CSS Part A |
+| `restaurant-search-input.tsx` | Custom dropdown + Maps pac |
+| `restaurant-input.tsx` | **Replace** blue/green/red-50 alert boxes with semantic alerts |
+| `profile-picture-upload.tsx` | Replace `from-blue-400 to-purple-500` fallback |
+| `be-first-modal.tsx` | Dialog + `bg-muted/50` blocks |
+| `spinner.tsx` | Token borders |
+| `avatar.tsx` | Fallback colors |
+
+##### Part D — Core product components
+| File | Hardcoded issues found (grep) |
+|------|-------------------------------|
+| `components/dish-card.tsx` | `bg-white/90` bookmark; `text-gray-600`; `bg-green-100`/`bg-blue-100` badges; `bg-green-600`/`bg-blue-600` action buttons; blue–purple avatar gradients |
+| `app/app/page.tsx` | `bg-red-50` error banner; protein filter buttons (use fixed Button tokens) |
+| `app/signup/page.tsx` | Green success circle; green/red-50 messages; green/red validation icons |
+| `app/verify-otp/page.tsx` | green/red-50 messages |
+| `app/complete-profile/page.tsx` | green/red-50 messages |
+| `app/account/page.tsx` | `bg-green-100` invite pills; green copy feedback; AvatarFallback gradient |
+| `app/edit-dish/[id]/page.tsx` | `bg-red-50` error; `text-green-600` success |
+| `app/add-dish/page.tsx` | Submit spinner `border-white` on primary button (verify contrast) |
+
+**DishCard action buttons (product decision in implementation):** Map Navigate / delivery CTAs to `bg-primary text-white` or `outline` variant — drop one-off `green-600` / `blue-600` so actions match brand.
+
+##### Part E — Pages without MainLayout
+| File | Notes |
+|------|--------|
+| `app/not-found.tsx` | Token-based; ensure primary Button uses white text |
+| `app/error.tsx` | Same |
+| `app/page.tsx` | Landing route only (no MainLayout) |
+| `app/edit-dish/[id]/loading.tsx` | Uses MainLayout |
+
+##### Part F — External / runtime UI
+| Integration | File(s) | Action |
+|-------------|---------|--------|
+| **Sonner toasts** | `app/layout.tsx` | `theme="dark"`; test success/error toasts on dark bg |
+| **Google Maps script** | `app/layout.tsx` | No theme API; CSS override for `.pac-container` (Part A) |
+| **Google Maps deep links** | `dish-card.tsx` | No UI change |
+| **Vercel Analytics** | `layout.tsx` | No theme impact |
+| **User-uploaded images** | DishCard, profile | Unchanged; ensure borders `border-border` |
+| **Emoji ratings** | `dish-card.tsx` | OK on dark (no color dependency) |
+
+##### Part G — Documentation (after implementation)
+- [ ] `Docs/UI_UX_doc.md` — Replace light-first palette; document dark-only, `#ff3333`, text roles, header spec, semantic alerts.
+- [ ] `Docs/project_structure.md` — Note global dark theme on `layout.tsx`.
+- [ ] `Docs/landing-page.md` — Note app shares same tokens (no longer “app stays light”).
+- [ ] `Docs/PRE_LAUNCH_CHECKLIST.md` — Add “dark theme smoke test on production” if needed.
+
+#### Out of scope (Stage 13)
+- Light mode or theme toggle
+- Re-designing landing copy or layout
+- Changing routing, auth, or API behavior
+- Redesigning DishCard information architecture (colors only unless bugs found)
+- Google Maps embedded map tiles (only autocomplete dropdown + existing buttons)
+
+#### Manual testing checklist (before marking complete)
+- [ ] `/` landing unchanged visually (or intentionally aligned with app header)
+- [ ] `/app` feed, filters, empty state, error banner on dark
+- [ ] `/signup`, `/verify-otp`, `/complete-profile` — forms, success/error states readable
+- [ ] `/add-dish`, `/edit-dish/[id]` — all steps, restaurant search dropdown (Maps pac), delivery pills
+- [ ] `/account` — invite codes, profile picture upload fallback
+- [ ] `/my-dishes`, `/my-wishlist` — grids and DishCards
+- [ ] Modals: BeFirst, dish comment expand, dialogs
+- [ ] Toasts (success/error) on dark
+- [ ] Mobile bottom nav + sticky safe areas
+- [ ] 404 / error pages
+- [ ] Logged-in `/` still redirects to `/app`; `/?preview=landing` still works
+- [ ] Primary buttons: white label on red everywhere
+- [ ] No bright `*-50` alert boxes left on main flows
+
+#### Files expected to change (reference)
+| Area | Files |
+|------|--------|
+| Tokens / global | `app/globals.css`, `app/layout.tsx` |
+| Shell | `components/header.tsx`, `components/bottom-navigation.tsx`, `components/main-layout.tsx` |
+| UI primitives | `components/ui/button.tsx`, `badge.tsx`, `restaurant-input.tsx`, `profile-picture-upload.tsx`, (+ audit list Part C) |
+| Product | `components/dish-card.tsx`, `app/app/page.tsx`, auth pages, `app/account/page.tsx`, `app/edit-dish/[id]/page.tsx` |
+| Landing cleanup | `components/landing-page.tsx`, `components/landing-redirect.tsx` (optional) |
+| Docs | `Docs/UI_UX_doc.md`, `Docs/project_structure.md`, `Docs/landing-page.md` |
+
+#### Risk register
+| Risk | Mitigation |
+|------|------------|
+| Maps autocomplete stays white | Dedicated `.pac-container` CSS in `globals.css` |
+| Missed hardcoded color | Ripgrep `bg-green-\|bg-red-50\|bg-blue-\|text-gray-\|bg-white` before merge |
+| Primary button regression | Single `button.tsx` fix + spot-check all `Button`/`asChild` links |
+| Landing/app header double styles | Implement Part B spec once; compare side-by-side `/` vs `/app` |
+| Contrast on orange/yellow accents | Use accent colors for decoration only, not small text on `#0a0a0a` |
+
+### Stage 14: Code Quality, Performance & Security Hardening
+**Status:** 📋 **PLANNED — begin after Stage 13 (dark theme) is complete**
+**Duration:** 3–5 days
+**Dependencies:** Stage 13 complete
+
+> This stage addresses findings from the June 2026 static analysis audit. All items are actionable with no product-visible behaviour changes except the image optimisation (visible quality/speed improvement).
+
+#### Priority 1 — Critical performance (do first)
+
+##### 1A — Fix N+1 queries in dishes and wishlist APIs
+**Files:** `app/api/dishes/route.ts:165–237`, `app/api/wishlist/route.ts:78–144`
+
+- [ ] Replace per-dish `Promise.all` loop (user profile RPC + availability channels + delivery apps) with a single Supabase nested select:
+  ```
+  .select(`*, restaurants(*), dish_availability_channels(*, dish_delivery_apps(*))`)
+  ```
+- [ ] Batch-fetch all user profiles for returned dishes in one RPC call instead of one call per dish
+- [ ] Remove the duplicate enhancement loop in `wishlist/route.ts` (same pattern as dishes route — extract into a shared `enhanceDishes()` utility)
+- [ ] Measure query count before/after in Supabase dashboard logs
+
+##### 1B — Replace `<img>` with `next/image`
+**Files:** `components/dish-card.tsx:285,461,509,545,630,701`, `components/header.tsx:56`, `app/edit-dish/[id]/page.tsx:673`
+
+- [ ] Swap all raw `<img>` tags to `<Image>` from `next/image`; set appropriate `width`/`height` or `fill` + `sizes`
+- [ ] Add `priority` prop on the first dish card image in the feed (above-the-fold LCP)
+- [ ] Ensure Supabase Storage domain is in `next.config.mjs` under `images.remotePatterns`
+
+---
+
+#### Priority 2 — High quality / architecture
+
+##### 2A — Extract duplicated logic into shared utilities
+**Files:** `app/api/dishes/route.ts`, `app/api/wishlist/route.ts`, `app/api/upload-profile-picture/route.ts`
+
+- [ ] Create `lib/utils/storage.ts` with a single `extractImagePath(url: string, bucket: string): string` function; remove the two near-identical implementations in dishes and upload-profile-picture routes
+- [ ] Create `lib/services/dish-service.ts` with `enhanceDishes(dishes)` — used by both the dishes API and wishlist API (resolves H2 + the N+1 fix from 1A)
+- [ ] Create a single canonical `Dish` TypeScript interface in `lib/types/dish.ts` and update all import sites (currently defined in 5+ places)
+
+##### 2B — Pull business logic out of components
+**Files:** `app/app/page.tsx:512–570`, `app/add-dish/page.tsx:95–121`, `components/dish-card.tsx:134–198`
+
+- [ ] Move filtering/sorting logic from `app/app/page.tsx` into `lib/utils/dish-filters.ts`
+- [ ] Move image compression invocation from `app/add-dish/page.tsx` into a `useImageUpload()` hook in `lib/hooks/`
+- [ ] Move deep-link and navigation helpers from `dish-card.tsx` into `lib/utils/navigation.ts`
+
+---
+
+#### Priority 3 — Medium security
+
+##### 3A — Add input validation to API routes
+- [ ] `app/api/users/route.ts:28` — add `maxLength: 100` check on `name`
+- [ ] `app/api/feedback/route.ts:18` — add `maxLength: 2000` check on `message`; validate `type` is one of `['bug', 'feature', 'general']`
+- [ ] `app/api/dishes/route.ts:61` — validate `protein_source` against the allowed ENUM values (read from a shared constant, not inline)
+- [ ] `app/api/auth/signup/route.ts:21` — replace permissive email regex with `email-validator` package or a stricter RFC 5321 pattern
+
+##### 3B — Extend rate limiting to remaining mutation endpoints
+- [ ] Copy the existing rate-limit pattern from `app/api/auth/signup/route.ts` to:
+  - `app/api/feedback/route.ts`
+  - `app/api/dishes/report/route.ts`
+  - `app/api/wishlist/route.ts` (write operations only)
+
+##### 3C — Harden file upload MIME validation
+- [ ] `app/api/upload-profile-picture/route.ts:60–68` — read the first 4 bytes of the uploaded buffer and check magic bytes (`ffd8ff` for JPEG, `89504e47` for PNG, `52494646` for WebP) in addition to the `file.type` check
+
+---
+
+#### Priority 4 — Medium quality / performance
+
+##### 4A — Wrap DishCard in React.memo
+- [ ] `components/dish-card.tsx` — wrap export with `React.memo`; verify bookmark toggle no longer re-renders the whole list in the feed
+
+##### 4B — Surface silent errors
+- [ ] `app/api/dishes/route.ts:36,357–361` — log image deletion failures to `console.error` and include a non-blocking warning in the API response JSON (`imageCleanupWarning`)
+- [ ] `lib/auth/session-provider.tsx:58–61` — distinguish 404 (no profile yet) from 5xx (fetch error); set a separate `profileError` state for the latter
+
+---
+
+#### Manual testing checklist (before marking complete)
+- [ ] Discover feed loads with ≤ 5 DB queries per page (verify in Supabase logs)
+- [ ] Images on feed, DishCard, header load via `next/image` (confirm in Network tab — `/next/image` path)
+- [ ] Bookmark a dish — only that card re-renders (React DevTools Profiler)
+- [ ] Submit feedback with `message` > 2000 chars → 400 response
+- [ ] Upload a `.txt` file renamed to `.jpg` → rejected by upload API
+- [ ] Rate limit: >5 feedback submissions in a row → 429 response
+- [ ] No TypeScript errors (`tsc --noEmit`)
+
+#### Files expected to change
+| Area | Files |
+|------|--------|
+| New utilities | `lib/utils/storage.ts`, `lib/utils/dish-filters.ts`, `lib/utils/navigation.ts`, `lib/types/dish.ts` |
+| New hooks | `lib/hooks/use-image-upload.ts` |
+| New service | `lib/services/dish-service.ts` |
+| API routes | `app/api/dishes/route.ts`, `app/api/wishlist/route.ts`, `app/api/users/route.ts`, `app/api/feedback/route.ts`, `app/api/dishes/report/route.ts`, `app/api/upload-profile-picture/route.ts`, `app/api/auth/signup/route.ts` |
+| Components | `components/dish-card.tsx`, `components/header.tsx`, `app/app/page.tsx`, `app/add-dish/page.tsx`, `app/edit-dish/[id]/page.tsx` |
+| Config | `next.config.mjs` (image remote patterns) |
+
+#### Stage index update
+> After completing this stage, update the Stage index table at the top of this file to add:
+> `| 14 | Code quality, performance & security hardening | ✅ Complete |`
+
+---
+
 ## Current Status Summary
 
 > **Changelog vs stages:** Older entries below are a historical journal. For authoritative stage status, use the **Stage index** and **Implementation Stages** sections above.
@@ -578,8 +858,9 @@ Show a loading state while login status is unknown. Then:
 - Upload retry, real upload progress, CDN/PWA (see Future Performance section — compression already shipped)
 
 ### 📋 Next Steps
-1. Optional V2: server-side sort/filter, recommendation system (`FEATURE-Recommendation-System.md`)
-2. Pre-launch: remaining items in `Docs/PRE_LAUNCH_CHECKLIST.md`
+1. **Stage 14** — Code quality, performance & security hardening (see stage plan above)
+2. Optional V2: server-side sort/filter, recommendation system (`FEATURE-Recommendation-System.md`)
+3. Pre-launch: remaining items in `Docs/PRE_LAUNCH_CHECKLIST.md`
 
 ### 🚧 Critical Bug Fixed (January 30, 2025 - Morning)
 **What We Actually Fixed Today (Morning):**

@@ -686,16 +686,16 @@ export default function HomePage() {
 
         {/* Location Permission Denied Message */}
         {!userLocation && locationPermissionRequested && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
             <div className="flex items-start gap-3">
-              <div className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0">
+              <div className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0">
                 ⚠️
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-900">
+                <p className="text-sm font-medium text-foreground">
                   Location access was denied
                 </p>
-                <p className="text-xs text-red-700 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   To enable location access: Go to your browser settings → Site Settings → Location → Allow for this website
                 </p>
               </div>

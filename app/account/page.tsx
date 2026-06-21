@@ -316,7 +316,7 @@ export default function AccountPage() {
                             <div className="flex items-center gap-2">
                               <p className="font-mono text-lg font-semibold">{inviteCode.code}</p>
                               {!inviteCode.is_used && (
-                                <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">
+                                <span className="px-2 py-1 text-xs rounded-full bg-primary/15 text-primary">
                                   Available
                                 </span>
                               )}
@@ -331,8 +331,8 @@ export default function AccountPage() {
                           >
                             {isCopied ? (
                               <>
-                                <Check className="w-4 h-4 text-green-600" />
-                                <span className="text-green-600">Copied!</span>
+                                <Check className="w-4 h-4 text-primary" />
+                                <span className="text-primary">Copied!</span>
                               </>
                             ) : (
                               <>
@@ -352,7 +352,7 @@ export default function AccountPage() {
                                   alt={`${firstName}'s profile`}
                                 />
                               ) : null}
-                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
+                              <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white text-xs font-semibold">
                                 {firstNameInitial}
                               </AvatarFallback>
                             </Avatar>

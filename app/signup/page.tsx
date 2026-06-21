@@ -124,8 +124,8 @@ export default function SignUpPage() {
       {showSuccessAnimation && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-[fadeIn_0.3s_ease-out]">
           <div className="flex flex-col items-center gap-4 animate-[zoomIn_0.3s_ease-out]">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center animate-[scaleIn_0.3s_ease-out]">
-              <Check className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center animate-[scaleIn_0.3s_ease-out]">
+              <Check className="w-8 h-8 text-primary" />
             </div>
             <p className="text-lg font-semibold text-foreground">Invite code verified!</p>
           </div>
@@ -163,9 +163,9 @@ export default function SignUpPage() {
               {/* Message Display */}
               {message && (
                 <div className={`mb-4 p-3 rounded-md text-sm ${
-                  message.type === 'success' 
-                    ? 'bg-green-50 text-green-800 border border-green-200' 
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                  message.type === 'success'
+                    ? 'bg-primary/10 text-foreground border border-primary/30'
+                    : 'bg-destructive/10 text-foreground border border-destructive/30'
                 }`}>
                   {message.text}
                 </div>
@@ -196,7 +196,7 @@ export default function SignUpPage() {
                         {isLoading && authMode === 'signup' ? (
                           <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                         ) : showSuccessAnimation ? (
-                          <Check className="w-4 h-4 text-green-600 animate-[zoomIn_0.3s_ease-out]" />
+                          <Check className="w-4 h-4 text-primary animate-[zoomIn_0.3s_ease-out]" />
                         ) : codeValidationError ? (
                           <X className="w-4 h-4 text-red-500" />
                         ) : null}

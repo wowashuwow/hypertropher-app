@@ -294,9 +294,9 @@ export function DishCard({
         )}
         <button
           onClick={handleBookmarkClick}
-          className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md"
+          className="absolute top-3 right-3 p-2.5 bg-background/90 backdrop-blur-sm rounded-full hover:bg-background transition-all shadow-md"
         >
-          <Bookmark className={cn("w-4 h-4", bookmarked ? "fill-primary text-primary" : "text-gray-600")} />
+          <Bookmark className={cn("w-4 h-4", bookmarked ? "fill-primary text-primary" : "text-muted-foreground")} />
         </button>
       </div>
 
@@ -318,7 +318,7 @@ export function DishCard({
               "flex h-8 w-8 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200 flex-shrink-0",
               "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40",
               "active:scale-95",
-              copyFeedback.dish && "text-emerald-600 bg-emerald-50 scale-110"
+              copyFeedback.dish && "text-primary bg-primary/10 scale-110"
             )}
           >
             {copyFeedback.dish ? (
@@ -333,12 +333,12 @@ export function DishCard({
         {(isCloudKitchen || distance !== undefined) && (
           <div className="mb-1">
             {isCloudKitchen ? (
-              <span className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-green-100 text-green-800">
+              <span className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-muted text-muted-foreground">
                 <Cloud className="h-3 w-3" />
                 Cloud Kitchen
               </span>
             ) : distance !== undefined ? (
-              <span className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap bg-muted text-muted-foreground">
                 <MapPin className="h-3 w-3" />
                 {formatDistance(distance)}
               </span>
@@ -363,7 +363,7 @@ export function DishCard({
               "flex h-8 w-8 items-center justify-center rounded-full border border-transparent bg-muted/60 text-muted-foreground transition-all duration-200 flex-shrink-0",
               "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/40",
               "active:scale-95",
-              copyFeedback.restaurant && "text-emerald-600 bg-emerald-50 scale-110"
+              copyFeedback.restaurant && "text-primary bg-primary/10 scale-110"
             )}
           >
             {copyFeedback.restaurant ? (
@@ -390,7 +390,7 @@ export function DishCard({
             />
           ) : null}
           <div 
-            className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 ${
+            className={`w-6 h-6 bg-gradient-to-br from-primary/80 to-primary rounded-full flex items-center justify-center flex-shrink-0 ${
               addedByProfilePicture ? 'hidden' : ''
             }`}
           >
@@ -432,7 +432,7 @@ export function DishCard({
           <div className="space-y-2">
             {/* In-Store button */}
             <Button 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 flex items-center justify-center gap-2"
+              className="w-full bg-primary hover:bg-primary/90 text-white border-0 flex items-center justify-center gap-2"
               onClick={handleNavigate}
               disabled={!hasGoogleMapsData}
             >
@@ -537,7 +537,7 @@ export function DishCard({
           </div>
         ) : availabilityInfo.type === 'online' ? (
           <Button 
-            className="w-full bg-green-600 hover:bg-green-700 text-white border-0 flex items-center justify-center gap-2"
+            className="w-full bg-primary hover:bg-primary/90 text-white border-0 flex items-center justify-center gap-2"
             disabled
           >
             {/* Generic online icon hidden for now */}
@@ -552,7 +552,7 @@ export function DishCard({
           </Button>
         ) : (
           <Button 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white border-0 flex items-center justify-center gap-2"
+            className="w-full bg-primary hover:bg-primary/90 text-white border-0 flex items-center justify-center gap-2"
             onClick={handleNavigate}
             disabled={!hasGoogleMapsData}
           >
@@ -640,7 +640,7 @@ export function DishCard({
                   />
                 ) : null}
                 <div 
-                  className={`w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center border-2 border-background shadow-sm ${
+                  className={`w-6 h-6 bg-gradient-to-br from-primary/80 to-primary rounded-full flex items-center justify-center border-2 border-background shadow-sm ${
                     addedByProfilePicture ? 'hidden' : ''
                   }`}
                 >

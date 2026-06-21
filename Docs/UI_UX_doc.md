@@ -27,53 +27,47 @@ Hypertropher follows a modern, mobile-first design approach with a focus on acce
 
 ## Color Palette
 
-### Primary Colors (Updated - v0 Design System)
+**Theme: Dark-only (Stage 13). No light mode, no user toggle.**
+All tokens live in `:root` in `app/globals.css`. `className="dark"` on `<html>` in `app/layout.tsx`.
+
+### Design tokens
 ```css
-/* Primary Brand Colors - Energetic Red/Orange Theme */
---primary: #cc0000;                  /* Bold red for powerful, energetic look */
---primary-foreground: #ffffff;       /* White text on primary */
-
-/* Secondary Colors */
---secondary: #ff4400;                /* Deep orange to complement red */
---secondary-foreground: #ffffff;     /* White text on secondary */
-
-/* Accent Colors */
---accent: #ff8800;                   /* Warm amber accent */
---accent-foreground: #ffffff;        /* White text on accent */
+--background: #0a0a0a;         /* Page background */
+--foreground: #ffffff;         /* Headlines, primary UI text */
+--card: #141414;               /* Cards, header, bottom nav */
+--popover: #1a1a1a;            /* Select, dialog, dropdown surfaces */
+--muted: #1f1f1f;              /* Input fills, chips, empty image areas */
+--muted-foreground: #a0a0a0;   /* Captions, helpers — short text only */
+--border: #2a2a2a;             /* Borders and input outlines */
+--primary: #ff3333;            /* Brand red (unified) */
+--primary-foreground: #ffffff; /* White text on red buttons (WCAG AA ~5.9:1) */
+--destructive: #ff3333;        /* Errors */
+--destructive-foreground: #ffffff;
+--secondary: #ff6600;          /* Deep orange — use sparingly */
+--accent: #ffbb00;             /* Golden yellow — decoration/icons only */
+--ring: #ff3333;               /* Focus rings */
 ```
 
-### Semantic Colors
-```css
-/* Status Colors */
---destructive: 0 84.2% 60.2%;        /* Red for errors */
---destructive-foreground: 210 40% 98%; /* Light text on destructive */
+### Text hierarchy
+- Headlines / primary: `text-foreground` (`#ffffff`)
+- Long secondary copy: `text-foreground/75`
+- Short one-line captions: `text-muted-foreground` (`#a0a0a0`)
+- Links / brand accents: `text-primary` (`#ff3333`)
 
-/* Success Colors */
---success: 142.1 76.2% 36.3%;        /* Green for success */
---success-foreground: 355.7 100% 97.3%; /* Light text on success */
+### WCAG contrast rules
+| Pairing | Rule |
+|---------|------|
+| `foreground` on `background` | Body and headings |
+| `foreground/75` on `background` | Paragraphs, card descriptions |
+| `muted-foreground` on `background` | One-line helpers only (~5.2:1) |
+| `text-white` on `primary` (#ff3333) | All primary CTAs (~5.9:1 AA ✅) |
+| Accent (#ffbb00) | Decoration/icons only — not small text on `#0a0a0a` |
 
-/* Warning Colors */
---warning: 38 92% 50%;                /* Orange for warnings */
---warning-foreground: 48 96% 89%;     /* Light text on warning */
+### Semantic alert pattern (no *-50 light washes)
 ```
-
-### Neutral Colors
-```css
-/* Background Colors */
---background: 0 0% 100%;              /* White background */
---foreground: 222.2 84% 4.9%;         /* Dark text */
-
-/* Card Colors */
---card: 0 0% 100%;                    /* White card background */
---card-foreground: 222.2 84% 4.9%;    /* Dark text on cards */
-
-/* Border Colors */
---border: 214.3 31.8% 91.4%;          /* Light gray borders */
---input: 214.3 31.8% 91.4%;           /* Input border color */
-
-/* Muted Colors */
---muted: 210 40% 96%;                 /* Muted background */
---muted-foreground: 215.4 16.3% 46.9%; /* Muted text */
+success → bg-primary/10    border-primary/30    text-foreground
+error   → bg-destructive/10  border-destructive/30  text-foreground
+info    → bg-card  border-border  text-foreground
 ```
 
 ## Typography
@@ -439,9 +433,9 @@ const navItems = [
 
 ### Marketing landing (`/`)
 
-- **Theme:** Dark only on `/` (wrap in `className="dark"`; app routes stay light).
-- **Tokens:** Use `.dark` values from `app/globals.css` (`#0a0a0a` background, `#ffffff` text, `#141414` cards).
-- **Contrast:** Primary CTAs use **white label on red** (`#ff3333`); do not use black `primary-foreground` on red buttons. Secondary text: `muted-foreground` (`#a0a0a0`) for one-line helpers only.
+- **Theme:** Dark globally (Stage 13 — `:root` in `app/globals.css` is dark; `className="dark"` on `<html>`). Landing page's local `className="dark"` wrapper is now redundant but harmless.
+- **Tokens:** Same as app — `#0a0a0a` background, `#ffffff` text, `#141414` cards, `#ff3333` primary.
+- **Contrast:** Primary CTAs use **white label on red** (`#ff3333`); `primary-foreground: #ffffff`. Secondary text: `muted-foreground` (`#a0a0a0`) for one-line helpers only.
 - **Nav:** Landing header — Browse dishes → `/app`. Logged-out app header — About → `/`.
 - **Docs:** `Docs/landing-page.md` (as-built), `Docs/landing-page-spec-final.yaml` (archive).
 

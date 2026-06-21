@@ -706,7 +706,7 @@ export default function EditDishPage() {
                       </div>
                     )}
                     {uploadStatus === 'completed' && (
-                      <div className="text-sm text-green-600">
+                      <div className="text-sm text-primary">
                         Photo uploaded successfully!
                       </div>
                     )}
@@ -844,7 +844,7 @@ export default function EditDishPage() {
 
                 {/* Error Message */}
                 {error && (
-                  <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md">
+                  <div className="text-destructive text-sm bg-destructive/10 p-3 rounded-md border border-destructive/30">
                     {error}
                   </div>
                 )}

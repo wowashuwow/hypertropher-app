@@ -113,21 +113,21 @@ export function RestaurantInput({
         <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/30">
           {/* Location Permission Request */}
           {!locationPermissionGranted && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 bg-card border border-border rounded-lg">
               <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-blue-900">
+                  <p className="text-sm font-medium text-foreground">
                     Find restaurants near you
                   </p>
-                  <p className="text-xs text-blue-700 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Allow location access to see restaurants ranked by distance from your current location.
                   </p>
                   <Button
                     type="button"
                     size="sm"
                     onClick={onRequestLocationPermission}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                    className="mt-2"
                     disabled={disabled}
                   >
                     Allow Location Access
@@ -139,29 +139,17 @@ export function RestaurantInput({
 
           {/* Location Error Messages */}
           {locationError && (
-            <div className={`p-3 border rounded-lg ${
-              locationErrorType === 'BROWSER_LEVEL_DENIED' 
-                ? 'bg-red-50 border-red-200' 
-                : 'bg-yellow-50 border-yellow-200'
-            }`}>
+            <div className="p-3 border border-destructive/40 bg-destructive/10 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                  locationErrorType === 'BROWSER_LEVEL_DENIED' 
-                    ? 'text-red-600' 
-                    : 'text-yellow-600'
-                }`} />
-                <div className={`text-sm ${
-                  locationErrorType === 'BROWSER_LEVEL_DENIED' 
-                    ? 'text-red-800' 
-                    : 'text-yellow-800'
-                }`}>
+                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-destructive" />
+                <div className="text-sm text-foreground">
                   <p className="font-medium">
-                    {locationErrorType === 'BROWSER_LEVEL_DENIED' 
-                      ? 'Location Access Blocked' 
+                    {locationErrorType === 'BROWSER_LEVEL_DENIED'
+                      ? 'Location Access Blocked'
                       : 'Location Access Denied'
                     }
                   </p>
-                  <p className="text-xs mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {locationError}
                   </p>
                   {locationErrorType === 'BROWSER_LEVEL_DENIED' && (
@@ -169,7 +157,8 @@ export function RestaurantInput({
                       type="button"
                       size="sm"
                       onClick={onRequestLocationPermission}
-                      className="mt-2 bg-red-600 hover:bg-red-700 text-white"
+                      className="mt-2"
+                      variant="destructive"
                       disabled={disabled}
                     >
                       Try Again After Fixing Settings
@@ -180,7 +169,7 @@ export function RestaurantInput({
                       type="button"
                       size="sm"
                       onClick={onRequestLocationPermission}
-                      className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white"
+                      className="mt-2"
                       disabled={disabled}
                     >
                       Allow Location Access
@@ -192,12 +181,12 @@ export function RestaurantInput({
           )}
 
           {locationPermissionGranted && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="p-3 bg-card border border-border rounded-lg">
               <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-green-800">
+                <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-foreground">
                   <p className="font-medium">Location Access Granted</p>
-                  <p className="text-xs mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Searching restaurants near your location for better results.
                   </p>
                 </div>

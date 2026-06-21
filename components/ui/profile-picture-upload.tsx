@@ -207,7 +207,7 @@ export function ProfilePictureUpload({
               className="w-24 h-24 rounded-full object-cover border-4 border-border"
             />
           ) : (
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center border-4 border-border">
+            <div className="w-24 h-24 bg-gradient-to-br from-primary/80 to-primary rounded-full flex items-center justify-center border-4 border-border">
               <User className="w-8 h-8 text-white" />
             </div>
           )}

@@ -166,9 +166,9 @@ export default function CompleteProfilePage() {
               {/* Message Display */}
               {message && (
                 <div className={`mb-4 p-3 rounded-md text-sm ${
-                  message.type === 'success' 
-                    ? 'bg-green-50 text-green-800 border border-green-200' 
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                  message.type === 'success'
+                    ? 'bg-primary/10 text-foreground border border-primary/30'
+                    : 'bg-destructive/10 text-foreground border border-destructive/30'
                 }`}>
                   {message.text}
                 </div>

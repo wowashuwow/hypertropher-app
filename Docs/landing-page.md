@@ -7,7 +7,7 @@
 
 | URL | Purpose |
 |-----|---------|
-| `/` | Dark marketing page (`LandingRedirect` → `LandingPage` when logged out) |
+| `/` | Marketing page (`LandingRedirect` → `LandingPage` when logged out). Local `className="dark"` wrapper is now redundant — app is globally dark (Stage 13). |
 | `/app` | Discover feed (was root `/` before Stage 12) |
 | `/?preview=landing` | Preview landing while logged in (local QA) |
 

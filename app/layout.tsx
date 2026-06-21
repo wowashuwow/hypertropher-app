@@ -72,7 +72,7 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         {googleMapsApiKey && (
           <script
@@ -92,13 +92,14 @@ export default function RootLayout({
             <Suspense fallback={null}>{children}</Suspense>
           </DishesCacheProvider>
         </SessionProvider>
-        <Toaster 
+        <Toaster
           position="top-center"
           duration={3000}
           expand={true}
           gap={8}
           offset="16px"
           richColors={true}
+          theme="dark"
         />
         <Analytics />
       </body>
