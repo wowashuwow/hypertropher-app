@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { X, ChevronRight, ChevronLeft, MapPin, Star, PlusCircle, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -80,10 +81,14 @@ export function OnboardingTour({ city = "your city" }: OnboardingTourProps) {
       icon: <PlusCircle size={28} className="text-primary" />,
       title: "Add dishes. Don't just browse.",
       body: (
-        <p className="text-foreground/75 leading-relaxed text-sm">
-          When you eat something worth sharing, add it. Takes 2 minutes and saves the next person from ordering blind.
-          Tap <span className="font-semibold text-foreground">+ Add Dish</span> in the header.
-        </p>
+        <div className="space-y-3 text-sm text-foreground/75">
+          <p>
+            No photo needed. Add dishes you&apos;ve already eaten, straight from memory. You don&apos;t need to go back and photograph anything first.
+          </p>
+          <p>
+            Tap <span className="font-semibold text-foreground">+ Add Dish</span> in the header. Takes 2 minutes.
+          </p>
+        </div>
       ),
     },
     {
@@ -107,8 +112,8 @@ export function OnboardingTour({ city = "your city" }: OnboardingTourProps) {
   const isLast = step === steps.length - 1
   const isFirst = step === 0
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  const overlay = (
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
@@ -166,4 +171,6 @@ export function OnboardingTour({ city = "your city" }: OnboardingTourProps) {
       </div>
     </div>
   )
+
+  return createPortal(overlay, document.body)
 }

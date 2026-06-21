@@ -82,7 +82,7 @@ export function GuidePage() {
 
             <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
               {[
-                { dim: "Protein", highLabel: "Overloaded", highEmoji: "🔥", highDesc: "exceptional protein for this dish type", solidLabel: "Assured", solidEmoji: "✅", solidDesc: "great protein content, reliably good" },
+                { dim: "Protein", highLabel: "Overloaded", highEmoji: "🔥", highDesc: "exceptional protein content. Price is not a factor. An expensive dish is still Overloaded if it earns it.", solidLabel: "Assured", solidEmoji: "✅", solidDesc: "great protein content, reliably good" },
                 { dim: "Taste", highLabel: "Exceptional", highEmoji: "🔥", highDesc: "outstanding, memorable", solidLabel: "Assured", solidEmoji: "✅", solidDesc: "great taste, consistently good" },
                 { dim: "Overall", highLabel: "Daily Fuel", highEmoji: "🔥", highDesc: "exceptional, you would make this a regular staple", solidLabel: "Assured", solidEmoji: "✅", solidDesc: "great overall, worth coming back to" },
               ].map(({ dim, highLabel, highEmoji, highDesc, solidLabel, solidEmoji, solidDesc }) => (
@@ -115,9 +115,13 @@ export function GuidePage() {
             <h2 className="text-xl font-bold text-foreground">Contributing</h2>
           </div>
           <div className="border border-border rounded-lg divide-y divide-border bg-card">
+            <div className="p-5 space-y-1 bg-primary/5 rounded-t-lg">
+              <p className="text-sm font-semibold text-foreground">Photos are optional</p>
+              <p className="text-sm text-foreground/75">You do not need a photo to add a dish. Add dishes you have already eaten, straight from memory. Building the list matters more than having images for every entry. Do not wait until you go back.</p>
+            </div>
             <div className="p-5 space-y-1">
               <p className="text-sm font-semibold text-foreground">What to add</p>
-              <p className="text-sm text-foreground/75">Any dish you&apos;ve actually eaten and can rate honestly. Photo optional. The list matters more than the image.</p>
+              <p className="text-sm text-foreground/75">Any dish you&apos;ve actually eaten and can rate honestly.</p>
             </div>
             <div className="p-5 space-y-1">
               <p className="text-sm font-semibold text-foreground">In-store vs online</p>

@@ -147,6 +147,15 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section className="px-6 py-12 border-t border-border">
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="text-2xl sm:text-3xl font-bold text-foreground leading-snug">
+              Wherever we are in the world, we lifters should always know what to eat.
+              For every budget.
+            </p>
+          </div>
+        </section>
+
         <section className="px-6 py-20 border-t border-border">
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
@@ -174,7 +183,7 @@ export function LandingPage() {
                 Help others find the good stuff
               </p>
               <p className="text-base text-foreground/75 leading-relaxed">
-                Add dishes from any restaurant or delivery app. What took you three bad orders to learn takes the next person three seconds.
+                Add dishes from any restaurant or delivery app. No photo needed. Add from memory, right now. What took you three bad orders to learn takes the next person three seconds.
               </p>
             </div>
           </div>
@@ -265,6 +274,9 @@ export function LandingPage() {
           <p className="mt-3 text-sm text-muted-foreground block">
             Opens LinkedIn in a new tab. Send Ashutosh a message to apply.
           </p>
+          <p className="mt-5 text-sm text-foreground/60 max-w-xs mx-auto">
+            Already eaten somewhere great? Add it right now from memory. Photos are optional. Don&apos;t put off joining because of this.
+          </p>
           <div className="mt-6 flex items-center justify-center gap-5 text-sm">
             <Link
               href={ROUTES.signup}
@@ -286,7 +298,7 @@ export function LandingPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">
               What we&apos;re actually building for
             </p>
-            <h2 className="text-6xl sm:text-7xl md:text-8xl font-extrabold tracking-tight text-foreground uppercase mb-8">
+            <h2 className="text-4xl sm:text-6xl md:text-8xl font-extrabold tracking-tight text-foreground uppercase mb-8 break-words">
               Hypertrophy.
             </h2>
             <p className="text-base text-muted-foreground font-mono mb-6">

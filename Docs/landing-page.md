@@ -31,10 +31,11 @@
 |---------|-------|
 | Hero | "INVITE ONLY" label, h1, subtext, LinkedIn CTA, secondary links |
 | Pain grid | "Sound familiar?" — 4 cards |
-| Value columns | Search / No scams / Help others — 3 columns |
+| Goal statement | "Wherever we are in the world, we lifters should always know what to eat. For every budget." |
+| Value columns | Search / No scams / Help others (includes "No photo needed. Add from memory.") |
 | Who gets in | "Selective on purpose." — 3 criteria cards + invite trust card |
-| Final CTA | LinkedIn template + CTA |
-| Hypertrophy definition | Full-width, bottom of page. "HYPERTROPHY." in large bold display, pronunciation in mono, clinical definition. Added June 2026. |
+| Final CTA | LinkedIn template + CTA button + no-photo callout below button |
+| Hypertrophy definition | "HYPERTROPHY." large display, pronunciation, clinical definition. `text-4xl` mobile. |
 
 ## Hero copy (user-edited May 2026)
 

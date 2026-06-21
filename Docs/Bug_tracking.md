@@ -3,6 +3,21 @@
 ## Overview
 This document tracks all bugs, errors, and issues encountered during the development of Hypertropher. It serves as a knowledge base for resolving similar issues and maintaining code quality.
 
+### [BUG-028] - Onboarding Tour Rendered Below Feed Content on Mobile
+**Date:** June 2026
+**Severity:** High (feature broken on mobile)
+**Status:** ✅ Fixed
+
+**Description:** The onboarding tour overlay appeared at the bottom of the page after all dish cards, rather than overlaying the screen, on mobile.
+
+**Root Cause:** `components/main-layout.tsx` applies `page-transition-enter-active` (a CSS `transform: translateX()` animation) to `<main>`. Any `position: fixed` element inside a transformed ancestor is fixed relative to that ancestor, not the viewport.
+
+**Fix:** Render `OnboardingTour` via `createPortal(overlay, document.body)` so it mounts directly in `<body>`, outside the transformed container.
+
+**Files:** `components/onboarding-tour.tsx`
+
+---
+
 ## Recent Fixes (Restaurant-Centric Implementation)
 
 ### [UX-052] - Dish Card Copy Buttons & Report Modal Touch Targets

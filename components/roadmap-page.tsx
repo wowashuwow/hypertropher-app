@@ -54,6 +54,7 @@ export function RoadmapPage() {
               { title: "City-based feed", desc: "You see dishes from your city only. Switch anytime from Account Settings." },
               { title: "Three ratings per dish", desc: "Protein, taste, and overall satisfaction. Two clear levels each. No star scores." },
               { title: "Contribute dishes", desc: "Add from any restaurant or delivery app. Google Maps for in-store, manual entry for cloud kitchens." },
+              { title: "Photos optional", desc: "You don't need a photo to add a dish. Add from memory, right now. Building the list matters more than having perfect images for every entry." },
               { title: "Invite-only access", desc: "3 codes per member. You vouch for who you bring in." },
             ].map(({ title, desc }) => (
               <div key={title} className="px-5 py-4">
