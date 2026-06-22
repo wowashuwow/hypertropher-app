@@ -16,7 +16,7 @@ import { useGeolocation } from "@/lib/hooks/use-geolocation"
 import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { cn, toTitleCase } from "@/lib/utils"
 import { compressImageWithTimeout, formatFileSize, getCompressionRatio } from "@/lib/image-compression"
 import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
 
@@ -39,9 +39,9 @@ export default function AddDishPage() {
   const [dishName, setDishName] = useState("")
   const [proteinSource, setProteinSource] = useState<"Chicken" | "Fish" | "Paneer" | "Tofu" | "Eggs" | "Mutton" | "Beef" | "Other" | "">("")
   const [price, setPrice] = useState<string>("")
-  const [taste, setTaste] = useState<"Exceptional" | "Assured" | "">("")
-  const [protein, setProtein] = useState<"Overloaded" | "Assured" | "">("")
-  const [satisfaction, setSatisfaction] = useState<"Daily Fuel" | "Assured" | "">("")
+  const [taste, setTaste] = useState<"Exceptional" | "Assured">("Assured")
+  const [protein, setProtein] = useState<"Overloaded" | "Assured">("Assured")
+  const [satisfaction, setSatisfaction] = useState<"Daily Fuel" | "Assured">("Assured")
   const [comment, setComment] = useState("")
   const [photo, setPhoto] = useState<File | null>(null)
   const [compressedPhoto, setCompressedPhoto] = useState<File | null>(null)
@@ -368,7 +368,7 @@ export default function AddDishPage() {
                   type="text"
                   placeholder="Enter dish name"
                   value={dishName}
-                  onChange={(e) => setDishName(e.target.value)}
+                  onChange={(e) => setDishName(toTitleCase(e.target.value))}
                   required
                 />
               </div>

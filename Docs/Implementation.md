@@ -17,10 +17,11 @@
 | 11 | Security (React CVE patch) | ✅ Complete |
 | 12 | Landing page, `/app` split, LinkedIn invites | ✅ Complete |
 | 13 | App-wide dark theme (match landing) | ✅ Complete |
-| 14 | Code quality, performance & security hardening | 📋 Planned |
 | 15 | Trust network rebrand: landing, guide, roadmap, onboarding tour | ✅ Complete |
+| 16 | Code quality, performance & security hardening | 📋 Planned |
+| 17 | UX polish, content, and icons | ✅ Complete |
 
-*Numbering note: An older changelog used **“Stage 10”** for the Middle East expansion—that work is **Stage 9.1** above. **Stage 10** is intentionally unused in the stage list to avoid confusion. New landing-page work is **Stage 12** (next stage after 11).*
+*Numbering note: Stage 10 is intentionally unused (Middle East expansion is Stage 9.1). Stage 14 is intentionally unused (code quality work was renumbered to Stage 16 after Stage 15 was completed first).*
 
 ## Feature Analysis
 
@@ -838,7 +839,126 @@ Footer on last step: "Read the full guide →" → `/guide`
 
 ---
 
-### Stage 14: Code Quality, Performance & Security Hardening
+### Stage 17: UX Polish, Content, and Icons
+**Status:** ✅ **COMPLETE**
+**Duration:** 1–2 days
+**Dependencies:** Stage 15 complete
+
+#### Task 1 — Dish name auto title-case
+**File:** `lib/utils.ts`, `app/add-dish/page.tsx`, `app/edit-dish/[id]/page.tsx`
+
+**Approach:** Manual utility function in `lib/utils.ts`. No external package needed — verified with dish name examples that the function handles all cases correctly.
+
+```ts
+export function toTitleCase(str: string): string {
+  const exceptions = new Set(['a','an','the','and','but','or','for','nor','on','at','to','by','in','of','up','as','with','into','from','over','than','that'])
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map((word, i) => {
+      if (i === 0 || !exceptions.has(word)) return word.charAt(0).toUpperCase() + word.slice(1)
+      return word
+    })
+    .join(' ')
+}
+```
+
+- [x] Add `toTitleCase()` to `lib/utils.ts`
+- [x] In `app/add-dish/page.tsx`: wrap `setDishName` in `toTitleCase` on `onChange`
+- [x] In `app/edit-dish/[id]/page.tsx`: same
+
+**Note on suggestions (FEATURE-028B):** Deferred. Will be more useful once the DB has enough dishes to generate meaningful suggestions.
+
+---
+
+#### Task 2 — Default "Assured" in all three rating fields
+**File:** `app/add-dish/page.tsx`
+
+Currently all three rating states start as `""`, meaning the user must actively select a value before submitting. Since most dishes will be Assured, default them to avoid unnecessary friction.
+
+- [x] Change `useState<"Assured" | "Overloaded" | "">("")` → `useState<"Assured" | "Overloaded">("Assured")` for protein
+- [x] Change `useState<"Assured" | "Exceptional" | "">("")` → `useState<"Assured" | "Exceptional">("Assured")` for taste
+- [x] Change `useState<"Daily Fuel" | "Assured" | "">("")` → `useState<"Daily Fuel" | "Assured">("Assured")` for satisfaction
+- [x] Submit button disabled condition does not check ratings (ratings always have a value now)
+- [ ] Verify ButtonGroup visually shows "Assured" pre-selected on form load (pending user verification)
+
+---
+
+#### Task 3 — Verify onboarding tour does not show on every visit
+**File:** `components/onboarding-tour.tsx`
+
+The `localStorage` key `ht_tour_done` is set on completion or dismiss. Confirm it persists correctly and the tour does not reappear after the first viewing.
+
+- [x] Log in and complete the tour — confirm `ht_tour_done` exists in localStorage after
+- [x] Reload `/app` — confirm tour does not reappear
+- [x] Code verified correct: `useEffect` checks key on mount; `dismiss()` sets key before hiding — no bug found, no code change needed
+
+---
+
+#### Task 4 — Pain point #3 copy + all pain point icons
+**File:** `components/landing-page.tsx`
+
+**Copy change:** Replace "Labels that lie" with "Leaving gains on the table."
+New supporting copy: "You're training hard, but if you can't hit your protein goals outside the gym, you're leaving results on the table."
+
+**Icon replacements (all 4 pain points):**
+| Pain point | Current icon | New icon | Reason |
+|------------|-------------|----------|--------|
+| Money down the drain | `CircleDollarSign` | `Banknote` | More concrete — money being spent |
+| The same dish, everyday | `RefreshCw` | `Repeat2` | Repetition is clearer with Repeat2 |
+| Leaving gains on the table | `AlertTriangle` | `Dumbbell` | Directly references gym/fitness |
+| Your findings die with you | `Lock` | `EyeOff` | Others can't see your knowledge |
+
+- [x] Swap pain point #3 heading and body copy ("Leaving gains on the table"); reordered pain points so this appears first
+- [x] Update all 4 pain point icons: `Banknote`, `Repeat2`, `Dumbbell`, `EyeOff`
+
+---
+
+#### Task 5 — Value columns: add gains counterpart + fix icons
+**File:** `components/landing-page.tsx`
+
+Add a fourth solution column as the direct counterpart to "Leaving gains on the table." Keep all three existing columns. Update the grid layout from 3 to 4 columns (2x2 on mobile/tablet, 4-across on desktop).
+
+**New column to add:**
+- Heading: "Make every meal count"
+- Body: "Know what's high-protein before you order. Every meal outside the gym works toward your goals."
+- Icon: `Target`
+
+**Icon updates on existing columns:**
+| Column | Current icon | New icon |
+|--------|-------------|----------|
+| Eat something new | `Search` | `Compass` |
+| No more scams | `UserCheck` | `ShieldCheck` |
+| Help others find the good stuff | `PlusCircle` | `Users` |
+
+- [x] Add "Make every meal count" as a fourth column with `Target` icon; reordered columns: Make every meal count, No more scams, Eat something new, Help others find the good stuff
+- [x] Update grid to `grid-cols-1 sm:grid-cols-2 md:grid-cols-4`
+- [x] Update the three existing icons (`Compass`, `ShieldCheck`, `Users`)
+- [x] Update all imports; removed eyebrow text above hypertrophy section
+
+---
+
+#### Files expected to change
+| File | Changes |
+|------|---------|
+| `lib/utils.ts` | Add `toTitleCase()` |
+| `app/add-dish/page.tsx` | Title case on dish name; default Assured ratings |
+| `app/edit-dish/[id]/page.tsx` | Title case on dish name |
+| `components/landing-page.tsx` | Pain point #3 copy + Dumbbell icon; all 4 pain icons; value column copy + all 3 icons |
+| `components/onboarding-tour.tsx` | Fix if bug found in Task 3 |
+
+#### Manual testing checklist
+- [ ] Add dish form: type "grilled fish with veggies" — auto-formats to "Grilled Fish with Veggies"
+- [ ] Add dish form: all three ratings show "Assured" pre-selected on load
+- [ ] Log in fresh (clear localStorage), visit `/app` — tour appears
+- [ ] Complete or dismiss tour, reload — tour does not appear again
+- [ ] Landing page: pain point #3 shows "Leaving gains on the table" + Dumbbell
+- [ ] Landing page: fourth value column "Make every meal count" + Target visible
+- [ ] Landing page: all 7 icon changes visible and clearly relevant
+
+---
+
+### Stage 16: Code Quality, Performance & Security Hardening
 **Status:** 📋 **PLANNED — begin after Stage 13 (dark theme) is complete**
 **Duration:** 3–5 days
 **Dependencies:** Stage 13 complete
@@ -936,7 +1056,7 @@ Footer on last step: "Read the full guide →" → `/guide`
 
 #### Stage index update
 > After completing this stage, update the Stage index table at the top of this file to add:
-> `| 14 | Code quality, performance & security hardening | ✅ Complete |`
+> `| 16 | Code quality, performance & security hardening | ✅ Complete |`
 
 ---
 
@@ -1009,7 +1129,8 @@ Footer on last step: "Read the full guide →" → `/guide`
 - Upload retry, real upload progress, CDN/PWA (see Future Performance section — compression already shipped)
 
 ### 📋 Next Steps
-1. **Stage 14** — Code quality, performance & security hardening
+1. **Stage 16** — Code quality, performance & security hardening (next)
+2. Optional V2: server-side sort/filter, recommendation system
 2. Optional V2: server-side sort/filter, recommendation system (`FEATURE-Recommendation-System.md`)
 3. Pre-launch: remaining items in `Docs/PRE_LAUNCH_CHECKLIST.md`
 

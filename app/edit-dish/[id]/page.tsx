@@ -15,7 +15,7 @@ import { RestaurantInput as RestaurantInputType } from "@/types/restaurant"
 import { useDeliveryAppsForCity } from "@/lib/hooks/use-delivery-apps"
 import { useGeolocation } from "@/lib/hooks/use-geolocation"
 import { ArrowLeft, Save, X, AlertCircle, Camera } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, toTitleCase } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { compressImageWithTimeout, formatFileSize, getCompressionRatio } from "@/lib/image-compression"
 import { useDishesCache } from "@/lib/cache/dishes-cache-provider"
@@ -724,7 +724,7 @@ export default function EditDishPage() {
                     type="text"
                     placeholder="Enter dish name"
                     value={dishName}
-                    onChange={(e) => setDishName(e.target.value)}
+                    onChange={(e) => setDishName(toTitleCase(e.target.value))}
                     required
                   />
                 </div>

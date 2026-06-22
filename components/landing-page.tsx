@@ -4,14 +4,14 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
-  CircleDollarSign,
-  RefreshCw,
-  AlertTriangle,
-  Lock,
-  Search,
-  UserCheck,
-  PlusCircle,
+  Banknote,
+  Repeat2,
   Dumbbell,
+  EyeOff,
+  Compass,
+  ShieldCheck,
+  Users,
+  Target,
   UtensilsCrossed,
   PenLine,
 } from "lucide-react"
@@ -103,7 +103,17 @@ export function LandingPage() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-card border-l-2 border-primary rounded-md p-5">
-                <CircleDollarSign size={22} className="text-primary mb-3" aria-hidden />
+                <Dumbbell size={22} className="text-primary mb-3" aria-hidden />
+                <p className="text-base font-bold text-foreground mb-2">
+                  Leaving gains on the table
+                </p>
+                <p className="text-base text-foreground/75 leading-relaxed">
+                  You're training hard, but if you can't hit your protein goals outside the gym, you're leaving results on the table.
+                </p>
+              </div>
+
+              <div className="bg-card border-l-2 border-primary rounded-md p-5">
+                <Banknote size={22} className="text-primary mb-3" aria-hidden />
                 <p className="text-base font-bold text-foreground mb-2">
                   Money down the drain
                 </p>
@@ -114,7 +124,7 @@ export function LandingPage() {
               </div>
 
               <div className="bg-card border-l-2 border-primary rounded-md p-5">
-                <RefreshCw size={22} className="text-primary mb-3" aria-hidden />
+                <Repeat2 size={22} className="text-primary mb-3" aria-hidden />
                 <p className="text-base font-bold text-foreground mb-2">
                   The same dish, everyday
                 </p>
@@ -124,17 +134,7 @@ export function LandingPage() {
               </div>
 
               <div className="bg-card border-l-2 border-primary rounded-md p-5">
-                <AlertTriangle size={22} className="text-primary mb-3" aria-hidden />
-                <p className="text-base font-bold text-foreground mb-2">
-                  Labels that lie
-                </p>
-                <p className="text-base text-foreground/75 leading-relaxed">
-                  The macro breakdown looks great on the menu. The food arrives and the numbers make no sense.
-                </p>
-              </div>
-
-              <div className="bg-card border-l-2 border-primary rounded-md p-5">
-                <Lock size={22} className="text-primary mb-3" aria-hidden />
+                <EyeOff size={22} className="text-primary mb-3" aria-hidden />
                 <p className="text-base font-bold text-foreground mb-2">
                   Your findings die with you
                 </p>
@@ -157,9 +157,28 @@ export function LandingPage() {
         </section>
 
         <section className="px-6 py-20 border-t border-border">
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <Search size={28} className="text-primary mb-4" aria-hidden />
+              <Target size={28} className="text-primary mb-4" aria-hidden />
+              <p className="text-lg font-bold text-foreground mb-2">
+                Make every meal count
+              </p>
+              <p className="text-base text-foreground/75 leading-relaxed">
+                Know what's high-protein before you order. Every meal outside the gym works toward your goals.
+              </p>
+            </div>
+
+            <div>
+              <ShieldCheck size={28} className="text-primary mb-4" aria-hidden />
+              <p className="text-lg font-bold text-foreground mb-2">No more scams</p>
+              <p className="text-base text-foreground/75 leading-relaxed">
+                Each dish was added by someone who also lifts regularly
+                and depends on outside food, so they know the stakes.
+              </p>
+            </div>
+
+            <div>
+              <Compass size={28} className="text-primary mb-4" aria-hidden />
               <p className="text-lg font-bold text-foreground mb-2">
                 Eat something new
               </p>
@@ -169,16 +188,7 @@ export function LandingPage() {
             </div>
 
             <div>
-              <UserCheck size={28} className="text-primary mb-4" aria-hidden />
-              <p className="text-lg font-bold text-foreground mb-2">No more scams</p>
-              <p className="text-base text-foreground/75 leading-relaxed">
-                Each dish was added by someone who also lifts regularly
-                and depends on outside food, so they know the stakes.
-              </p>
-            </div>
-
-            <div>
-              <PlusCircle size={28} className="text-primary mb-4" aria-hidden />
+              <Users size={28} className="text-primary mb-4" aria-hidden />
               <p className="text-lg font-bold text-foreground mb-2">
                 Help others find the good stuff
               </p>
@@ -295,9 +305,6 @@ export function LandingPage() {
 
         <section className="px-6 py-24 border-t border-border">
           <div className="max-w-3xl mx-auto">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">
-              What we&apos;re actually building for
-            </p>
             <h2 className="text-4xl sm:text-6xl md:text-8xl font-extrabold tracking-tight text-foreground uppercase mb-8 break-words">
               Hypertrophy.
             </h2>
