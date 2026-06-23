@@ -53,10 +53,12 @@ export function LandingPage() {
               INVITE ONLY
             </span>
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-foreground leading-tight mb-6 max-w-3xl mx-auto">
-            Discover high-protein dishes your city's lifters trust.
+              Find{" "}
+              <span className="text-emerald-400">trusted</span>
+              {" "}high protein meals in your city.
             </h1>
             <p className="text-lg sm:text-xl text-foreground/75 max-w-xl mx-auto mb-10 leading-relaxed">
-              Hypertropher is a community-built database of the best high-protein dishes available in your city.
+              Hypertropher is a community-built database of the best high protein meals available in your city - in restaurants and on food delivery apps.
             </p>
             <Button
               asChild
@@ -71,7 +73,7 @@ export function LandingPage() {
               </a>
             </Button>
             <p className="mt-3 text-sm text-muted-foreground">
-              Opens LinkedIn in a new tab. Send Ashutosh a message to apply.
+              Opens LinkedIn in a new tab. Send Ashutosh a message.
             </p>
             <div className="mt-6 flex items-center justify-center gap-5 text-sm">
               <Link
@@ -92,7 +94,7 @@ export function LandingPage() {
 
         <section className="px-6 py-6 border-b border-border">
           <p className="text-base text-muted-foreground text-center max-w-xl mx-auto">
-            Built for people who train seriously and depend on outside food.
+            For lifters who depend on outside food, by lifters who depend on outside food.
           </p>
         </section>
 
@@ -119,7 +121,6 @@ export function LandingPage() {
                 </p>
                 <p className="text-base text-foreground/75 leading-relaxed">
                   You order something marked high-protein. It arrives 75% pasta.
-                  Nobody else knows to avoid it.
                 </p>
               </div>
 
@@ -161,10 +162,10 @@ export function LandingPage() {
             <div>
               <Target size={28} className="text-primary mb-4" aria-hidden />
               <p className="text-lg font-bold text-foreground mb-2">
-                Make every meal count
+                No more wasted workouts
               </p>
               <p className="text-base text-foreground/75 leading-relaxed">
-                Know what's high-protein before you order. Every meal outside the gym works toward your goals.
+                When you know it's high protein before you order, you know you're making gains.
               </p>
             </div>
 
@@ -193,7 +194,7 @@ export function LandingPage() {
                 Help others find the good stuff
               </p>
               <p className="text-base text-foreground/75 leading-relaxed">
-                Add dishes from any restaurant or delivery app. No photo needed. Add from memory, right now. What took you three bad orders to learn takes the next person three seconds.
+                Add dishes from any restaurant or delivery app. Photos not compulsory. Add from memory, right now.
               </p>
             </div>
           </div>
@@ -242,7 +243,7 @@ export function LandingPage() {
               </p>
               <p className="text-base text-foreground/75">
                 Every member gets 3 invite codes. Pass them only to people who
-                meet the same bar. A bad entry hurts everyone.
+                meet the same bar.
               </p>
             </div>
           </div>
@@ -282,7 +283,7 @@ export function LandingPage() {
             </a>
           </Button>
           <p className="mt-3 text-sm text-muted-foreground block">
-            Opens LinkedIn in a new tab. Send Ashutosh a message to apply.
+            Opens LinkedIn in a new tab. Send Ashutosh a message.
           </p>
           <p className="mt-5 text-sm text-foreground/60 max-w-xs mx-auto">
             Already eaten somewhere great? Add it right now from memory. Photos are optional. Don&apos;t put off joining because of this.

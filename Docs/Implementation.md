@@ -944,7 +944,7 @@ Add a fourth solution column as the direct counterpart to "Leaving gains on the 
 | `lib/utils.ts` | Add `toTitleCase()` |
 | `app/add-dish/page.tsx` | Title case on dish name; default Assured ratings |
 | `app/edit-dish/[id]/page.tsx` | Title case on dish name |
-| `components/landing-page.tsx` | Pain point #3 copy + Dumbbell icon; all 4 pain icons; value column copy + all 3 icons |
+| `components/landing-page.tsx` | Pain point #3 copy + Dumbbell icon; all 4 pain icons; value column copy + all 3 icons; reordered pain points and solution columns; removed hypertrophy eyebrow; "trusted" in hero highlighted `text-emerald-400` |
 | `components/onboarding-tour.tsx` | Fix if bug found in Task 3 |
 
 #### Manual testing checklist
