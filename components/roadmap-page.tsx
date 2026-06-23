@@ -75,19 +75,19 @@ export function RoadmapPage() {
           <div className="border border-border rounded-lg divide-y divide-border bg-card">
             <div className="px-5 py-4">
               <div className="flex items-start gap-3">
-                <Users size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                <GitBranch size={18} className="text-primary mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-foreground text-sm mb-0.5">Friends-only mode</p>
-                  <p className="text-sm text-foreground/75">Filter the feed to show only dishes added by your direct connections. Smaller circle, higher trust.</p>
+                  <p className="font-semibold text-foreground text-sm mb-0.5">Tried it? Say so.</p>
+                  <p className="text-sm text-foreground/75">Mark dishes you&apos;ve actually eaten and trust. Shows on the card: &ldquo;Ashutosh trusts this&rdquo; or &ldquo;Ashutosh&apos;s friend Rohan trusts this&rdquo; depending on your filter.</p>
                 </div>
               </div>
             </div>
             <div className="px-5 py-4">
               <div className="flex items-start gap-3">
-                <GitBranch size={18} className="text-primary mt-0.5 flex-shrink-0" />
+                <Users size={18} className="text-primary mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-foreground text-sm mb-0.5">Friends-of-friends discovery</p>
-                  <p className="text-sm text-foreground/75">See dishes from people your friends vouched for. One step beyond your direct connections. Still trusted, wider reach.</p>
+                  <p className="font-semibold text-foreground text-sm mb-0.5">Filter by your circle</p>
+                  <p className="text-sm text-foreground/75">Filter the feed by who added or trusted a dish: direct friends, or expand to friends-of-friends.</p>
                 </div>
               </div>
             </div>
@@ -103,8 +103,8 @@ export function RoadmapPage() {
           </div>
           <div className="border border-border rounded-lg divide-y divide-border bg-card">
             <div className="px-5 py-4">
-              <p className="font-semibold text-foreground text-sm mb-0.5">Social proof from real relationships</p>
-              <p className="text-sm text-foreground/75">&ldquo;3 of your friends added this dish&rdquo; means something when you actually know those 3 people. Dish cards will show who in your network has tried it and how they rated it.</p>
+              <p className="font-semibold text-foreground text-sm mb-0.5">Contributor profiles</p>
+              <p className="text-sm text-foreground/75">Every member gets a public profile showing the dishes they&apos;ve contributed. A shareable link. Your track record as someone who finds good food, visible to anyone you send it to.</p>
             </div>
             <div className="px-5 py-4">
               <p className="font-semibold text-foreground text-sm mb-0.5">Dishes to avoid</p>

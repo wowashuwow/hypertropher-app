@@ -1439,8 +1439,8 @@ Re-implement Google OAuth authentication with proper invite code validation and 
 - Verify user has completed profile in auth callback before allowing access
 - Ensure ProtectedRoute properly enforces full profile completion
 
-### Recommendation System (High Priority)
-**Status:** Planned  
+### Recommendation System / Trust Feature (High Priority)
+**Status:** Soon (live on roadmap page as "Tried it? Say so.")
 **Documentation:** See [FEATURE-Recommendation-System.md](./FEATURE-Recommendation-System.md)
 
 **Overview:**
@@ -1462,7 +1462,7 @@ Separate dish validation from personal wishlist functionality by introducing a r
 - Updated dish deletion protection logic (check recommendations, not wishlists)
 - New "My Recommendations" page
 - Independent Save and Recommend buttons on dish cards
-- Social proof display ("Recommended by 3 friends")
+- Social proof display on dish cards ("Ashutosh trusts this" / "Ashutosh's friend Rohan trusts this" depending on filter)
 
 See full feature plan for detailed database schema, API endpoints, UI/UX flows, and implementation strategy.
 

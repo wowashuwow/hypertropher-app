@@ -160,7 +160,7 @@ Build a valuable and trusted, community-sourced database of high-protein dishes 
 
 ## 8. Out of Scope / Future Scope
 
-* **V2 - High Priority:** Sharable Public User Profiles (e.g., "Protein Linktree"): A public, shareable link for each user that showcases their top-rated contributed dishes.
+* **V2 - High Priority:** Contributor profiles: A public, shareable link for each user showcasing the dishes they've contributed. Live on the roadmap page as "Contributor profiles" (previously called "Protein Linktree" internally).
 * **V2 - High Priority:** Highlighting Exceptional Dishes: A visual system (e.g., icon overlays on the dish image) to make dishes with the highest ratings stand out.
 * **V2 - High Priority:** Server-Side Sorting & Filtering: Implement database-level sorting and filtering for better performance with large datasets. This includes:
   - Server-side price sorting (low-to-high, high-to-low)
@@ -171,5 +171,5 @@ Build a valuable and trusted, community-sourced database of high-protein dishes 
 * **V2:** Advanced Sorting: Implementing the "Sort by Distance" functionality.
 * **Future:** Data Verification: A system for users to report incorrect dish entries.
 * **Completed:** Data Quality: Removed all mock data, ensuring database-only data source for consistent user experience.
-* **Future:** Social Features: A "Thanks" button or other social feedback mechanisms.
+* **Soon:** Trust system ("Tried it? Say so."): Users mark dishes they've eaten and trust. Shows on dish cards as "Ashutosh trusts this" or "Ashutosh's friend Rohan trusts this" depending on the viewer's filter. Supersedes the earlier "Thanks button" concept. See roadmap page.
 * **Future:** User Feedback System: A dedicated tool for collecting user feedback.
